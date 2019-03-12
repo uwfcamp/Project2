@@ -6,14 +6,25 @@
  * @DATE	3/8/2019
  * @INFO	COP4635 Project 1
  */
-#include "Definitions.h"
-#include "parse.h"
+#include <stdio.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <fcntl.h>
+
+#define PORT 60001
+#define BUFFER_SIZE 30000
 
 int main(int argc, char const *argv[])
 {
     int server_fd, new_socket; long valread;
     struct sockaddr_in address;
     int addrlen = sizeof(address);
+
     memset(&address, '\0', sizeof address);
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
@@ -61,22 +72,14 @@ int main(int argc, char const *argv[])
 
     while(1)
     {
-		int inputPathArr[MAX_PATH_ID_LENGTH];
-		char buffer[BUFFER_SIZE];
-		char messageIn[BUFFER_SIZE];
-		char messageOut[BUFFER_SIZE];
-		clear_string(buffer, BUFFER_SIZE);
-		clear_string(messageIn, BUFFER_SIZE);
-		clear_string(messageOut, BUFFER_SIZE);
-		clear_path(inputPathArr, MAX_PATH_ID_LENGTH);
-		int err;
+	int err;
 
         // Here we will check to see if there is
         // a new connection request, and if there
         // is, we will need to add it to a list of
         // connections. If there is no new connection,
         // indicated by "errno", we just keep going.
-		temp_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
+	temp_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
         err = errno;
         if (err !=EAGAIN || err != EWOULDBLOCK){
             // This is where we would add the
@@ -86,9 +89,9 @@ int main(int argc, char const *argv[])
             // XXX XXX XXX XXX
             // XXX XXX XXX XXX
         }
-		
-        //clear buffer and path array for message acceptance
-        clear_string(buffer, BUFFER_SIZE);
+
+        // buffer for message acceptance
+        char buffer[BUFFER_SIZE] = {0};
 
         // accept message from client, will
         // need to loop through all connections.
@@ -118,4 +121,3 @@ int main(int argc, char const *argv[])
     printf("STATUS: connection broken\n");
     return 0;
 }
-
