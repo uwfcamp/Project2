@@ -13,15 +13,15 @@ BINARYS = server client
 all: $(BINARYS)
 
 server: $(OBJECTS1)
-	$(CC) $(LINKS) -o lizards $(OBJECTS1)
+	$(CC) $(LINKS) -o server $(OBJECTS1) $(OBJECTS3)
 	
 client: $(OBJECTS2)
-	$(CC) $(LINKS) -o lizardsUni $(OBJECTS2)
+	$(CC) $(LINKS) -o client $(OBJECTS2) $(OBJECTS3)
 
 client_framework.o: $(CFILES1)
-	$(CC) -c $(CFLAGS) lizards.c
+	$(CC) -c $(CFLAGS) client_framework.c
 server_framework.o: $(CFILES2)
-	$(CC) -c $(CFLAGS) lizardsUni.c
+	$(CC) -c $(CFLAGS) server_framework.c
 	
 .PHONY : clean
 clean:
