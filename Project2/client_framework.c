@@ -67,10 +67,12 @@ int main(int argc, char const *argv[])
 
     while(1){
         // get user's input
-        printf("YOUR MESSAGE: ");
+        printf("PATH: ");
         server->buffer[0]='\0';
         server->buffered_size=0;
-        scanf(" %[^\n]", server->buffer);
+        fgets(server->buffer, BUFFER_SIZE, stdin);
+	printf("MESSAGE: ");
+	fgets(&server.buffer[strlen(server->buffer)], BUFFER_SIZE-strlen(server->buffer), stdin);
         // establish size of input string
         server->buffered_size=strlen(server->buffer)+1;
         // declare there is a message to send to the server
@@ -80,7 +82,7 @@ int main(int argc, char const *argv[])
 
 	if (server->recieve==1)
 	        printf("RESPONSE: %s\n",server->buffer );
-        while (getchar()!='\n');
+        //while (getchar()!='\n');
     }
 
     disconnect(server);
