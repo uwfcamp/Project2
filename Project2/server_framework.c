@@ -9,11 +9,30 @@
 #include "Definitions.h"
 #include "parse.h"
 
+typedef struct client_list_s{
+	int socket;			// identifier for the server socket
+	int connected;			// 0 if not connected, 1 if connected
+	char name[60];			// the name of the user, for private chat
+	struct client_list_s *last;	// pointer to the previous element in the list
+	struct client_list_s *next;	// pointer to the next element in the list
+}client_list_t;
+
+void broadcast_message(client_list_t *clientList, int sender_socket, char *buffer, int messageSize);
+void new_connection(client_list_t *clientList, int socket, char *name);
+void remove_connection(client_list_t **clientList, int target_socket);
+
 int main(int argc, char const *argv[])
 {
-    int server_fd, new_socket; long valread;
+    int server_fd;
+    long valread;
     struct sockaddr_in address;
     int addrlen = sizeof(address);
+    client_list_t *clientList = (client_list_t *) malloc(sizeof(client_list_t));
+    clientList->socket=0;
+    clientList->connected=0;
+    clientList->last=NULL;
+    clientList->next=NULL;
+    clientList->name[0]='\0';
     memset(&address, '\0', sizeof address);
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
@@ -41,16 +60,6 @@ int main(int argc, char const *argv[])
         exit(EXIT_FAILURE);
     }
 
-    // This needs to be performed in a seperate thread,
-    // so that new connections can be added, while
-    // still listening to existing connections.
-    printf("STATUS: waiting for connection request\n");
-    if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0)
-    {
-        perror("In accept");
-        exit(EXIT_FAILURE);
-    }
-
     // make it so that future calls to accept
     // new sockets do not block. This means
     // that the server will keep going if
@@ -69,53 +78,108 @@ int main(int argc, char const *argv[])
 		clear_string(messageIn, BUFFER_SIZE);
 		clear_string(messageOut, BUFFER_SIZE);
 		clear_path(inputPathArr, MAX_PATH_ID_LENGTH);
-		int err;
 
         // Here we will check to see if there is
         // a new connection request, and if there
-        // is, we will need to add it to a list of
-        // connections. If there is no new connection,
-        // indicated by "errno", we just keep going.
-		temp_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
-        err = errno;
-        if (err !=EAGAIN || err != EWOULDBLOCK){
-            // This is where we would add the
-            // new socket to our list of sockets
-            // XXX XXX XXX XXX
-            // XXX XXX XXX XXX
-            // XXX XXX XXX XXX
-            // XXX XXX XXX XXX
-        }
-		
-        //clear buffer and path array for message acceptance
-        clear_string(buffer, BUFFER_SIZE);
+        // is, we will add it to the list.
+	temp_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
+        if (temp_socket>0)
+            new_connection(clientList, temp_socket, "ANONYMOUS");
 
-        // accept message from client, will
-        // need to loop through all connections.
-        // Would likely be more efficient to
-        // have a seperate thread for each connection.
-        //printf("STATUS: waiting for message\n");
-        valread = recv( new_socket , buffer, BUFFER_SIZE, MSG_NOSIGNAL | MSG_DONTWAIT);
-        err = errno;
-        if (valread>0)
-                printf("MESSAGE: %s\n", buffer );
+	// loop through every connection, to
+        // see if there is an incoming message.
+        // This must be done for any type of
+        // message; public, private, file, etc.
+        client_list_t *current = clientList;
+        while (current!=NULL){
+                if (current->connected==1){
+                    //clear buffer and path array for message acceptance
+                    clear_string(buffer, BUFFER_SIZE);
 
-        // determine where message needs to be sent
-        // XXX XXX XXX XXX
-        // XXX XXX XXX XXX
-        // XXX XXX XXX XXX
-        // XXX XXX XXX XXX
+                    // accept message from client
+                    valread = recv( current->socket , buffer, BUFFER_SIZE, MSG_NOSIGNAL | MSG_DONTWAIT);
 
-        // send the message to all the proper recipients
-        if (valread>0){
-                printf("STATUS: sending response message\n");
-                valread = send(new_socket , buffer , valread, MSG_NOSIGNAL);
+                    // send message to all other clients.
+                    if (valread>0)
+                        broadcast_message(clientList, current->socket, buffer, valread);
+                }
+            // move to the next element in the list
+            current = current->next;
         }
     }
-    close(temp_socket);
-    close(new_socket);
     close(server_fd);
     printf("STATUS: connection broken\n");
     return 0;
 }
 
+
+
+void broadcast_message(client_list_t *clientList, int sender_socket, char *buffer, int messageSize){
+    while(clientList != NULL){
+        if (clientList->socket != sender_socket && clientList->connected==1){
+	        send(clientList->socket , buffer , messageSize, MSG_NOSIGNAL | MSG_DONTWAIT);
+	}
+        clientList=clientList->next;
+    }
+    printf("STATUS: message sent to all users\n");
+}
+
+
+
+void new_connection(client_list_t *clientList, int socket, char *name){
+    // there is at least 1 connection
+    if (clientList->connected == 1){
+        client_list_t *end = clientList;
+        while(end->next != NULL)
+            end = end->next;
+        end->next = (client_list_t *)malloc(sizeof(client_list_t));
+        end->next->next = NULL;
+        end->next->last = end;
+        end->next->socket = socket;
+        end->next->connected = 1;
+        strcpy(end->next->name, name);
+    }
+    else{ // there are no connections
+        clientList->socket = socket;
+        clientList->connected = 1;
+        strcpy(clientList->name, name);
+    }
+    printf("STATUS: new connection added, socket:%d\n", socket);
+
+}
+
+
+
+void remove_connection(client_list_t **clientList, int target_socket){
+    // special case, where the target being
+    // removed is the first element in the
+    // link-list. A double pointer is passed
+    // because of the second part of this case.
+    if ((*clientList)->socket == target_socket){
+        if ((*clientList)->next==NULL){
+            (*clientList)->socket = 0;
+            (*clientList)->connected = 0;
+            (*clientList)->name[0]='\0';
+        }
+        else{
+            client_list_t *temp = (*clientList);
+            (*clientList)=(*clientList)->next;
+            (*clientList)->last = NULL;
+            free(temp);
+        }
+        return;
+    }
+
+    // look for the correct element in the link list
+    client_list_t *target = *clientList;
+    while(target->socket != target_socket && target != NULL)
+        target = target->next;
+
+    // if the element exists, remove it
+    if (target != NULL){
+        target->last->next = target->next;
+	if (target->next != NULL)
+		target->next->last = target->last;
+        free(target);
+    }
+}
