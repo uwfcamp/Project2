@@ -72,7 +72,7 @@ int main(int argc, char const *argv[])
         server->buffered_size=0;
         fgets(server->buffer, BUFFER_SIZE, stdin);
 	printf("MESSAGE: ");
-	fgets(&server.buffer[strlen(server->buffer)], BUFFER_SIZE-strlen(server->buffer), stdin);
+	fgets(&server->buffer[strlen(server->buffer)], BUFFER_SIZE-strlen(server->buffer), stdin);
         // establish size of input string
         server->buffered_size=strlen(server->buffer)+1;
         // declare there is a message to send to the server

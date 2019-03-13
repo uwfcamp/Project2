@@ -14,14 +14,13 @@ all: $(BINARYS)
 
 server: $(OBJECTS1) $(OBJECTS3)
 	$(CC) $(LINKS) -o server $(OBJECTS1) $(OBJECTS3)
-	
 client: $(OBJECTS2) $(OBJECTS3)
 	$(CC) $(LINKS) -o client $(OBJECTS2) $(OBJECTS3)
 
-client_framework.o: $(CFILES1) $(CFILES3)
-	$(CC) -c $(CFLAGS) client_framework.c
-server_framework.o: $(CFILES2) $(CFILES3)
+server_framework.o: $(CFILES1) $(CFILES3)
 	$(CC) -c $(CFLAGS) server_framework.c
+client_framework.o: $(CFILES2) $(CFILES3)
+	$(CC) -c $(CFLAGS) client_framework.c
 	
 .PHONY : clean
 clean:
