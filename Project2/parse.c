@@ -1,14 +1,14 @@
 #include "parse.h"
 #include "Definitions.h"
 
-void parse_numbers(int intArr[], char buffer[], char inputPathArr[])
+void parse_numbers(int inputPathArr[], char buffer[], char messageIn[])
 {
 	char * search = " ";
 	char * token;
 	char temp_string[MAX_PATH_ID_LENGTH]={0};
 	int i, j;
 	clear_string(messageIn, BUFFER_SIZE);
-	clear_path();
+	clear_path(inputPathArr[], MAX_PATH_ID_LENGTH);
 	//parse out path and identifiers into separate string
 	for(i=0;(i<MAX_PATH_ID_LENGTH) && (buffer[i] != "\n");i++)
 		temp_string[i]=buffer[i];
@@ -21,7 +21,7 @@ void parse_numbers(int intArr[], char buffer[], char inputPathArr[])
 	while(token != NULL) {
 		inputPathArr[i] = atoi(token);
 		i++;
-		token = strtok
+		token = strtok(NULL, search);
 	}
 	return;
 }
