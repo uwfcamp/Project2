@@ -18,7 +18,6 @@
 
 typedef struct server_s{
 	int socket;		// identifier for the server socket
-	int header[MAX_PATH_ID_LENGTH]; // holds 'header' information for program routing
 	char *buffer;		// Pointer to the buffer
 	int buffer_size;	// The max size of buffer
 	int buffered_size;	// The number of bytes in buffer
