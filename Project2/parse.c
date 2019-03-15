@@ -1,19 +1,19 @@
 #include "parse.h"
 #include "Definitions.h"
 
-void parse_numbers(int inputPathArr[], char buffer[], char messageIn[])
+void parse_message(int inputPathArr[], char buffer[], char messageIn[])
 {
-	char * search = " ";
+	char * search = DELIMITER;
 	char * token;
 	char temp_string[MAX_PATH_ID_LENGTH]={0};
 	int i, j;
 	clear_string(messageIn, BUFFER_SIZE);
 	clear_path(inputPathArr, MAX_PATH_ID_LENGTH);
 	//parse out path and identifiers into separate string
-	for(i=0;(i<MAX_PATH_ID_LENGTH) && (buffer[i] != '\n');i++)
+	for(i=0;(i<MAX_PATH_ID_LENGTH) && (buffer[i] != HEADER_DELIMITER);i++)
 		temp_string[i]=buffer[i];
 	//parse out message into messageIn
-	for(i=i+1, j=0;i<MAX_PATH_ID_LENGTH && buffer[i] != '\n';i++, j++)
+	for(i=i+1, j=0;i<BUFFER_SIZE && buffer[i] != HEADER_DELIMITER;i++, j++)
 		messageIn[j]=buffer[i];
 	i = 0;
 	//convert path temp string into integer inputPathArr
