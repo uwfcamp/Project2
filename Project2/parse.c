@@ -1,35 +1,28 @@
 #include "parse.h"
 #include "Definitions.h"
 
-void parse_message(int inputPathArr[], char buffer[], char messageIn[])
+void parse_message(char buffer[], int * mode, char username[], char password[], char destination[], char body[])
 {
-	char * search = DELIMITER;
-	char * token;
-	char temp_string[MAX_PATH_ID_LENGTH]={0};
-	int i, j;
-	clear_string(messageIn, BUFFER_SIZE);
-	clear_path(inputPathArr, MAX_PATH_ID_LENGTH);
-	//parse out path and identifiers into separate string
-	for(i=0;(i<MAX_PATH_ID_LENGTH) && (buffer[i] != HEADER_DELIMITER);i++)
-		temp_string[i]=buffer[i];
-	//parse out message into messageIn
-	for(i=i+1, j=0;i<BUFFER_SIZE && buffer[i] != HEADER_DELIMITER;i++, j++)
-		messageIn[j]=buffer[i];
-	i = 0;
-	//convert path temp string into integer inputPathArr
-	token = strtok(temp_string, search);
-	while(token != NULL) {
-		inputPathArr[i] = atoi(token);
-		i++;
-		token = strtok(NULL, search);
-	}
-	return;
-}
+	clear_string(username, CREDENTIAL_SIZE);
+	clear_string(password, CREDENTIAL_SIZE);
+	clear_string(destination, CREDENTIAL_SIZE);
+	clear_string(body, BUFFER_SIZE);
 
-void clear_path(int inputPathArr[], int max_Size) {
-	int i;
-	for(i=0;i<max_Size;i++)
-		inputPathArr[i]=0;
+	char * search = malloc(2*sizeof(char));
+	char * token;
+	search[1]=0;
+	search[0]=DELIMITER;
+	token = strtok(buffer, search);
+	*mode = atoi(token);
+	token = strtok(NULL, search);
+	strcpy(username, token);
+	token = strtok(NULL, search);
+	strcpy(password, token);
+	token = strtok(NULL, search);
+	strcpy(destination, token);
+	token = strtok(NULL, search);
+	strcpy(body, token);
+	free(search);
 	return;
 }
 
