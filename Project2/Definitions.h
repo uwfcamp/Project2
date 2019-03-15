@@ -14,5 +14,7 @@
 	#define PORT 60001
 	#define BUFFER_SIZE 30000
 	#define MAX_PATH_ID_LENGTH 20
+	#define DELIMITER 176
+	#define HEADER_DELIMITER 177
 
 #endif
