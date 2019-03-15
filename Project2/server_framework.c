@@ -70,14 +70,12 @@ int main(int argc, char const *argv[])
 
     while(1)
     {
-		int inputPathArr[MAX_PATH_ID_LENGTH];
-		char buffer[BUFFER_SIZE];
-		char messageIn[BUFFER_SIZE];
-		char messageOut[BUFFER_SIZE];
-		clear_string(buffer, BUFFER_SIZE);
-		clear_string(messageIn, BUFFER_SIZE);
-		clear_string(messageOut, BUFFER_SIZE);
-		clear_path(inputPathArr, MAX_PATH_ID_LENGTH);
+	int mode;
+	char buffer[BUFFER_SIZE];
+	char username[CREDENTIAL_SIZE];
+	char password[CREDENTIAL_SIZE];
+	char destination[CREDENTIAL_SIZE];
+	char body[BUFFER_SIZE];
 
         // Here we will check to see if there is
         // a new connection request, and if there
@@ -98,7 +96,8 @@ int main(int argc, char const *argv[])
 
                     // accept message from client
                     valread = recv( current->socket , buffer, BUFFER_SIZE, MSG_NOSIGNAL | MSG_DONTWAIT);
-
+		    // parse message
+		    parse_message(buffer, &mode, username, password, destination, body);
                     // send message to all other clients.
                     if (valread>0)
                         broadcast_message(clientList, current->socket, buffer, valread);
