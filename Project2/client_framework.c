@@ -256,6 +256,7 @@ void registration_input(server_t *server){
 	char username[50]={0};
 	char password1[50]={0};
 	char password2[50]={0};
+	int valid=0;
 
 	// print the menu
 	printf("\n-=| REGISTER NEW ACCOUNT |=-\n\n");
@@ -274,10 +275,10 @@ void registration_input(server_t *server){
 			while(getchar()!='\n');
 
 			// prompt user to reenter password
-			printf("PASSWORD: ");
+			printf("RE-ENTER PASSWORD: ");
 			scanf(" %s", password2);
 			while(getchar()!='\n');
-		}while(!strcmp(password1, password2));
+		}while(strcmp(password1, password2)!=0);
 
 		// send the registration attempt to the server
 		sprintf(server->buffer_out,"0%c%s%c%s%c %c ", (char)DELIMITER, username, (char)DELIMITER, password1, (char)DELIMITER, (char)DELIMITER);
@@ -286,14 +287,19 @@ void registration_input(server_t *server){
 
 		// wait for the response from the server
 		while(!server->recieve);
-		server->recieve=0;
 
+		// check if the server says the user is logged in
 		if (server->buffer_in[0] == '0')
 			printf("COULD NOT CREATE ACCOUNT, TRY A DIFFERENT USERNAME\n");
+		else
+			valid=1;
+
+		// let the listening thread know it is okay to read new messages
+		server->recieve=0;
 
 	// if the server responds that the user is still attempting
 	// to register, then the username must already be in use.
-	}while(server->buffer_in[0] == '0');
+	}while(!valid);
 	
 	// copy the username and password
 	strcpy(server->username, username);
@@ -306,6 +312,7 @@ void registration_input(server_t *server){
 void login_input(server_t *server){
 	char username[50]={0};
 	char password[50]={0};
+	int valid=0;
 
 	// print the menu
 	printf("\n-=| LOGIN TO ACCOUNT |=-\n\n");
@@ -327,19 +334,20 @@ void login_input(server_t *server){
 		server->send=1;
 
 		// wait for the response from the server
-		// XXX UNCOMMENT THE FOLLOWING CODE XXX		
-		//while(!server->recieve);
-		//server->recieve=0;
+		while(!server->recieve);
 
-		// XXX UNCOMMENT THE FOLLOWING CODE XXX	
-		//if (server->buffer_in[0] == '1')
-		//	printf("INVALID LOGIN CREDENTIALS\n");
+		// check if the server says the user is logged in
+		if (server->buffer_in[0] == '1')
+			printf("INVALID LOGIN CREDENTIALS\n");
+		else
+			valid=1;
+
+		// let the listening thread know it is okay to read new messages
+		server->recieve=0;
 
 	// if the server responds that the user is still attempting
 	// to register, then the username must already be in use.
-	// XXX UNCOMMENT THE FOLLOWING CODE XXX
-	//}while(server->buffer_in[0] == '1');
-	}while(0);
+	}while(!valid);
 
 	// copy the username and password
 	strcpy(server->username, username);
