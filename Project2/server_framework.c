@@ -10,24 +10,22 @@
 #include "parse.h"
 
 typedef struct client_list_s{
-	// XXX ADDITIONS THAT NEED TO BE VERIFIED XXX
 	int logged_in;			// 0 if the client is not logged in, 1 otherwise
-	int in_private_chat;		// 0 if the client is not in private chat, 1 otherwise
-	int in_group_chat;		// 0 if the client is not in public chat, 1 otherwise
-	char username_private_chat[50];	// the name of the user that the client is chatting with
 	char username[50];		// the client's username
 	char password[50];		// the client's password
-	// XXX ADDITIONS THAT NEED TO BE VERIFIED XXX
 	int socket;			// identifier for the server socket
 	int connected;			// 0 if not connected, 1 if connected
-	char name[60];			// the name of the user, for private chat
 	struct client_list_s *last;	// pointer to the previous element in the list
 	struct client_list_s *next;	// pointer to the next element in the list
 }client_list_t;
 
-void broadcast_message(client_list_t *clientList, int sender_socket, char *buffer, int messageSize);
-void new_connection(client_list_t *clientList, int socket, char *name);
+void broadcast_message(client_list_t *clientList, int sender_socket, char *message, char *sender);
+void private_message(client_list_t *clientList, char *message, char *destination, char *sender);
+void new_connection(client_list_t *clientList, int socket);
 void remove_connection(client_list_t **clientList, int target_socket);
+
+int login_user(char *username, char *password, client_list_t *client);
+int register_user(char *username, char *password, client_list_t *client);
 
 int main(int argc, char const *argv[])
 {
@@ -38,13 +36,19 @@ int main(int argc, char const *argv[])
     client_list_t *clientList = (client_list_t *) malloc(sizeof(client_list_t));
     clientList->socket=0;
     clientList->connected=0;
+    clientList->logged_in=0;
     clientList->last=NULL;
     clientList->next=NULL;
-    clientList->name[0]='\0';
+    clientList->username[0]='\0';
+    clientList->password[0]='\0';
     memset(&address, '\0', sizeof address);
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons( PORT );
+
+    // Ensure there is a login registry
+    FILE *logins = fopen("logins.txt", "a");
+    fclose(logins);
 
     // Creating socket file descriptor
     printf("STATUS: creating socket file descriptor\n");
@@ -78,21 +82,20 @@ int main(int argc, char const *argv[])
 
     while(1)
     {
-		int inputPathArr[MAX_PATH_ID_LENGTH];
-		char buffer[BUFFER_SIZE];
-		char messageIn[BUFFER_SIZE];
-		char messageOut[BUFFER_SIZE];
-		clear_string(buffer, BUFFER_SIZE);
-		clear_string(messageIn, BUFFER_SIZE);
-		clear_string(messageOut, BUFFER_SIZE);
-		clear_path(inputPathArr, MAX_PATH_ID_LENGTH);
+	char buffer[BUFFER_SIZE];
+
+	int mode;
+	char body[BUFFER_SIZE];
+	char username[CREDENTIAL_SIZE];
+	char password[CREDENTIAL_SIZE];
+	char destination[CREDENTIAL_SIZE];
 
         // Here we will check to see if there is
         // a new connection request, and if there
         // is, we will add it to the list.
 	temp_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
         if (temp_socket>0)
-            new_connection(clientList, temp_socket, "ANONYMOUS");
+            new_connection(clientList, temp_socket);
 
 	// loop through every connection, to
         // see if there is an incoming message.
@@ -107,9 +110,48 @@ int main(int argc, char const *argv[])
                     // accept message from client
                     valread = recv( current->socket , buffer, BUFFER_SIZE, MSG_NOSIGNAL | MSG_DONTWAIT);
 
-                    // send message to all other clients.
-                    if (valread>0)
-                        broadcast_message(clientList, current->socket, buffer, valread);
+                    // handle recieved messages
+                    if (valread>0){
+                        parse_message(buffer, &mode, username, password, destination, body);
+			switch (mode){
+				case 0:
+					register_user(username, password, current);
+					break;
+				case 1:
+					login_user(username, password, current);
+					break;
+				case 2:
+					// THIS CASE IS RESERVED FOR MESSAGES FROM THE
+					// SERVER TO THE CLIENT, TO VERIFY LOGIN SUCCESS
+					break;
+				case 3:
+					break;
+				case 4:
+					break;
+				case 5:
+					break;
+				case 6:
+					break;
+				case 7:
+					if (current->logged_in==1){
+						if (strcmp(destination, " ")==0)
+							broadcast_message(clientList, current->socket, body, current->username);
+						else
+							private_message(clientList, body, destination, current->username);
+					}
+					break;
+				case 8:
+					break;
+				case 9:
+					break;
+				case 10:
+					break;
+				case 11:
+					break;
+				case 12:
+					break;
+			}
+                    }
                 }
             // move to the next element in the list
             current = current->next;
@@ -122,10 +164,13 @@ int main(int argc, char const *argv[])
 
 
 
-void broadcast_message(client_list_t *clientList, int sender_socket, char *buffer, int messageSize){
+void broadcast_message(client_list_t *clientList, int sender_socket, char *message, char *sender){
+    char new_buffer[BUFFER_SIZE];
+    sprintf(new_buffer, "7%c%s%c%s%c%s%c%s", (char)DELIMITER, sender, (char)DELIMITER, " ", (char)DELIMITER, " ", (char)DELIMITER, message);
     while(clientList != NULL){
-        if (clientList->socket != sender_socket && clientList->connected==1){
-	        send(clientList->socket , buffer , messageSize, MSG_NOSIGNAL | MSG_DONTWAIT);
+        if (clientList->socket != sender_socket && clientList->connected==1 && clientList->logged_in==1){
+	        send(clientList->socket , new_buffer , strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+		break;
 	}
         clientList=clientList->next;
     }
@@ -134,7 +179,24 @@ void broadcast_message(client_list_t *clientList, int sender_socket, char *buffe
 
 
 
-void new_connection(client_list_t *clientList, int socket, char *name){
+void private_message(client_list_t *clientList, char *message, char *destination, char *sender){
+    char new_buffer[BUFFER_SIZE];
+    sprintf(new_buffer, "7%c%s%c%s%c%s%c%s", (char)DELIMITER, sender, (char)DELIMITER, " ", (char)DELIMITER, destination, (char)DELIMITER, message);
+    while(clientList != NULL){
+        if (strcmp(destination, clientList->username)==0){
+		if (clientList->connected==1 && clientList->logged_in==1)
+	        	send(clientList->socket , new_buffer , strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+                printf("STATUS: message sent to %s\n", destination);
+		return;
+	}
+        clientList=clientList->next;
+    }
+    printf("STATUS: message could not be sent to %s\n", destination);
+}
+
+
+
+void new_connection(client_list_t *clientList, int socket){
     // there is at least 1 connection
     if (clientList->connected == 1){
         client_list_t *end = clientList;
@@ -145,12 +207,16 @@ void new_connection(client_list_t *clientList, int socket, char *name){
         end->next->last = end;
         end->next->socket = socket;
         end->next->connected = 1;
-        strcpy(end->next->name, name);
+	end->next->logged_in=0;
+	end->next->username[0]='\0';
+	end->next->password[0]='\0';
     }
     else{ // there are no connections
         clientList->socket = socket;
         clientList->connected = 1;
-        strcpy(clientList->name, name);
+	clientList->logged_in=0;
+	clientList->username[0]='\0';
+	clientList->password[0]='\0';
     }
     printf("STATUS: new connection added, socket:%d\n", socket);
 
@@ -167,7 +233,9 @@ void remove_connection(client_list_t **clientList, int target_socket){
         if ((*clientList)->next==NULL){
             (*clientList)->socket = 0;
             (*clientList)->connected = 0;
-            (*clientList)->name[0]='\0';
+            (*clientList)->logged_in = 0;
+            (*clientList)->username[0]='\0';
+            (*clientList)->password[0]='\0';
         }
         else{
             client_list_t *temp = (*clientList);
@@ -190,4 +258,87 @@ void remove_connection(client_list_t **clientList, int target_socket){
 		target->next->last = target->last;
         free(target);
     }
+}
+
+
+
+int login_user(char *username, char *password, client_list_t *client){
+	FILE *logins = fopen("logins.txt", "r");
+	char login_buffer[200];
+
+	char search[3];
+	search[0]=(char)DELIMITER;
+	search[1]='\n';
+	search[2]='\0';
+
+	char *load_username;
+	char *load_password;
+
+	// check to see if the given credentials match existing records
+	while(!feof(logins)){
+		fgets(login_buffer, 200, logins);
+		load_username = strtok(login_buffer, search);
+		load_password = strtok(NULL, search);
+		if (strcmp(load_username, username)==0 && strcmp(load_password, password)==0){
+			fclose(logins);
+			char new_buffer[BUFFER_SIZE];
+			sprintf(new_buffer, "2%c%s%c%s%c%s%c%s",(char)DELIMITER, username, (char)DELIMITER, password, (char)DELIMITER, " ", (char)DELIMITER, " ");
+			send(client->socket , new_buffer , strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+			strcpy(client->username, username);
+			strcpy(client->password, password);
+			client->logged_in=1;
+			return 1;
+		}
+	}
+
+	// the given credentials did not match any records
+	fclose(logins);
+
+	char new_buffer[BUFFER_SIZE];
+	sprintf(new_buffer, "1%c%s%c%s%c%s%c%s",(char)DELIMITER, username, (char)DELIMITER, password, (char)DELIMITER, " ", (char)DELIMITER, " ");
+	send(client->socket , new_buffer , strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+
+	return 0;
+}
+
+
+
+int register_user(char *username, char *password, client_list_t *client){
+	FILE *logins = fopen("logins.txt", "r");
+	char login_buffer[200];
+
+	char search[3];
+	search[0]=(char)DELIMITER;
+	search[1]='\n';
+	search[2]='\0';
+
+	char *load_username;
+
+	// check to see if the given username exists already
+	while(!feof(logins)){
+		fgets(login_buffer, 200, logins);
+		load_username = strtok(login_buffer, search);
+		if (strcmp(load_username, username)==0){
+			fclose(logins);
+			char new_buffer[BUFFER_SIZE];
+			sprintf(new_buffer, "%c%s%c%s%c%s%c%s",(char)DELIMITER, username, (char)DELIMITER, password, (char)DELIMITER, " ", (char)DELIMITER, " ");
+			send(client->socket , new_buffer , strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+			return 1;
+		}
+	}
+
+	// the given username does not exist in the records, create new account
+	fclose(logins);
+	logins = fopen("logins.txt", "a");
+	fprintf(logins, "%s%c%s\n", username, (char)DELIMITER, password);
+	fclose(logins);
+
+	char new_buffer[BUFFER_SIZE];
+	sprintf(new_buffer, "2%c%s%c%s%c%s%c%s",(char)DELIMITER, username, (char)DELIMITER, password, (char)DELIMITER, " ", (char)DELIMITER, " ");
+	send(client->socket , new_buffer , strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+	strcpy(client->username, username);
+	strcpy(client->password, password);
+	client->logged_in=1;
+
+	return 0;
 }
