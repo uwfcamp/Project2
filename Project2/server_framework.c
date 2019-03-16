@@ -10,6 +10,14 @@
 #include "parse.h"
 
 typedef struct client_list_s{
+	// XXX ADDITIONS THAT NEED TO BE VERIFIED XXX
+	int logged_in;			// 0 if the client is not logged in, 1 otherwise
+	int in_private_chat;		// 0 if the client is not in private chat, 1 otherwise
+	int in_group_chat;		// 0 if the client is not in public chat, 1 otherwise
+	char username_private_chat[50];	// the name of the user that the client is chatting with
+	char username[50];		// the client's username
+	char password[50];		// the client's password
+	// XXX ADDITIONS THAT NEED TO BE VERIFIED XXX
 	int socket;			// identifier for the server socket
 	int connected;			// 0 if not connected, 1 if connected
 	char name[60];			// the name of the user, for private chat
@@ -70,12 +78,14 @@ int main(int argc, char const *argv[])
 
     while(1)
     {
-	int mode;
-	char buffer[BUFFER_SIZE];
-	char username[CREDENTIAL_SIZE];
-	char password[CREDENTIAL_SIZE];
-	char destination[CREDENTIAL_SIZE];
-	char body[BUFFER_SIZE];
+		int inputPathArr[MAX_PATH_ID_LENGTH];
+		char buffer[BUFFER_SIZE];
+		char messageIn[BUFFER_SIZE];
+		char messageOut[BUFFER_SIZE];
+		clear_string(buffer, BUFFER_SIZE);
+		clear_string(messageIn, BUFFER_SIZE);
+		clear_string(messageOut, BUFFER_SIZE);
+		clear_path(inputPathArr, MAX_PATH_ID_LENGTH);
 
         // Here we will check to see if there is
         // a new connection request, and if there
@@ -96,8 +106,7 @@ int main(int argc, char const *argv[])
 
                     // accept message from client
                     valread = recv( current->socket , buffer, BUFFER_SIZE, MSG_NOSIGNAL | MSG_DONTWAIT);
-		    // parse message
-		    parse_message(buffer, &mode, username, password, destination, body);
+
                     // send message to all other clients.
                     if (valread>0)
                         broadcast_message(clientList, current->socket, buffer, valread);
