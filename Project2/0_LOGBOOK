@@ -19,12 +19,13 @@ server_framework.c-bak
 REASON:
 
 client_framework.c
-->
-REASON:
+-> Nathan A Wilkins Jr.
+REASON: 3/16/2019 correcting client handling of server login response
 
 server_framework.c
--> Nathan A Wilkins Jr
-REASON: Implementing username and password registration/verification
+->
+REASON: 
+REASON: 3/16/2019 Implementing username and password registration/verification
 
 parse.c
 ->
