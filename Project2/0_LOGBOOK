@@ -23,8 +23,8 @@ client_framework.c
 REASON:
 
 server_framework.c
-->
-REASON:
+-> Nathan A Wilkins Jr
+REASON: Implementing username and password registration/verification
 
 parse.c
 ->
