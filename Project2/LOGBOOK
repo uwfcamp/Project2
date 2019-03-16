@@ -1,0 +1,47 @@
+WHEN YOU WANT TO EDIT A FILE, PUT YOUR NAME IN THE POINTER AREA UNDERNEATH THAT FILE'S NAME.
+IF THE FILE YOU WANT TO EDIT ALREADY HAS A NAME UNDER IT, YOU MUST WAIT TILL THE NAME HAS BEEN REMOVED.
+DO NOT REMOVE YOUR NAME UNTIL AFTER YOU HAVE MADE YOUR CHANGES AND UPLOADED THE FILE.
+IF YOU CREATE A NEW FILE, ADD IT TO THIS LIST AFTER UPLOADING.
+DO NOT MODIFY FILES THAT ARE NOT LISTED IN THE LOGBOOK.
+
+makefile
+->
+
+client_framework.c-bak
+->
+
+server_framework.c-bak
+->
+
+client_framework.c
+-> Nathan Allen Wilkins Jr.
+
+server_framework.c
+->
+
+parse.c
+->
+
+Definitions.h
+->
+
+parse.h
+->
+
+Reference.txt
+->
+
+messageFile.txt
+->
+
+messageStructure.txt
+->
+
+readme.txt
+->
+
+userFile.txt
+->
+
+Project2OverView.docx
+->
