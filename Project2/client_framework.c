@@ -424,6 +424,6 @@ void group_chat(server_t *server){
 
 		if (input!='\n')
 			while(getchar()!='\n');
-	}while(input != 'q' || input !='Q');
+	}while(input != 'q' && input !='Q');
 	server->in_group_chat=0;
 }
