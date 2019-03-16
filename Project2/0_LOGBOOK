@@ -19,7 +19,8 @@ server_framework.c-bak
 REASON:
 
 client_framework.c
--> Nathan A Wilkins Jr.
+-> 
+REASON: 
 REASON: 3/16/2019 correcting client handling of server login response
 
 server_framework.c
