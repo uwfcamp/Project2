@@ -216,6 +216,7 @@ int main_menu(server_t *server){
 	}while(selection<0 || selection>8);
 
 	// perform selection
+	fflush(stdout);
 	switch(selection){
 		case 0:
 			break;

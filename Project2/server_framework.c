@@ -94,7 +94,7 @@ int main(int argc, char const *argv[])
 
                     // handle recieved messages
                     if (valread>0){
-                        printf("%s\n", buffer);
+                        //printf("%s\n", buffer);
 			parse_message(buffer, &mode, username, password, destination, body);
 			printf("%s\n", buffer);
 			switch (mode){
@@ -108,11 +108,13 @@ int main(int argc, char const *argv[])
 					// THIS CASE IS RESERVED FOR MESSAGES FROM THE
 					// SERVER TO THE CLIENT, TO VERIFY LOGIN SUCCESS
 					break;
-				case 3:
+				case 3: //logout case
+					s_logout(username, password, current);
 					break;
 				case 4:
 					break;
-				case 5:
+				case 5: //online user query case
+					show_users(username, password, clientList, current);
 					break;
 				case 6:
 					break;

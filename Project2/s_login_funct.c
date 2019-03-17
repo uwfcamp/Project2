@@ -86,3 +86,12 @@ int register_user(char *username, char *password, client_list_t *client){
 
 	return 0;
 }
+void s_logout(char * username, char * password, client_list_t *client){
+	if (strcmp(client->username, username)==0 && strcmp(client->password, password)==0){
+		printf("Logging out %s\n", username);
+		client->logged_in=0;
+		strcpy(client->username, "\0");
+		strcpy(client->password, "\0");
+	}
+	return;
+}

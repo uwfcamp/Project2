@@ -49,3 +49,18 @@ void log_into_group(char *username, char *body){
 	fclose(fp);
 	return;
 }
+
+void show_users(char * username, char * password, client_list_t *clientList, client_list_t *current){
+	char new_buffer[BUFFER_SIZE];
+	client_list_t *list = clientList;
+	sprintf(new_buffer, "5%c %c %c %c", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
+	while(list != NULL) {
+		if(list->logged_in == 1){
+			strcat(new_buffer, list->username);
+			strcat(new_buffer, " ");
+		}
+		list = list->next;
+	}
+	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+	return;	
+}
