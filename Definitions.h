@@ -1,0 +1,53 @@
+#ifndef Definitions
+#define Definitions
+	#include <stdio.h>
+	#include <sys/socket.h>
+	#include <sys/types.h>
+	#include <unistd.h>
+	#include <stdlib.h>
+	#include <errno.h>
+	#include <netinet/in.h>
+	#include <string.h>
+	#include <fcntl.h>
+	#include <time.h>
+	#include <arpa/inet.h>
+	#include <pthread.h>
+	
+	//Global Definitions
+	#define PORT 60001
+	#define BUFFER_SIZE 30000
+	#define CREDENTIAL_SIZE 20
+	#define DELIMITER 176
+	#define MAX_TIME_SIZE 50
+
+	typedef struct server_s{
+	int socket;		// identifier for the server socket
+	char username[CREDENTIAL_SIZE];	// store the username of the user
+	char password[CREDENTIAL_SIZE];	// store the password of the user
+	char *buffer_in;	// Pointer to the buffer of stuff coming in from the server
+	char *buffer_out;	// Pointer to the buffer of stuff going out to the server
+	int buffer_size;	// The max size of buffer
+	int buffered_in_size;	// The number of bytes in the input buffer
+	int buffered_out_size;	// The number of bytes in the output buffer
+	int send;		// 0 if there is nothing to be sent, 1 if there is
+	int recieve;		// 0 if nothing has been recieved, 1 if something has
+	int connected;		// 0 if not connected, 1 if connected
+	int logged_in;		// 0 if not logged in, 1 if logged in
+	int typing;
+	int in_group_chat;
+	int in_private_chat;
+	char username_private_chat[CREDENTIAL_SIZE];
+	}server_t;
+	
+	typedef struct client_list_s{
+	int logged_in;			// 0 if the client is not logged in, 1 otherwise
+	char username[50];		// the client's username
+	char password[50];		// the client's password
+	int socket;			// identifier for the server socket
+	int connected;			// 0 if not connected, 1 if connected
+	struct client_list_s *last;	// pointer to the previous element in the list
+	struct client_list_s *next;	// pointer to the next element in the list
+	}client_list_t;
+
+	
+#endif
