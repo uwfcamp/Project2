@@ -5,8 +5,9 @@ LINKS = -pthread
 OBJECTS1 = server_framework.o
 OBJECTS2 = client_framework.o
 OBJECTS3 = parse.o
+
 CFILES1 = server_framework.c
-CFILES2 = client_framework.c
+CFILES2 = client_framework.c c_login_funct.c c_menu_funct.c
 CFILES3 = parse.c parse.h Definitions.h
 BINARYS = server client
 

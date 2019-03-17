@@ -281,7 +281,7 @@ int login_user(char *username, char *password, client_list_t *client){
 	while(!feof(logins)){
 		fgets(login_buffer, 200, logins);
 		load_username = strtok(login_buffer, search);
-		if (load_username!=NULL);
+		if (load_username!=NULL)
 			load_password = strtok(NULL, search);
 		if (load_username!=NULL && load_password!=NULL){
 			if (strcmp(load_username, username)==0 && strcmp(load_password, password)==0){

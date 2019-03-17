@@ -1,49 +1,19 @@
 // Client side C/C++ program to demonstrate Socket programming
-#include <stdio.h>
-#include <sys/socket.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <netinet/in.h>
-#include <string.h>
-#include <arpa/inet.h>
-#include <pthread.h>
+
 #include "Definitions.h"
 #include "parse.h"
-
+#include "c_menu_funct.h"
+#include "c_login_funct.h"
 #define IP_ADDRESS "127.0.0.1"
 
 
 
-typedef struct server_s{
-	int socket;		// identifier for the server socket
-	char username[CREDENTIAL_SIZE];	// store the username of the user
-	char password[CREDENTIAL_SIZE];	// store the password of the user
-	char *buffer_in;	// Pointer to the buffer of stuff coming in from the server
-	char *buffer_out;	// Pointer to the buffer of stuff going out to the server
-	int buffer_size;	// The max size of buffer
-	int buffered_in_size;	// The number of bytes in the input buffer
-	int buffered_out_size;	// The number of bytes in the output buffer
-	int send;		// 0 if there is nothing to be sent, 1 if there is
-	int recieve;		// 0 if nothing has been recieved, 1 if something has
-	int connected;		// 0 if not connected, 1 if connected
-	int logged_in;		// 0 if not logged in, 1 if logged in
-	int typing;
-	int in_group_chat;
-	int in_private_chat;
-	char username_private_chat[CREDENTIAL_SIZE];
-}server_t;
 
 
 
-int login_menu(server_t *server);
+
 int menu_input(void);
-void registration_input(server_t *server);
-void login_input(server_t *server);
 int main_menu(server_t *server);
-void group_chat(server_t *server);
-
-
 
 server_t *build_server_structure(void);
 void disconnect(server_t *server);

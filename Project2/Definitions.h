@@ -10,6 +10,8 @@
 	#include <string.h>
 	#include <fcntl.h>
 	#include <time.h>
+	#include <arpa/inet.h>
+	#include <pthread.h>
 	
 	//Global Definitions
 	#define PORT 60001
@@ -18,4 +20,23 @@
 	#define DELIMITER 176
 	#define MAX_TIME_SIZE 50
 
+	typedef struct server_s{
+	int socket;		// identifier for the server socket
+	char username[CREDENTIAL_SIZE];	// store the username of the user
+	char password[CREDENTIAL_SIZE];	// store the password of the user
+	char *buffer_in;	// Pointer to the buffer of stuff coming in from the server
+	char *buffer_out;	// Pointer to the buffer of stuff going out to the server
+	int buffer_size;	// The max size of buffer
+	int buffered_in_size;	// The number of bytes in the input buffer
+	int buffered_out_size;	// The number of bytes in the output buffer
+	int send;		// 0 if there is nothing to be sent, 1 if there is
+	int recieve;		// 0 if nothing has been recieved, 1 if something has
+	int connected;		// 0 if not connected, 1 if connected
+	int logged_in;		// 0 if not logged in, 1 if logged in
+	int typing;
+	int in_group_chat;
+	int in_private_chat;
+	char username_private_chat[CREDENTIAL_SIZE];
+	}server_t;
+	
 #endif
