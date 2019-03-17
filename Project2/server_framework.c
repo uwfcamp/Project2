@@ -113,7 +113,9 @@ int main(int argc, char const *argv[])
 
                     // handle recieved messages
                     if (valread>0){
-                        parse_message(buffer, &mode, username, password, destination, body);
+                        printf("%s\n", buffer);
+			parse_message(buffer, &mode, username, password, destination, body);
+			printf("%s\n", buffer);
 			switch (mode){
 				case 0:
 					register_user(username, password, current);
