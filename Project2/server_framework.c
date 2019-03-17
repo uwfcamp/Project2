@@ -6,28 +6,9 @@
  * @DATE	3/8/2019
  * @INFO	COP4635 Project 1
  */
-#include "Definitions.h"
-#include "parse.h"
 
-typedef struct client_list_s{
-	int logged_in;			// 0 if the client is not logged in, 1 otherwise
-	char username[50];		// the client's username
-	char password[50];		// the client's password
-	int socket;			// identifier for the server socket
-	int connected;			// 0 if not connected, 1 if connected
-	struct client_list_s *last;	// pointer to the previous element in the list
-	struct client_list_s *next;	// pointer to the next element in the list
-}client_list_t;
-
-void broadcast_message(client_list_t *clientList, int sender_socket, char *message, char *sender);
-void private_message(client_list_t *clientList, char *message, char *destination, char *sender);
-void new_connection(client_list_t *clientList, int socket);
-void remove_connection(client_list_t **clientList, int target_socket);
-void log_into_group(char *username, char *body);
-
-int login_user(char *username, char *password, client_list_t *client);
-int register_user(char *username, char *password, client_list_t *client);
-
+#include "server_framework.h" 
+ 
 int main(int argc, char const *argv[])
 {
     int server_fd;
@@ -167,40 +148,6 @@ int main(int argc, char const *argv[])
     return 0;
 }
 
-
-
-void broadcast_message(client_list_t *clientList, int sender_socket, char *message, char *sender){
-    char new_buffer[BUFFER_SIZE];
-    sprintf(new_buffer, "7%c%s%c%s%c%s%c%s", (char)DELIMITER, sender, (char)DELIMITER, " ", (char)DELIMITER, " ", (char)DELIMITER, message);
-    while(clientList != NULL){
-        if (clientList->socket != sender_socket && clientList->connected==1 && clientList->logged_in==1){
-	        send(clientList->socket , new_buffer , strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
-		break;
-	}
-        clientList=clientList->next;
-    }
-    printf("STATUS: message sent to all users\n");
-}
-
-
-
-void private_message(client_list_t *clientList, char *message, char *destination, char *sender){
-    char new_buffer[BUFFER_SIZE];
-    sprintf(new_buffer, "7%c%s%c%s%c%s%c%s", (char)DELIMITER, sender, (char)DELIMITER, " ", (char)DELIMITER, destination, (char)DELIMITER, message);
-    while(clientList != NULL){
-        if (strcmp(destination, clientList->username)==0){
-		if (clientList->connected==1 && clientList->logged_in==1)
-	        	send(clientList->socket , new_buffer , strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
-                printf("STATUS: message sent to %s\n", destination);
-		return;
-	}
-        clientList=clientList->next;
-    }
-    printf("STATUS: message could not be sent to %s\n", destination);
-}
-
-
-
 void new_connection(client_list_t *clientList, int socket){
     // there is at least 1 connection
     if (clientList->connected == 1){
@@ -226,8 +173,6 @@ void new_connection(client_list_t *clientList, int socket){
     printf("STATUS: new connection added, socket:%d\n", socket);
 
 }
-
-
 
 void remove_connection(client_list_t **clientList, int target_socket){
     // special case, where the target being
@@ -263,111 +208,4 @@ void remove_connection(client_list_t **clientList, int target_socket){
 		target->next->last = target->last;
         free(target);
     }
-}
-
-
-
-int login_user(char *username, char *password, client_list_t *client){
-	FILE *logins = fopen("logins.txt", "r");
-	char login_buffer[200];
-
-	char search[3];
-	search[0]=(char)DELIMITER;
-	search[1]='\n';
-	search[2]='\0';
-
-	char *load_username=NULL;
-	char *load_password=NULL;
-
-	// check to see if the given credentials match existing records
-	while(!feof(logins)){
-		fgets(login_buffer, 200, logins);
-		load_username = strtok(login_buffer, search);
-		if (load_username!=NULL)
-			load_password = strtok(NULL, search);
-		if (load_username!=NULL && load_password!=NULL){
-			if (strcmp(load_username, username)==0 && strcmp(load_password, password)==0){
-				fclose(logins);
-				char new_buffer[BUFFER_SIZE];
-				sprintf(new_buffer, "2%c%s%c%s%c%s%c%s",(char)DELIMITER, username, (char)DELIMITER, password, (char)DELIMITER, " ", (char)DELIMITER, " ");
-				send(client->socket , new_buffer , strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
-				strcpy(client->username, username);
-				strcpy(client->password, password);
-				client->logged_in=1;
-				return 1;
-			}
-		}
-	}
-
-	// the given credentials did not match any records
-	fclose(logins);
-
-	char new_buffer[BUFFER_SIZE];
-	sprintf(new_buffer, "1%c%s%c%s%c%s%c%s",(char)DELIMITER, username, (char)DELIMITER, password, (char)DELIMITER, " ", (char)DELIMITER, " ");
-	send(client->socket , new_buffer , strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
-
-	return 0;
-}
-
-
-
-int register_user(char *username, char *password, client_list_t *client){
-	FILE *logins = fopen("logins.txt", "r");
-	char login_buffer[200];
-
-	char search[3];
-	search[0]=(char)DELIMITER;
-	search[1]='\n';
-	search[2]='\0';
-
-	char *load_username;
-
-	// check to see if the given username exists already
-	while(!feof(logins)){
-		fgets(login_buffer, 200, logins);
-		load_username = strtok(login_buffer, search);
-		if (load_username!=NULL){
-			if (strcmp(load_username, username)==0){
-				fclose(logins);
-				char new_buffer[BUFFER_SIZE];
-				sprintf(new_buffer, "0%c%s%c%s%c%s%c%s",(char)DELIMITER, username, (char)DELIMITER, password, (char)DELIMITER, " ", (char)DELIMITER, " ");
-				send(client->socket , new_buffer , strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
-				return 1;
-			}
-		}
-	}
-
-	// the given username does not exist in the records, create new account
-	fclose(logins);
-	logins = fopen("logins.txt", "a");
-	fprintf(logins, "%s%c%s\n", username, (char)DELIMITER, password);
-	fclose(logins);
-
-	char new_buffer[BUFFER_SIZE];
-	sprintf(new_buffer, "2%c%s%c%s%c%s%c%s",(char)DELIMITER, username, (char)DELIMITER, password, (char)DELIMITER, " ", (char)DELIMITER, " ");
-	send(client->socket , new_buffer , strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
-	strcpy(client->username, username);
-	strcpy(client->password, password);
-	client->logged_in=1;
-
-	return 0;
-}
-
-
-void log_into_group(char *username, char *body){
-	FILE *fp;
-	fp=fopen("groupchat.txt", "a");
-
-	time_t rawtime;
-	time(&rawtime);
-	struct tm *info = localtime(&rawtime);
-	char timestamp[MAX_TIME_SIZE];
-	clear_string(timestamp,MAX_TIME_SIZE);
-	strcpy(timestamp,asctime(info));
-	timestamp[strlen(timestamp)-1]='\0'; // removing newline
-
-	fprintf(fp, "%s - %s: %s",timestamp, username, body);
-
-	fclose(fp);
-	return;
 }

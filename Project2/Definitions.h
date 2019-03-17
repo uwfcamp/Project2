@@ -39,4 +39,15 @@
 	char username_private_chat[CREDENTIAL_SIZE];
 	}server_t;
 	
+	typedef struct client_list_s{
+	int logged_in;			// 0 if the client is not logged in, 1 otherwise
+	char username[50];		// the client's username
+	char password[50];		// the client's password
+	int socket;			// identifier for the server socket
+	int connected;			// 0 if not connected, 1 if connected
+	struct client_list_s *last;	// pointer to the previous element in the list
+	struct client_list_s *next;	// pointer to the next element in the list
+	}client_list_t;
+
+	
 #endif
