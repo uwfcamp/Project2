@@ -10,10 +10,6 @@
 	#include <string.h>
 	#include <fcntl.h>
 	#include <time.h>
-	#include <pthread.h>
-	#include <sched.h>
-	#include <arpa/inet.h>
-	#include <semaphore.h>
 	
 	//Global Definitions
 	#define PORT 60001
