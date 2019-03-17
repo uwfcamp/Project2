@@ -1,20 +1,11 @@
 // Client side C/C++ program to demonstrate Socket programming
-#include <stdio.h>
-#include <sys/socket.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <netinet/in.h>
-#include <string.h>
-#include <arpa/inet.h>
-#include <pthread.h>
 #include "Definitions.h"
 #include "parse.h"
 
 
 #define IP_ADDRESS "127.0.0.1"
 
-
+sem_t mutex;
 
 typedef struct server_s{
 	int socket;		// identifier for the server socket
@@ -57,8 +48,7 @@ int main(int argc, char const *argv[])
 {
     struct sockaddr_in serv_addr;
     server_t *server = build_server_structure();
-
-
+    sem_init(&mutex, 0, 1);
     if ((server->socket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
         fprintf(stderr,"ERROR: socket creation error\n");
@@ -100,7 +90,7 @@ int main(int argc, char const *argv[])
 
     pthread_join(tid, NULL);
     disconnect(server);
-
+    sem_destroy(&mutex);
     return 0;
 }
 
@@ -152,7 +142,9 @@ void *server_communication(void *vargp){
 			char destination[CREDENTIAL_SIZE];
 		
 			parse_message(server->buffer_in, &mode, username, password, destination, body);
-
+			if(mode == 3){
+				sem_wait(&mutex);
+			}
 			// print out chat messages
 			if (server->buffer_in[0]=='7' && (server->in_group_chat==1 || server->in_private_chat==1)){
 				printf("%s: %s", username, body);
@@ -164,6 +156,8 @@ void *server_communication(void *vargp){
 			server->buffer_in[0]='\0';
 			server->buffered_in_size=0;
 			server->recieve=0;
+			if(mode ==3)
+				sem_post(&mutex);
 		}
 	}
 	return NULL;
@@ -452,7 +446,8 @@ void logout(server_t *server){
 	while(server->send==1);
 	sprintf(server->buffer_out,"3%c%s%c%s%c %c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
 	server->send=1;
-	while(!server->recieve);
+	sem_wait(&mutex);
+	while(!server->recieve)
 	if (server->buffer_in[0]=='3'){
 		printf("You are successfully logged out\n");
 		server->logged_in=0;
@@ -462,4 +457,5 @@ void logout(server_t *server){
 	else{
 		printf("An error has occured, and we could not log you out at this time\n");
 	}
+	sem_post(&mutex);
 }

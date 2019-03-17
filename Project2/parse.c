@@ -10,9 +10,12 @@ void parse_message(char buffer[], int * mode, char username[], char password[], 
 
 	char * search = malloc(2*sizeof(char));
 	char * token;
+	char temp[BUFFER_SIZE];
+	clear_string(temp, BUFFER_SIZE);
+	strcpy(temp, buffer);
 	search[1]=0;
 	search[0]=DELIMITER;
-	token = strtok(buffer, search);
+	token = strtok(temp, search);
 	*mode = atoi(token);
 	token = strtok(NULL, search);
 	strcpy(username, token);
