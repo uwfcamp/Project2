@@ -9,7 +9,7 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 #include "Definitions.h"
-
+#include "parse.h"
 
 #define IP_ADDRESS "127.0.0.1"
 
@@ -17,8 +17,8 @@
 
 typedef struct server_s{
 	int socket;		// identifier for the server socket
-	char username[50];	// store the username of the user
-	char password[50];	// store the password of the user
+	char username[CREDENTIAL_SIZE];	// store the username of the user
+	char password[CREDENTIAL_SIZE];	// store the password of the user
 	char *buffer_in;	// Pointer to the buffer of stuff coming in from the server
 	char *buffer_out;	// Pointer to the buffer of stuff going out to the server
 	int buffer_size;	// The max size of buffer
@@ -31,7 +31,7 @@ typedef struct server_s{
 	int typing;
 	int in_group_chat;
 	int in_private_chat;
-	char username_private_chat[50];
+	char username_private_chat[CREDENTIAL_SIZE];
 }server_t;
 
 
@@ -117,6 +117,7 @@ void *server_communication(void *vargp){
 		if (server->send==1){
 			if (send(server->socket , server->buffer_out, server->buffered_out_size , MSG_NOSIGNAL | MSG_DONTWAIT)<0)
 				server->connected=0;
+			clear_string(server->buffer_out, BUFFER_SIZE);
 			server->buffer_out[0]='\0';
 			server->buffered_out_size=0;
 			server->send=0;
@@ -140,10 +141,18 @@ void *server_communication(void *vargp){
 		// the different types of messages
 		if (server->recieve==1 && server->typing==0 && server->logged_in==1){
 			//mutex 1 lock to replace typing variable
+			int mode;
+			char body[BUFFER_SIZE];
+			char username[CREDENTIAL_SIZE];
+			char password[CREDENTIAL_SIZE];
+			char destination[CREDENTIAL_SIZE];
+
+			parse_message(server->buffer_in, &mode, username, password, destination, body);
+
 
 			// print out chat messages
 			if (server->buffer_in[0]=='7' && (server->in_group_chat==1 || server->in_private_chat==1)){
-				printf("%s\n",server->buffer_in);
+				printf("%s: %s", username, body);
 			}
 
 			//mutex 1 unlock to replace typing variable
@@ -234,7 +243,7 @@ int login_menu(server_t *server){
 
 
 int menu_input(void){
-	char input[50]={0};
+	char input[CREDENTIAL_SIZE]={0};
 	int valid = 0, i;
 	do{
 		printf("Enter an action: ");
@@ -253,9 +262,9 @@ int menu_input(void){
 
 
 void registration_input(server_t *server){
-	char username[50]={0};
-	char password1[50]={0};
-	char password2[50]={0};
+	char username[CREDENTIAL_SIZE]={0};
+	char password1[CREDENTIAL_SIZE]={0};
+	char password2[CREDENTIAL_SIZE]={0};
 	int valid=0;
 
 	// print the menu
@@ -310,8 +319,8 @@ void registration_input(server_t *server){
 
 
 void login_input(server_t *server){
-	char username[50]={0};
-	char password[50]={0};
+	char username[CREDENTIAL_SIZE]={0};
+	char password[CREDENTIAL_SIZE]={0};
 	int valid=0;
 
 	// print the menu
