@@ -23,6 +23,8 @@ void broadcast_message(client_list_t *clientList, int sender_socket, char *messa
 void private_message(client_list_t *clientList, char *message, char *destination, char *sender);
 void new_connection(client_list_t *clientList, int socket);
 void remove_connection(client_list_t **clientList, int target_socket);
+void log_into_group(char *username, char *body);
+void logout_user(client_list_t *user);
 
 int login_user(char *username, char *password, client_list_t *client);
 int register_user(char *username, char *password, client_list_t *client);
@@ -105,6 +107,7 @@ int main(int argc, char const *argv[])
         while (current!=NULL){
                 if (current->connected==1){
                     //clear buffer and path array for message acceptance
+
                     clear_string(buffer, BUFFER_SIZE);
 
                     // accept message from client
@@ -125,6 +128,7 @@ int main(int argc, char const *argv[])
 					// SERVER TO THE CLIENT, TO VERIFY LOGIN SUCCESS
 					break;
 				case 3:
+					logout_user(current);
 					break;
 				case 4:
 					break;
@@ -134,8 +138,10 @@ int main(int argc, char const *argv[])
 					break;
 				case 7:
 					if (current->logged_in==1){
-						if (strcmp(destination, " ")==0)
+						if (strcmp(destination, " ")==0){
 							broadcast_message(clientList, current->socket, body, current->username);
+							log_into_group(username,body);
+						}
 						else
 							private_message(clientList, body, destination, current->username);
 					}
@@ -346,4 +352,36 @@ int register_user(char *username, char *password, client_list_t *client){
 	client->logged_in=1;
 
 	return 0;
+}
+
+
+
+void log_into_group(char *username, char *body){
+	FILE *fp;
+	fp=fopen("groupchat.txt", "a");
+
+	time_t rawtime;
+	time(&rawtime);
+	struct tm *info = localtime(&rawtime);
+	char timestamp[MAX_TIME_SIZE];
+	clear_string(timestamp,MAX_TIME_SIZE);
+	strcpy(timestamp,asctime(info));
+	timestamp[strlen(timestamp)-1]='\0'; // removing newline
+
+	fprintf(fp, "%s - %s: %s",timestamp, username, body);
+	
+	fclose(fp);
+	return;
+}
+
+
+
+void logout_user(client_list_t *user){
+	clear_string(user->username, strlen(user->username));
+	clear_string(user->password, strlen(user->password));
+	user->logged_in=0;
+	char new_buffer[BUFFER_SIZE];
+	clear_string(new_buffer, BUFFER_SIZE);
+	sprintf(new_buffer,"3%c %c %c %c ", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
+	send(user->socket , new_buffer , strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
 }
