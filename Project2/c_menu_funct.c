@@ -50,3 +50,29 @@ void request_users(server_t *server){
 	while(server->recieve!=2);
 	server->recieve=0;
 }
+void chat_history(server_t *server) {
+	int menuChoice = -1;
+	while (menuChoice != 0){
+		printf("\n-=| CHAT HISTORY |=-");
+		printf("\n1. Group Chat");
+		printf("\n2. Private Chat");
+		printf("\n0. QUIT");
+		printf("\n\nENTER SELECTION: ");
+		fflush(stdin);
+		scanf("%d", &menuChoice);
+		fflush(stdin);
+		if(menuChoice == 1)
+			g_chat_history(server);
+	}
+	return;
+}
+void g_chat_history(server_t *server){
+	while(server->send==1);
+	printf("\n-=| Group Chat History |=-");
+	sprintf(server->buffer_out, "8%c%s%c%s%c %c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
+	server->buffered_out_size=strlen(server->buffer_out)+1;
+	server->send=1;
+	while(server->recieve!=2);
+	server->recieve=0;
+	return;
+}

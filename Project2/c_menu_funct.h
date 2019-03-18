@@ -4,5 +4,7 @@
 	void group_chat(server_t *server);
 	void logout(server_t *server);	
 	void request_users(server_t *server);
+	void chat_history(server_t *server);
+	void g_chat_history(server_t *server);
 
 #endif

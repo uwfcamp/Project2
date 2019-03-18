@@ -121,7 +121,7 @@ void *server_communication(void *vargp){
 			if ((mode==7) && (server->in_group_chat==1 || server->in_private_chat==1)){
 				printf("%s: %s", username, body);
 			}
-			else if (mode==5){
+			else if (mode==5||mode==8){
 				printf("\n%s\n", body);
 			}
 
@@ -241,9 +241,10 @@ int main_menu(server_t *server){
 			break;
 		case 3:
 			break;
-		case 4:
+		case 4: //view chat history
+			chat_history(server);
 			break;
-		case 5:
+		case 5: 
 			break;
 		case 6:
 			break;
