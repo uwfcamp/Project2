@@ -12,7 +12,8 @@
 	#include <time.h>
 	#include <arpa/inet.h>
 	#include <pthread.h>
-	
+	#include <stdlib.h>
+
 	//Global Definitions
 	#define PORT 60001
 	#define BUFFER_SIZE 30000

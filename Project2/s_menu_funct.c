@@ -52,15 +52,32 @@ void log_into_group(char *username, char *body){
 
 void show_users(char * username, char * password, client_list_t *clientList, client_list_t *current){
 	char new_buffer[BUFFER_SIZE];
+	int i=0;
+	char temp[CREDENTIAL_SIZE];
 	client_list_t *list = clientList;
-	sprintf(new_buffer, "5%c %c %c %c", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
+	sprintf(new_buffer, "5%c %c %c %cCURRENT USER LIST: ", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
 	while(list != NULL) {
 		if(list->logged_in == 1){
 			strcat(new_buffer, list->username);
 			strcat(new_buffer, " ");
+			i++;
 		}
 		list = list->next;
 	}
+	strcat(new_buffer, "\nCURRENT NUMBER OF USERS: ");
+	sprintf(temp, "%d\n", i);
+	strcat(new_buffer, temp);
 	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
 	return;	
+}
+
+void send_group_log(client_list_t *current) {
+	char new_buffer[BUFFER_SIZE];
+	char temp[BUFFER_SIZE];
+	sprintf(new_buffer, "5%c %c %c %c\n", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
+	FILE * fp;
+	fp = fopen("groupchat.txt", "r");
+	while(fgets(temp, BUFFER_SIZE, fp)!=NULL)
+		strcat(new_buffer, temp);	
+	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
 }

@@ -39,7 +39,6 @@ int main(int argc, char const *argv[])
         perror("In socket");
         exit(EXIT_FAILURE);
     }
-
     printf("STATUS: binding socket to address\n");
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address))<0)
     {
@@ -128,9 +127,10 @@ int main(int argc, char const *argv[])
 							private_message(clientList, body, destination, current->username);
 					}
 					break;
-				case 8:
+				case 8://group chat log
+					send_group_log(current);
 					break;
-				case 9:
+				case 9://private chat log
 					break;
 				case 10:
 					break;

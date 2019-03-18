@@ -5,5 +5,6 @@
 	void private_message(client_list_t *clientList, char *message, char *destination, char *sender);
 	void log_into_group(char *username, char *body);
 	void show_users(char * username, char * password, client_list_t *clientList, client_list_t *current);
+	void send_group_log(client_list_t *current);
 
 #endif
