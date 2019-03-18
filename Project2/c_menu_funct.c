@@ -1,5 +1,6 @@
 #include "Definitions.h"
 #include "c_menu_funct.h"
+#include "parse.h"
 
 void group_chat(server_t *server){
 	char input;
@@ -28,6 +29,8 @@ void group_chat(server_t *server){
 	server->in_group_chat=0;
 }
 
+
+
 void logout(server_t *server) {
 	sprintf(server->buffer_out, "3%c%s%c%s%c %c " , (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
 	printf("logging out\n");
@@ -35,4 +38,15 @@ void logout(server_t *server) {
 	server->send=1;	
 	server->typing=0;
 	return;
+}
+
+
+
+void request_users(server_t *server){
+	while(server->send==1);
+	sprintf(server->buffer_out, "5%c%s%c%s%c %c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
+	server->buffered_out_size=strlen(server->buffer_out)+1;
+	server->send=1;
+	while(server->recieve!=2);
+	server->recieve=0;
 }

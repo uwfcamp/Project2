@@ -86,7 +86,6 @@ void *server_communication(void *vargp){
 			if (send(server->socket , server->buffer_out, server->buffered_out_size , MSG_NOSIGNAL | MSG_DONTWAIT)<0)
 				server->connected=0;
 			clear_string(server->buffer_out, BUFFER_SIZE);
-			server->buffer_out[0]='\0';
 			server->buffered_out_size=0;
 			server->send=0;
 		}
@@ -119,16 +118,28 @@ void *server_communication(void *vargp){
 
 
 			// print out chat messages
-			if (server->buffer_in[0]=='7' && (server->in_group_chat==1 || server->in_private_chat==1)){
+			if ((mode==7) && (server->in_group_chat==1 || server->in_private_chat==1)){
 				printf("%s: %s", username, body);
+			}
+			else if (mode==5){
+				printf("\n%s\n", body);
 			}
 
 			//mutex 1 unlock to replace typing variable
 
-			// once the recieved message has been utalyzed, the buffer must be cleared
-			server->buffer_in[0]='\0';
-			server->buffered_in_size=0;
-			server->recieve=0;
+			// once the recieved message has been utalyzed,
+			// the buffer must be cleared, except in instances
+			// where the main thread must handle the response.
+			if(mode !=5){
+				clear_string(server->buffer_in, BUFFER_SIZE);
+				server->buffered_in_size=0;
+				server->recieve=0;
+			}
+			else{
+				server->buffered_in_size=0;
+				clear_string(server->buffer_in, BUFFER_SIZE);
+				server->recieve=2;
+			}
 		}
 	}
 	return NULL;
@@ -176,6 +187,7 @@ void disconnect(server_t *server){
 }
 
 
+
 int menu_input(void){
 	char input[CREDENTIAL_SIZE]={0};
 	int valid = 0, i;
@@ -192,6 +204,7 @@ int menu_input(void){
 	}while(!valid);
 	return atoi(input);
 }
+
 
 
 int main_menu(server_t *server){
@@ -221,8 +234,9 @@ int main_menu(server_t *server){
 		case 0:
 			break;
 		case 1:
+			request_users(server);
 			break;
-		case 2: // this is the only feature we are initially worried about implementing
+		case 2:
 			group_chat(server);
 			break;
 		case 3:
