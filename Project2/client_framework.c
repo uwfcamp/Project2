@@ -97,8 +97,9 @@ void *server_communication(void *vargp){
 			int err = errno;
 
 			//check if any data was actually recieved
-			if (server->buffered_in_size>0)
+			if (server->buffered_in_size>0) {
 				server->recieve=1;
+			}
 			else if (err == EAGAIN || err == EWOULDBLOCK)
 				server->buffered_in_size=0;
 			else if (server->buffered_in_size<0)
@@ -113,16 +114,29 @@ void *server_communication(void *vargp){
 			char username[CREDENTIAL_SIZE];
 			char password[CREDENTIAL_SIZE];
 			char destination[CREDENTIAL_SIZE];
-
 			parse_message(server->buffer_in, &mode, username, password, destination, body);
-
-
+			/*
+********************MY EDITS*******************************************
+*****************selective rendering of group and private messages*****
+*/
 			// print out chat messages
-			if ((mode==7) && (server->in_group_chat==1 || server->in_private_chat==1)){
+			if ((mode==6) && (server->in_private_chat==1 && destination[0]!=' ')){
 				printf("%s: %s", username, body);
 			}
+			else if ((mode==7) && (server->in_group_chat==1 && destination[0]==' ')){
+				printf("%s: %s", username, body);
+			}
+//*************************************************************			
 			else if (mode==5||mode==8){
 				printf("\n%s\n", body);
+			}
+			else if (mode==13) {
+				if (strcmp(body, "Y")==0){
+					server->valid_destination=1;
+				}
+				else {
+					server->valid_destination=0;
+				}
 			}
 
 			//mutex 1 unlock to replace typing variable
@@ -130,7 +144,8 @@ void *server_communication(void *vargp){
 			// once the recieved message has been utalyzed,
 			// the buffer must be cleared, except in instances
 			// where the main thread must handle the response.
-			if(mode !=5){
+			
+			if(mode !=5 && mode != 13){
 				clear_string(server->buffer_in, BUFFER_SIZE);
 				server->buffered_in_size=0;
 				server->recieve=0;
@@ -240,6 +255,7 @@ int main_menu(server_t *server){
 			group_chat(server);
 			break;
 		case 3:
+			private_chat(server);
 			break;
 		case 4: //view chat history
 			chat_history(server);
@@ -260,4 +276,3 @@ int main_menu(server_t *server){
 
 	return selection;
 }
-

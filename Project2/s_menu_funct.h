@@ -6,5 +6,7 @@
 	void log_into_group(char *username, char *body);
 	void show_users(char * username, char * password, client_list_t *clientList, client_list_t *current);
 	void send_group_log(client_list_t *current);
+	void log_into_private(char *sender, char *reciever, char *body);
+	void validate_user(char * destination, client_list_t *clientList, client_list_t *current);
 
 #endif

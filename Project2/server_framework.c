@@ -39,6 +39,18 @@ int main(int argc, char const *argv[])
         perror("In socket");
         exit(EXIT_FAILURE);
     }
+	
+/*
+************************************MY EDITS *******************************************
+********************************allow immediate reuse of server socket******************
+*/	
+	int on=1;
+	 if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) != 0)
+    {
+        perror("In socket");
+        exit(EXIT_FAILURE);
+    }
+//***************************************************************************************
     printf("STATUS: binding socket to address\n");
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address))<0)
     {
@@ -93,9 +105,7 @@ int main(int argc, char const *argv[])
 
                     // handle recieved messages
                     if (valread>0){
-                        //printf("%s\n", buffer);
 			parse_message(buffer, &mode, username, password, destination, body);
-			printf("%s\n", buffer);
 			switch (mode){
 				case 0:
 					register_user(username, password, current);
@@ -116,6 +126,7 @@ int main(int argc, char const *argv[])
 					show_users(username, password, clientList, current);
 					break;
 				case 6:
+					private_message(clientList, body, destination, current->username);
 					break;
 				case 7:
 					if (current->logged_in==1){
@@ -123,14 +134,11 @@ int main(int argc, char const *argv[])
 							broadcast_message(clientList, current->socket, body, current->username);
 							log_into_group(username,body);
 						}
-						else
-							private_message(clientList, body, destination, current->username);
 					}
 					break;
-				case 8://group chat log
-					send_group_log(current);
+				case 8:
 					break;
-				case 9://private chat log
+				case 9:
 					break;
 				case 10:
 					break;
@@ -138,6 +146,10 @@ int main(int argc, char const *argv[])
 					break;
 				case 12:
 					break;
+				case 13:
+					validate_user(destination, clientList, current);
+					break;
+
 			}
                     }
                 }
