@@ -1,5 +1,5 @@
-mode	username	password	destination	body	        description
-0	    andre	    pass123			                        registration request
+mode  username  password  destination body          description
+0     andre     pass123                             registration request
 1	    andre	    pass123			                        log in request
 2	    andre	    pass123			                        logged in
 3	    andre	    pass123			                        log out
@@ -8,7 +8,7 @@ mode	username	password	destination	body	        description
 6	    andre	    pass321		christo33	  testing       direct PM	private message             
 7	    andre	    pass321	              Server Up	    broadcast
 8	    andre	    pass321			                        request public chat log
-9	    andre	    pass321			                        request private chat log
+9	    andre	    pass321		God           	          request private chat log between andre and God, send to andre
 10	  andre	    pass321		            FileContents	file transfer
 11	  andre	    pass321	  God		                    Ban God
 12	  andre	    pass321	  XmalcomX		              kick XmalcomX
