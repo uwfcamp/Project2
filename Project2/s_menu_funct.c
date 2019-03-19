@@ -21,6 +21,7 @@ void broadcast_message(client_list_t *clientList, int sender_socket, char *messa
 
 void private_message(client_list_t *clientList, char *message, char *destination, char *sender){
     char new_buffer[BUFFER_SIZE];
+    log_into_private(sender, destination, message);
     sprintf(new_buffer, "6%c%s%c%s%c%s%c%s", (char)DELIMITER, sender, (char)DELIMITER, " ", (char)DELIMITER, destination, (char)DELIMITER, message);
     while(clientList != NULL){
         if (strcmp(destination, clientList->username)==0){
@@ -51,7 +52,6 @@ void log_into_group(char *username, char *body){
 	fclose(fp);
 	return;
 }
-
 
 
 void log_into_private(char *sender, char *reciever, char *body){
