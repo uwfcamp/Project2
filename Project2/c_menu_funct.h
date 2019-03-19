@@ -7,6 +7,7 @@
 	void request_users(server_t *server);
 	void chat_history(server_t *server);
 	void g_chat_history(server_t *server);
+	void p_chat_history(server_t *server);
 	int get_destination(char * destination, server_t *server);
 
 #endif

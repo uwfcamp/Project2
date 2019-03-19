@@ -127,7 +127,7 @@ void *server_communication(void *vargp){
 				printf("%s: %s", username, body);
 			}
 //*************************************************************			
-			else if (mode==5||mode==8){
+			else if (mode==5||mode==8||mode==9){
 				printf("\n%s\n", body);
 			}
 			else if (mode==13) {
@@ -145,7 +145,7 @@ void *server_communication(void *vargp){
 			// the buffer must be cleared, except in instances
 			// where the main thread must handle the response.
 			
-			if(mode !=5 && mode != 13){
+			if(mode !=5 && mode != 13 && mode != 8 && mode != 9){
 				clear_string(server->buffer_in, BUFFER_SIZE);
 				server->buffered_in_size=0;
 				server->recieve=0;

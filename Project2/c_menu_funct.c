@@ -107,7 +107,7 @@ void request_users(server_t *server){
 	server->recieve=0;
 }
 void chat_history(server_t *server) {
-	int menuChoice = -1;
+	char menuChoice[CREDENTIAL_SIZE];
 	while (menuChoice != 0){
 		printf("\n-=| CHAT HISTORY |=-");
 		printf("\n1. Group Chat");
@@ -115,10 +115,13 @@ void chat_history(server_t *server) {
 		printf("\n0. QUIT");
 		printf("\n\nENTER SELECTION: ");
 		fflush(stdin);
-		scanf("%d", &menuChoice);
-		fflush(stdin);
-		if(menuChoice == 1)
+		fgets(menuChoice, CREDENTIAL_SIZE, stdin);
+		menuChoice[strlen(menuChoice)-1]='\0';
+		if(atoi(menuChoice) == 1)
 			g_chat_history(server);
+		else if(atoi(menuChoice) == 2)
+			p_chat_history(server);
+
 	}
 	return;
 }
@@ -130,6 +133,25 @@ void g_chat_history(server_t *server){
 	server->send=1;
 	while(server->recieve!=2);
 	server->recieve=0;
+	return;
+}
+void p_chat_history(server_t *server) {
+	char destination[CREDENTIAL_SIZE];
+	int valid =0;
+	do {	
+		printf("PRIVATE CHAT HISTORY BETWEEN YOU AND: ");
+		fgets(destination, CREDENTIAL_SIZE, stdin);
+		destination[strlen(destination)-1]='\0';
+		printf("%s\n", destination);
+		valid = 1;
+	} while(!valid);
+	printf("\n-=| Private Chat History with %s |=-", destination);
+	sprintf(server->buffer_out, "9%c%s%c%s%c%s%c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, destination, (char)DELIMITER);
+	server->buffered_out_size=strlen(server->buffer_out)+1;
+	server->send=1;
+	while(server->recieve!=2);
+	server->recieve=0;
+
 	return;
 }
 int get_destination(char * destination, server_t *server) {
@@ -167,5 +189,6 @@ int get_destination(char * destination, server_t *server) {
 	// if the server responds that the user is still attempting
 	// to register, then the username must already be in use.
 	}while(!server->valid_destination);
+	server->valid_destination = 0;
 	return 0;
 }

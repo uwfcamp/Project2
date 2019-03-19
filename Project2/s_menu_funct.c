@@ -100,12 +100,53 @@ void show_users(char * username, char * password, client_list_t *clientList, cli
 void send_group_log(client_list_t *current) {
 	char new_buffer[BUFFER_SIZE];
 	char temp[BUFFER_SIZE];
-	sprintf(new_buffer, "5%c %c %c %c\n", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
+	sprintf(new_buffer, "8%c %c %c %c\n", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
 	FILE * fp;
 	fp = fopen("groupchat.txt", "r");
 	while(fgets(temp, BUFFER_SIZE, fp)!=NULL)
 		strcat(new_buffer, temp);	
 	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+}
+void send_private_log(char * destination, client_list_t *current) {
+	char new_buffer[BUFFER_SIZE];
+	char temp[BUFFER_SIZE];
+	char log[BUFFER_SIZE];
+	clear_string(log, BUFFER_SIZE);
+	sprintf(new_buffer, "9%c %c %c %c\n", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
+	FILE * fp;
+	char * token;
+	char search[1];
+	search[0] = (char)DELIMITER;
+	search[1] = '\0';
+	char u_to[CREDENTIAL_SIZE];
+	char u_from[CREDENTIAL_SIZE];
+	char u_timestamp[CREDENTIAL_SIZE];
+	char message[BUFFER_SIZE-CREDENTIAL_SIZE*3];
+	fp = fopen("privatechat.txt", "r");
+	while(fgets(temp, BUFFER_SIZE, fp)!=NULL) {
+		clear_string(u_timestamp, CREDENTIAL_SIZE);
+		clear_string(u_to, CREDENTIAL_SIZE);
+		clear_string(u_from, CREDENTIAL_SIZE);
+		clear_string(message, BUFFER_SIZE-CREDENTIAL_SIZE*3);
+		token = strtok(temp, search);
+		strcpy(u_timestamp, token);
+		token = strtok(NULL, search);
+		strcpy(u_from, token);
+		token = strtok(NULL, search);
+		strcpy(u_to, token);
+		token = strtok(NULL, search);	
+		strcpy(message, token);
+		if(((strcmp(u_from, current->username) == 0) && (strcmp(u_to, destination))==0) || ((strcmp(u_to, current->username)==0) && strcmp(u_from, destination)==0)) {
+			sprintf(temp, "%s - %s: %s", u_timestamp, u_from, message);
+			strcat(log, temp);
+		}
+		clear_string(temp, BUFFER_SIZE);
+	}
+	if(strlen(log)==0)
+		sprintf(log, "Sorry, there is no chat history between you and %s\n", destination);
+	strcat(new_buffer, log);
+	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+	return;
 }
 
 void validate_user(char * destination, client_list_t * clientList, client_list_t * current) {

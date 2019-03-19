@@ -105,7 +105,8 @@ int main(int argc, char const *argv[])
 
                     // handle recieved messages
                     if (valread>0){
-			parse_message(buffer, &mode, username, password, destination, body);
+			    printf("%s\n", buffer);
+			    parse_message(buffer, &mode, username, password, destination, body);
 			switch (mode){
 				case 0:
 					register_user(username, password, current);
@@ -137,8 +138,10 @@ int main(int argc, char const *argv[])
 					}
 					break;
 				case 8:
+					send_group_log(current);
 					break;
 				case 9:
+					send_private_log(destination, current);
 					break;
 				case 10:
 					break;
