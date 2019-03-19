@@ -9,14 +9,22 @@ void group_chat(server_t *server){
 	printf("\n-=| PRESS Q THEN ENTER TO EXIT |=-\n\n");
 	server->in_group_chat=1;
 	do{
+		char message[BUFFER_SIZE-strlen(server->buffer_out)];
 		input=getchar();
+		fflush(stdin);
 		if (input!='Q' && input!='q'){
 			while(server->send==1);
+			sprintf(server->buffer_out,"7%c%s%c%s%c %c", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
 			// mutex 1 lock to replace typing variable
 			server->typing=1;
-			printf("YOUR MESSAGE: ");
-			sprintf(server->buffer_out,"7%c%s%c%s%c %c", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
-			fgets(&server->buffer_out[strlen(server->buffer_out)], BUFFER_SIZE-strlen(server->buffer_out), stdin);
+			do {
+				printf("YOUR MESSAGE: ");
+				fgets(message, BUFFER_SIZE-strlen(server->buffer_out), stdin);
+				fflush(stdin);
+				if(strlen(message)<=1)
+					printf("MESSAGE CANNOT BE NULL\n");
+			}while(strlen(message)<=1);
+			strcat(server->buffer_out, message);
 			server->buffered_out_size=strlen(server->buffer_out)+1;
 			server->send=1;
 			server->typing=0;
@@ -47,14 +55,23 @@ void private_chat(server_t *server){
 	do{
 		input=getchar();
 		if (input!='Q' && input!='q'){
+			fflush(stdin);
 			while(server->send==1);
 			p_exit = get_destination(destination, server);
 			// mutex 1 lock to replace typing variable
 			if(p_exit != 1) {
 				server->typing=1;
-				printf("YOUR MESSAGE: ");
 				sprintf(server->buffer_out,"6%c%s%c%s%c%s%c", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, destination, (char)DELIMITER);
-				fgets(&server->buffer_out[strlen(server->buffer_out)], BUFFER_SIZE-strlen(server->buffer_out), stdin);
+					char message[BUFFER_SIZE-strlen(server->buffer_out)];
+				do {
+					printf("YOUR MESSAGE: ");
+					fflush(stdin);
+					fgets(message, BUFFER_SIZE-strlen(server->buffer_out), stdin);
+					if(strlen(message)<=1){
+						printf("MESSAGE CANNOT BE NULL\n");
+					}
+				}while(strlen(message)<=1);
+				strcat(server->buffer_out, message);	
 				server->buffered_out_size=strlen(server->buffer_out)+1;
 				server->typing=0;
 				server->send=1;
@@ -119,12 +136,18 @@ int get_destination(char * destination, server_t *server) {
 	server->valid_destination = 0;
 	do{
 		// prompt user for a destination
-		printf("Enter \\q to abort\n");
-		printf("DESTINATION: ");
 		fflush(stdin);
-		fgets(destination, CREDENTIAL_SIZE, stdin);
+		do {
+			printf("Enter _q to abort\n");
+			printf("DESTINATION: ");
+			fgets(destination, CREDENTIAL_SIZE, stdin);
+			if (strlen(destination) <=1){
+				printf("DESTINATION CANNOT BE NULL\n");
+			}
+			fflush(stdin);
+		} while(strlen(destination)<=1);
 		destination[strlen(destination)-1]='\0';
-		if (strcmp(destination, "\\n")==0) {
+		if (strcmp(destination, "_q")==0) {
 			return 1;
 		}
 		// query the server to validate the desination QUERYUSER is a placeholder for a new request mode integer
