@@ -11,5 +11,5 @@ mode	username	password	destination	body	        description
 9	    andre	    pass321			                        request private chat log
 10	  andre	    pass321		            FileContents	file transfer
 11	  andre	    pass321	  God		                    Ban God
-12	  andre	    pass321	  Icwiener		              dismiss Icwiener
-13	  andre	    pass321	  XmalcomX		              kick XmalcomX
+12	  andre	    pass321	  XmalcomX		              kick XmalcomX
+13    andre     pass321   God                       query if user God exists
