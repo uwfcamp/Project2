@@ -79,7 +79,7 @@ void show_users(char * username, char * password, client_list_t *clientList, cli
 	int i=0;
 	char temp[CREDENTIAL_SIZE];
 	client_list_t *list = clientList;
-	sprintf(new_buffer, "5%c %c %c %cCURRENT USER LIST: ", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
+	sprintf(new_buffer, "5%c %c %c %cCURRENT ONLINE USER LIST: ", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
 	while(list != NULL) {
 		if(list->logged_in == 1){
 			strcat(new_buffer, list->username);
@@ -88,7 +88,7 @@ void show_users(char * username, char * password, client_list_t *clientList, cli
 		}
 		list = list->next;
 	}
-	strcat(new_buffer, "\nCURRENT NUMBER OF USERS: ");
+	strcat(new_buffer, "\nCURRENT NUMBER OF ONLINE USERS: ");
 	sprintf(temp, "%d\n", i);
 	strcat(new_buffer, temp);
 	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
@@ -106,6 +106,7 @@ void send_group_log(client_list_t *current) {
 	while(fgets(temp, BUFFER_SIZE, fp)!=NULL)
 		strcat(new_buffer, temp);	
 	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+	fclose(fp);
 }
 void send_private_log(char * destination, client_list_t *current) {
 	char new_buffer[BUFFER_SIZE];
@@ -146,6 +147,7 @@ void send_private_log(char * destination, client_list_t *current) {
 		sprintf(log, "Sorry, there is no chat history between you and %s\n", destination);
 	strcat(new_buffer, log);
 	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+	fclose(fp);
 	return;
 }
 
@@ -163,5 +165,33 @@ void validate_user(char * destination, client_list_t * clientList, client_list_t
 	}
 	sprintf(new_buffer, "13%c %c %c %cN", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
 	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+	return;
+}
+void confirm_existence(char * destination, client_list_t * current){
+	FILE * fp;
+	fp = fopen("logins.txt", "r");
+	char search[3];
+	char temp[BUFFER_SIZE];
+	char * token;
+	char new_buffer[BUFFER_SIZE];
+	search[2]='\0';
+	search[1]='\n';
+	search[0]=DELIMITER;
+	sprintf(new_buffer, "14%c %c %c %c", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
+	while(fgets(temp, BUFFER_SIZE, fp)!=NULL){
+		token = strtok(temp, search);
+		if(strcmp(token, destination)==0){
+			//a match was found
+			strcat(new_buffer, "Y");
+			send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+			fclose(fp);
+			return;
+		}
+		clear_string(temp, BUFFER_SIZE);
+	}	
+	//a match was not found
+	strcat(new_buffer, "N");
+	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+	fclose(fp);
 	return;
 }

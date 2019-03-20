@@ -15,6 +15,8 @@ int main(int argc, char const *argv[])
     long valread;
     struct sockaddr_in address;
     int addrlen = sizeof(address);
+    int valid=0;
+    char verify_password[CREDENTIAL_SIZE];
     client_list_t *clientList = (client_list_t *) malloc(sizeof(client_list_t));
     clientList->socket=0;
     clientList->connected=0;
@@ -23,11 +25,30 @@ int main(int argc, char const *argv[])
     clientList->next=NULL;
     clientList->username[0]='\0';
     clientList->password[0]='\0';
+    admin_account_t *admin = (admin_account_t *) malloc(sizeof(admin_account_t));
     memset(&address, '\0', sizeof address);
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons( PORT );
-
+    do {
+	    printf("Please enter the administrative account's username: ");
+	    fgets(admin->username, CREDENTIAL_SIZE, stdin);
+	    admin->username[strlen(admin->username)-1]='\0';
+	    printf("Please enter the administrative account's password: ");
+	    fgets(admin->password, CREDENTIAL_SIZE, stdin);
+	    printf("Please Re-enter the administrative account's password: ");
+	    fgets(verify_password, CREDENTIAL_SIZE, stdin);
+	    if(strcmp(verify_password, admin->password)!=0) 
+		fprintf(stderr, "ERROR: PASSWORDS DID NOT MATCH\n");
+	    else if(strlen(admin->username)<=0)
+		fprintf(stderr, "ERROR: USERNAME CANNOT BE NULL\n");
+	    else if(strlen(admin->password)<=1)
+		fprintf(stderr, "ERROR: PASSWORD CANNOT BE NULL\n");
+	    else{
+		valid =1;
+		admin->password[strlen(admin->password)-1]='\0';	
+	    }
+    }while(valid != 1);
     // Ensure there is a login registry
     FILE *logins = fopen("logins.txt", "a");
     fclose(logins);
@@ -152,7 +173,9 @@ int main(int argc, char const *argv[])
 				case 13:
 					validate_user(destination, clientList, current);
 					break;
-
+				case 14: // case of confirming user exists
+					confirm_existence(destination, current);
+					break;
 			}
                     }
                 }
@@ -161,6 +184,7 @@ int main(int argc, char const *argv[])
         }
     }
     close(server_fd);
+    free(admin);
     printf("STATUS: connection broken\n");
     return 0;
 }

@@ -138,13 +138,25 @@ void g_chat_history(server_t *server){
 void p_chat_history(server_t *server) {
 	char destination[CREDENTIAL_SIZE];
 	int valid =0;
-	do {	
+	do {
+		server->valid_destination = 0;	
+		request_users(server);
 		printf("PRIVATE CHAT HISTORY BETWEEN YOU AND: ");
 		fgets(destination, CREDENTIAL_SIZE, stdin);
 		destination[strlen(destination)-1]='\0';
-		printf("%s\n", destination);
-		valid = 1;
-	} while(!valid);
+		if (strlen(destination) == 0)
+			printf("INPUT CANNOT BE NULL\n");
+		else{	
+			sprintf(server->buffer_out, "14%c%s%c%s%c%s%c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, destination, (char)DELIMITER);
+			server->buffered_out_size=strlen(server->buffer_out)+1;
+			server->send=1;
+
+			// wait for the response from the server
+			while(server->recieve != 2);
+			if(server->valid_destination == 0)
+				printf("User does not exist\n");
+		}
+	} while(!valid && server->valid_destination==0);
 	printf("\n-=| Private Chat History with %s |=-", destination);
 	sprintf(server->buffer_out, "9%c%s%c%s%c%s%c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, destination, (char)DELIMITER);
 	server->buffered_out_size=strlen(server->buffer_out)+1;
@@ -160,6 +172,7 @@ int get_destination(char * destination, server_t *server) {
 		// prompt user for a destination
 		fflush(stdin);
 		do {
+			request_users(server);
 			printf("Enter _q to abort\n");
 			printf("DESTINATION: ");
 			fgets(destination, CREDENTIAL_SIZE, stdin);
