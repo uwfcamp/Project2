@@ -12,4 +12,5 @@ mode  username  password  destination body          description
 10    andre     pass321               FileContents  file transfer
 11    andre     pass321   God                       Ban God
 12    andre     pass321   XmalcomX                  kick XmalcomX
-13    andre     pass321   God                       query if user God exists
+13    andre     pass321   God                       query if user God is online
+14    andre     pass321   ToothFairy                qeury if user ToothFairy exists
