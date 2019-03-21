@@ -16,7 +16,17 @@ I. SETUP AND COMPILATION
   
   2.  This sumbission should contain the following:
     - client_framework.c
+    - client_framework.h
+    - c_login_funct.c
+    - c_login_funct.h
+    - c_menu_funct.c
+    - c_menu_funct.h
     - server_framework.c
+    - server_framework.h
+    - s_login_funct.c
+    - s_login_funct.h
+    - s_menu_funct.c
+    - s_menu_funct.h
     - makefile
     - parse.h
     - parse.c
