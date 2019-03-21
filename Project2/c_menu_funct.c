@@ -61,18 +61,19 @@ void private_chat(server_t *server){
 				sprintf(server->buffer_out,"6%c%s%c%s%c%s%c", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, destination, (char)DELIMITER);
 					char message[BUFFER_SIZE-strlen(server->buffer_out)];
 				do {
-					printf("YOUR MESSAGE: ");
-					fflush(stdin);
+					printf("Enter _q to abort\nYOUR MESSAGE: ");
 					fgets(message, BUFFER_SIZE-strlen(server->buffer_out), stdin);
 					if(strlen(message)<=1){
 						printf("MESSAGE CANNOT BE NULL\n");
 					}
 				}while(strlen(message)<=1);
-				strcat(server->buffer_out, message);	
-				server->buffered_out_size=strlen(server->buffer_out)+1;
-				server->typing=0;
-				server->send=1;
-				while(server->send==1);
+				if (strcmp(message, "_q\n")) {
+					strcat(server->buffer_out, message);	
+					server->buffered_out_size=strlen(server->buffer_out)+1;
+					server->typing=0;
+					server->send=1;
+					while(server->send==1);
+				}
 			}
 			// mutex 1 unlock to replace typing variable
 		}
