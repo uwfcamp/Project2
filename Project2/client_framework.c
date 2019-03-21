@@ -7,10 +7,8 @@
 #define IP_ADDRESS "127.0.0.1"
 
 
-
-
-
-
+struct sockaddr_in serv_addr;
+server_t *server;
 
 int menu_input(void);
 int main_menu(server_t *server);
@@ -22,10 +20,10 @@ void *server_communication(void *vargp);
 
 int main(int argc, char const *argv[])
 {
-    struct sockaddr_in serv_addr;
-    server_t *server = build_server_structure();
+    server = build_server_structure();
     int quit = -1;
-
+    sem_init(&server->mutex, 0, 1);
+    sem_wait(&server->mutex);
     if ((server->socket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
         fprintf(stderr,"ERROR: socket creation error\n");
@@ -66,7 +64,7 @@ int main(int argc, char const *argv[])
 
     pthread_join(tid, NULL);
     disconnect(server);
-
+    sem_destroy(&server->mutex);
     return 0;
 }
 
@@ -154,6 +152,7 @@ void *server_communication(void *vargp){
 				server->buffered_in_size=0;
 				clear_string(server->buffer_in, BUFFER_SIZE);
 				server->recieve=2;
+				sem_post(&server->mutex);
 			}
 		}
 	}

@@ -13,6 +13,7 @@
 	#include <arpa/inet.h>
 	#include <pthread.h>
 	#include <stdlib.h>
+	#include <semaphore.h>
 
 	//Global Definitions
 	#define PORT 60001
@@ -38,6 +39,7 @@
 	int in_group_chat;
 	int in_private_chat;
 	int valid_destination;
+	sem_t mutex;
 	char username_private_chat[CREDENTIAL_SIZE];
 	}server_t;
 	

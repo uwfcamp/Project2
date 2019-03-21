@@ -103,7 +103,7 @@ void request_users(server_t *server){
 	sprintf(server->buffer_out, "5%c%s%c%s%c %c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
 	server->buffered_out_size=strlen(server->buffer_out)+1;
 	server->send=1;
-	while(server->recieve!=2);
+	sem_wait(&server->mutex);
 	server->recieve=0;
 }
 void chat_history(server_t *server) {
@@ -121,7 +121,8 @@ void chat_history(server_t *server) {
 			g_chat_history(server);
 		else if(atoi(menuChoice) == 2)
 			p_chat_history(server);
-
+		else if(atoi(menuChoice) == 0)
+			return;
 	}
 	return;
 }
@@ -131,7 +132,7 @@ void g_chat_history(server_t *server){
 	sprintf(server->buffer_out, "8%c%s%c%s%c %c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
 	server->buffered_out_size=strlen(server->buffer_out)+1;
 	server->send=1;
-	while(server->recieve!=2);
+	sem_wait(&server->mutex);
 	server->recieve=0;
 	return;
 }
@@ -152,7 +153,8 @@ void p_chat_history(server_t *server) {
 			server->send=1;
 
 			// wait for the response from the server
-			while(server->recieve != 2);
+			sem_wait(&server->mutex);
+			server->recieve=0;
 			if(server->valid_destination == 0)
 				printf("User does not exist\n");
 		}
@@ -161,7 +163,7 @@ void p_chat_history(server_t *server) {
 	sprintf(server->buffer_out, "9%c%s%c%s%c%s%c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, destination, (char)DELIMITER);
 	server->buffered_out_size=strlen(server->buffer_out)+1;
 	server->send=1;
-	while(server->recieve!=2);
+	sem_wait(&server->mutex);
 	server->recieve=0;
 
 	return;
@@ -191,7 +193,8 @@ int get_destination(char * destination, server_t *server) {
 		server->send=1;
 
 		// wait for the response from the server
-		while(server->recieve != 2);
+		sem_wait(&server->mutex);
+		server->recieve= 0;
 
 		// check if the server says the destination is valid - Here i'm just reusing the login successful bit but a new response field may be defined as needed
 		if (server->valid_destination==0)
