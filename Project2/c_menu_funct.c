@@ -3,14 +3,14 @@
 #include "parse.h"
 
 void group_chat(server_t *server){
-	char input[CREDENTIAL_SIZE];
+	char input[BUFFER_SIZE];
 	server->in_group_chat=1;
 	do{
 		char message[BUFFER_SIZE-strlen(server->buffer_out)];
 		printf("\n-=| GROUP CHAT |=-");
 		printf("\n-=| HIT ENTER TO TYPE A MESSAGE |=-");
 		printf("\n-=| PRESS Q THEN ENTER TO EXIT |=-\n\n");
-		fgets(input, CREDENTIAL_SIZE, stdin);
+		fgets(input, BUFFER_SIZE, stdin);
 		
 		if (input[0] == '\n') {
 			while(server->send==1);
@@ -42,18 +42,17 @@ void group_chat(server_t *server){
 **************************client side private message function*************************
 */
 void private_chat(server_t *server){
-	char input;
+	char input[BUFFER_SIZE];
 	char destination[CREDENTIAL_SIZE]={0};
 	int p_exit = -1;
 
-	printf("\n-=|            PRIVATE CHAT             |=-");
-	printf("\n-=| HIT ENTER TO SEND A PRIVATE MESSAGE |=-");
-	printf("\n-=|     PRESS Q THEN ENTER TO EXIT      |=-\n\n");
 	server->in_private_chat=1;
 	do{
-		input=getchar();
-		if (input!='Q' && input!='q'){
-			fflush(stdin);
+		printf("\n-=|            PRIVATE CHAT             |=-");
+		printf("\n-=| HIT ENTER TO SEND A PRIVATE MESSAGE |=-");
+		printf("\n-=|     PRESS Q THEN ENTER TO EXIT      |=-\n\n");
+		fgets(input, BUFFER_SIZE, stdin);
+		if (input[0]=='\n'){
 			while(server->send==1);
 			p_exit = get_destination(destination, server);
 			// mutex 1 lock to replace typing variable
@@ -78,9 +77,7 @@ void private_chat(server_t *server){
 			// mutex 1 unlock to replace typing variable
 		}
 
-		if (input!='\n')
-			while(getchar()!='\n');
-	}while(input != 'q' && input !='Q');
+	}while((strlen(input)!=2) || (input[0] != 'q' && input[0] !='Q'));
 	server->in_private_chat=0;
 }
 //******************************************************************************************
