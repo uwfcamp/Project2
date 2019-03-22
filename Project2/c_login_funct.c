@@ -42,21 +42,27 @@ void registration_input(server_t *server){
 
 	do{
 		// prompt user for a username
-		printf("USERNAME: ");
-		scanf(" %s", username);
-		while(getchar()!='\n');
+		do {
+			printf("USERNAME: ");
+			fgets(username, CREDENTIAL_SIZE, stdin);
+		} while(strlen(username)<=1);
+		username[strlen(username)-1]=0;
 		do{
 			if (strcmp(password1, password2))
 				printf("PASSWORDS DO NOT MATCH\n");
 			// prompt user for a password
-			printf("PASSWORD: ");
-			scanf(" %s", password1);
-			while(getchar()!='\n');
+			do {
+				printf("PASSWORD: ");
+				fgets(password1, CREDENTIAL_SIZE, stdin);
+			}while(strlen(password1)<=1);
+			password1[strlen(password1)-1]=0;
 
 			// prompt user to reenter password
-			printf("RE-ENTER PASSWORD: ");
-			scanf(" %s", password2);
-			while(getchar()!='\n');
+			do {
+				printf("RE-ENTER PASSWORD: ");
+				fgets(password2, CREDENTIAL_SIZE, stdin);
+			}while(strlen(password2)<=1);
+			password2[strlen(password2)-1]=0;
 		}while(strcmp(password1, password2)!=0);
 
 		// send the registration attempt to the server
@@ -96,14 +102,18 @@ void login_input(server_t *server){
 
 	do{
 		// prompt user for a username
-		printf("USERNAME: ");
-		scanf(" %s", username);
-		while(getchar()!='\n');
-
+		do {
+			printf("USERNAME: ");
+			fgets(username, CREDENTIAL_SIZE, stdin);
+		} while (strlen(username)<=1);
+		username[strlen(username)-1]=0;
 		// prompt user for a password
-		printf("PASSWORD: ");
-		scanf(" %s", password);
-		while(getchar()!='\n');
+		do {
+			printf("PASSWORD: ");
+			fgets(password, CREDENTIAL_SIZE, stdin);
+		}while (strlen(password)<=1);
+		password[strlen(password)-1]=0;
+
 
 		// send the registration attempt to the server
 		sprintf(server->buffer_out,"1%c%s%c%s%c %c ", (char)DELIMITER, username, (char)DELIMITER, password, (char)DELIMITER, (char)DELIMITER);

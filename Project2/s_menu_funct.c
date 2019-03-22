@@ -10,7 +10,6 @@ void broadcast_message(client_list_t *clientList, int sender_socket, char *messa
     while(clientList != NULL){
         if (clientList->socket != sender_socket && clientList->connected==1 && clientList->logged_in==1){
 	        send(clientList->socket , new_buffer , strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
-		break;
 	}
         clientList=clientList->next;
     }
@@ -20,19 +19,22 @@ void broadcast_message(client_list_t *clientList, int sender_socket, char *messa
 
 
 void private_message(client_list_t *clientList, char *message, char *destination, char *sender){
+    int i=0;
     char new_buffer[BUFFER_SIZE];
     log_into_private(sender, destination, message);
     sprintf(new_buffer, "6%c%s%c%s%c%s%c%s", (char)DELIMITER, sender, (char)DELIMITER, " ", (char)DELIMITER, destination, (char)DELIMITER, message);
     while(clientList != NULL){
         if (strcmp(destination, clientList->username)==0){
-		if (clientList->connected==1 && clientList->logged_in==1)
+		if (clientList->connected==1 && clientList->logged_in==1){
 	        	send(clientList->socket , new_buffer , strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
-                printf("STATUS: message sent to %s\n", destination);
-		return;
+                	printf("STATUS: message sent to %s\n", destination);
+			i++;
+		}
 	}
         clientList=clientList->next;
     }
-    printf("STATUS: message could not be sent to %s\n", destination);
+    if(i==0)
+    	printf("STATUS: message could not be sent to %s\n", destination);
 }
 
 void log_into_group(char *username, char *body){

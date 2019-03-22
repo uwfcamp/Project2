@@ -206,9 +206,11 @@ int menu_input(void){
 	char input[CREDENTIAL_SIZE]={0};
 	int valid = 0, i;
 	do{
-		printf("Enter an action: ");
-		scanf(" %s", input);
-		while(getchar()!='\n');
+		do {
+			printf("Enter an action: ");
+			fgets(input, CREDENTIAL_SIZE, stdin);
+		}while(strlen(input)<=1);
+		input[strlen(input)-1]=0;
 		for(i=0; input[i]!='\0'; i++){
 			valid = 0;
 			if (input[i]<'0' || input[i]>'9')
