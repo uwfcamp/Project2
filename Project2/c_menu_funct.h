@@ -9,5 +9,6 @@
 	void g_chat_history(server_t *server);
 	void p_chat_history(server_t *server);
 	int get_destination(char * destination, server_t *server);
+	void change_password(server_t *server);
 
 #endif

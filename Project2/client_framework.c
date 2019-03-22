@@ -260,9 +260,10 @@ int main_menu(server_t *server){
 		case 4: //view chat history
 			chat_history(server);
 			break;
-		case 5: 
+		case 5: //file transfer
 			break;
-		case 6:
+		case 6: //change password
+			change_password(server);
 			break;
 		case 7:
 			logout(server);

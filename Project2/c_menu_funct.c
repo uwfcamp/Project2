@@ -207,3 +207,45 @@ int get_destination(char * destination, server_t *server) {
 	server->valid_destination = 0;
 	return 0;
 }
+void change_password(server_t *server) {
+	char input[CREDENTIAL_SIZE];
+	char cur_password[CREDENTIAL_SIZE];
+	char password1[CREDENTIAL_SIZE];
+	char password2[CREDENTIAL_SIZE];
+	char new_buffer[BUFFER_SIZE];
+	do {
+		do {
+			printf("PLEASE ENTER CURRENT PASSWORD: ");
+			fgets(cur_password, CREDENTIAL_SIZE, stdin);
+		}while(strlen(cur_password)<=1);
+		cur_password[strlen(cur_password)-1]=0;
+		do {
+			printf("PLEASE ENTER NEW PASSWORD: ");
+			fgets(password1, CREDENTIAL_SIZE, stdin);
+		}while(strlen(password1)<=1);
+	
+		do {
+			printf("PLEASE REENTER NEW PASSWORD: ");
+			fgets(password2, CREDENTIAL_SIZE, stdin);
+		}while(strlen(password2)<=1);
+		if(strcmp(password1, password2))
+			printf("PASSWORDS DO NOT MATCH\n");
+		if(strcmp(cur_password, server->password))
+			printf("INCORRECT CURRENT CREDENTIAL\n");
+		if(strcmp(password1, password2) || strcmp(server->password, cur_password)) {
+			printf("ENTER Q TO ABORT, OTHERWISE PRESS ENTER TO CONTINUE\n");
+			fgets(input, CREDENTIAL_SIZE, stdin);
+			if((strlen(input) == 2) && (input[0] == 'q' || input[0] == 'Q'))
+				return;
+		}
+	}while (strcmp(password1, password2) || strcmp(server->password, cur_password));
+	password1[strlen(password1)-1]=0;
+	sprintf(new_buffer, "4%c%s%c%s%c %c%s", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER, password1);
+	printf("%s\n", new_buffer);
+	//send message to server then wait for response
+	
+	//change server->password to password1
+	printf("PASSWORD SUCCESSFULLY CHANGED\n");
+
+	return;
+}
