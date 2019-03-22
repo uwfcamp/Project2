@@ -234,7 +234,6 @@ int main_menu(server_t *server){
 	printf("6. Change the password\n");
 	printf("7. Logout\n");
 	printf("8. Administrator\n");
-	printf("0. Return to login screen\n");
 	printf("\n");
 
 	// get the selection

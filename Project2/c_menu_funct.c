@@ -18,15 +18,18 @@ void group_chat(server_t *server){
 			// mutex 1 lock to replace typing variable
 			server->typing=1;
 			do {
+				printf("Enter _q to abort\n");
 				printf("YOUR MESSAGE: ");
 				fgets(message, BUFFER_SIZE-strlen(server->buffer_out), stdin);
 				fflush(stdin);
 				if(strlen(message)<=1)
 					printf("MESSAGE CANNOT BE NULL\n");
 			}while(strlen(message)<=1);
-			strcat(server->buffer_out, message);
-			server->buffered_out_size=strlen(server->buffer_out)+1;
-			server->send=1;
+			if (strcmp(input, "_q\n")) {
+				strcat(server->buffer_out, message);
+				server->buffered_out_size=strlen(server->buffer_out)+1;
+				server->send=1;
+			}
 			server->typing=0;
 			// mutex 1 unlock to replace typing variable
 		}

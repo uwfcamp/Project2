@@ -170,7 +170,7 @@ int main(int argc, char const *argv[])
 					break;
 				case 12:
 					break;
-				case 13:
+				case 13: // validate user is online
 					validate_user(destination, clientList, current);
 					break;
 				case 14: // case of confirming user exists
