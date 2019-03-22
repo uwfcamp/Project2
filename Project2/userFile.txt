@@ -1,8 +1,0 @@
-uid	usertag	status
-1	andre	Active
-2	yodawg	Inactive
-3	XmalcomX	Banned
-4	chisto33	Active
-5	Icwiener	dismissed
-6	Blink182	Inactive
-7	God	Banned
