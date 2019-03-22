@@ -136,6 +136,10 @@ void *server_communication(void *vargp){
 					server->valid_destination=0;
 				}
 			}
+			else if (mode==4){
+				strcpy(server->password, body);
+				printf("PASSWORD SUCCESSFULLY CHANGED\n");
+			}
 
 			//mutex 1 unlock to replace typing variable
 
@@ -154,6 +158,8 @@ void *server_communication(void *vargp){
 				server->recieve=2;
 				sem_post(&server->mutex);
 			}
+			if(mode == 4)
+				sem_post(&server->mutex);
 		}
 	}
 	return NULL;

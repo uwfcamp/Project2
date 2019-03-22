@@ -197,3 +197,41 @@ void confirm_existence(char * destination, client_list_t * current){
 	fclose(fp);
 	return;
 }
+
+void change_password(char * body, client_list_t * current) {
+	FILE * fp;
+	char search[3];
+	search[0]=(char)DELIMITER;
+	search[1]='\n';
+	search[2]='\0';
+	char * token;
+	char temp[BUFFER_SIZE];
+	char username[CREDENTIAL_SIZE];
+	char password[CREDENTIAL_SIZE];
+	char new_contents[BUFFER_SIZE];
+	char is_banned[CREDENTIAL_SIZE];
+	clear_string(new_contents, BUFFER_SIZE);
+	fp = fopen("logins.txt", "r");
+	while (fgets(temp, BUFFER_SIZE, fp) != NULL) {
+		token = strtok(temp, search);
+		strcpy(username, token);
+		token = strtok(NULL, search);
+		strcpy(password, token);
+		token = strtok(NULL, search);
+		strcpy(is_banned,token);
+		clear_string(temp, BUFFER_SIZE);
+		if(strcmp(username, current->username)) {
+			sprintf(temp, "%s%c%s%c%s\n", username, (char)DELIMITER, password, (char)DELIMITER, is_banned);
+			strcat(new_contents, temp);
+		}
+	}
+	fclose(fp);
+	fopen("logins.txt", "w");
+	fprintf(fp, "%s", new_contents);
+       	fprintf(fp, "%s%c%s%c%s", current->username, (char)DELIMITER, body, (char)DELIMITER, current->is_banned);
+	fclose(fp);
+	strcpy(current->password, body);
+	sprintf(temp, "4%c %c %c %c ", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
+	send(current->socket, temp, strlen(temp), MSG_NOSIGNAL | MSG_DONTWAIT);
+	return;
+}

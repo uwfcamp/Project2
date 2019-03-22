@@ -12,23 +12,35 @@ int login_user(char *username, char *password, client_list_t *client){
 
 	char *load_username=NULL;
 	char *load_password=NULL;
+	char *is_banned=NULL;
 
 	// check to see if the given credentials match existing records
 	while(!feof(logins)){
 		fgets(login_buffer, 200, logins);
 		load_username = strtok(login_buffer, search);
-		if (load_username!=NULL)
+		if (load_username!=NULL) 
 			load_password = strtok(NULL, search);
 		if (load_username!=NULL && load_password!=NULL){
 			if (strcmp(load_username, username)==0 && strcmp(load_password, password)==0){
+				is_banned=strtok(NULL, search);	
 				fclose(logins);
 				char new_buffer[BUFFER_SIZE];
-				sprintf(new_buffer, "2%c%s%c%s%c%s%c%s",(char)DELIMITER, username, (char)DELIMITER, password, (char)DELIMITER, " ", (char)DELIMITER, " ");
-				send(client->socket , new_buffer , strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
-				strcpy(client->username, username);
-				strcpy(client->password, password);
-				client->logged_in=1;
-				return 1;
+				if(atoi(is_banned) != 1) {
+					char new_buffer[BUFFER_SIZE];
+					sprintf(new_buffer, "2%c%s%c%s%c%s%c%s",(char)DELIMITER, username, (char)DELIMITER, password, (char)DELIMITER, " ", (char)DELIMITER, " ");
+					send(client->socket , new_buffer , strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+					strcpy(client->username, username);
+					strcpy(client->password, password);
+					strcpy(client->is_banned, is_banned);
+					client->logged_in=1;
+					return 1;
+				}
+				else {//user is banned, notify client
+					sprintf(new_buffer, "2%c%s%c%s%c%s%c%s",(char)DELIMITER, username, (char)DELIMITER, password, (char)DELIMITER, " ", (char)DELIMITER, "1");
+					send(client->socket , new_buffer , strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+					printf("%s IS BANNED NOTIFYING CLIENT\n", username);
+					return -1;
+				}
 			}
 		}
 	}
@@ -74,7 +86,7 @@ int register_user(char *username, char *password, client_list_t *client){
 	// the given username does not exist in the records, create new account
 	fclose(logins);
 	logins = fopen("logins.txt", "a");
-	fprintf(logins, "%s%c%s\n", username, (char)DELIMITER, password);
+	fprintf(logins, "%s%c%s%c0\n", username, (char)DELIMITER, password, (char)DELIMITER);
 	fclose(logins);
 
 	char new_buffer[BUFFER_SIZE];
@@ -82,6 +94,7 @@ int register_user(char *username, char *password, client_list_t *client){
 	send(client->socket , new_buffer , strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
 	strcpy(client->username, username);
 	strcpy(client->password, password);
+	strcpy(client->is_banned, "0");
 	client->logged_in=1;
 
 	return 0;

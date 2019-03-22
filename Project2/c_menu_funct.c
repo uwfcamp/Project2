@@ -212,7 +212,6 @@ void change_password(server_t *server) {
 	char cur_password[CREDENTIAL_SIZE];
 	char password1[CREDENTIAL_SIZE];
 	char password2[CREDENTIAL_SIZE];
-	char new_buffer[BUFFER_SIZE];
 	do {
 		do {
 			printf("PLEASE ENTER CURRENT PASSWORD: ");
@@ -240,11 +239,15 @@ void change_password(server_t *server) {
 		}
 	}while (strcmp(password1, password2) || strcmp(server->password, cur_password));
 	password1[strlen(password1)-1]=0;
-	sprintf(new_buffer, "4%c%s%c%s%c %c%s", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER, password1);
-	printf("%s\n", new_buffer);
+	sprintf(server->buffer_out, "4%c%s%c%s%c %c%s", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER, password1);
+	server->buffered_out_size = strlen(server->buffer_out)+1;
 	//send message to server then wait for response
-	
+	server->send=1;
+	sem_wait(&server->mutex);
+	//printf("%s\n", new_buffer);
+		
 	//change server->password to password1
+	strcpy(server->password, password1);
 	printf("PASSWORD SUCCESSFULLY CHANGED\n");
 
 	return;

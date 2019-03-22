@@ -47,6 +47,7 @@
 	int logged_in;			// 0 if the client is not logged in, 1 otherwise
 	char username[CREDENTIAL_SIZE];	// the client's username
 	char password[CREDENTIAL_SIZE];	// the client's password
+	char is_banned[CREDENTIAL_SIZE];// is the client banned?
 	int socket;			// identifier for the server socket
 	int connected;			// 0 if not connected, 1 if connected
 	struct client_list_s *last;	// pointer to the previous element in the list

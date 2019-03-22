@@ -126,8 +126,25 @@ void login_input(server_t *server){
 		// check if the server says the user is logged in
 		if (server->buffer_in[0] == '1')
 			printf("INVALID LOGIN CREDENTIALS\n");
-		else
-			valid=1;
+		
+		else {
+			char temp[BUFFER_SIZE];
+			strcpy(temp,server->buffer_in);
+			char * is_banned;
+			char search[3];
+			search[0]=(char)DELIMITER;
+			search[1]='\n';
+			search[2]='\0';
+			strtok(temp, search);
+			strtok(NULL, search);
+			strtok(NULL, search);
+			strtok(NULL, search);
+			is_banned = strtok(NULL, search);
+			if (atoi(is_banned) == 1)
+				printf("USER IS BANNED\n");
+			else
+				valid=1;
+		}
 
 		// let the listening thread know it is okay to read new messages
 		server->recieve=0;

@@ -143,6 +143,7 @@ int main(int argc, char const *argv[])
 					s_logout(username, password, current);
 					break;
 				case 4:
+					change_password(body, current);
 					break;
 				case 5: //online user query case
 					show_users(username, password, clientList, current);
