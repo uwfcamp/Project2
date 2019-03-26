@@ -42,6 +42,7 @@
 	int valid_destination;
 	int is_banned;
 	sem_t mutex;
+	pthread_mutex_t lock;
 	char username_private_chat[CREDENTIAL_SIZE];
 	}server_t;
 	
