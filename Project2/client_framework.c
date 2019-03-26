@@ -140,6 +140,8 @@ void *server_communication(void *vargp){
 				strcpy(server->password, body);
 				printf("PASSWORD SUCCESSFULLY CHANGED\n");
 			}
+			else if (mode == 15)
+				server->is_banned=atoi(body);
 
 			//mutex 1 unlock to replace typing variable
 
@@ -147,7 +149,7 @@ void *server_communication(void *vargp){
 			// the buffer must be cleared, except in instances
 			// where the main thread must handle the response.
 			
-			if(mode !=5 && mode != 13 && mode != 8 && mode != 9 && mode != 14){
+			if(mode !=5 && mode != 13 && mode != 8 && mode != 9 && mode != 14 && mode != 15){
 				clear_string(server->buffer_in, BUFFER_SIZE);
 				server->buffered_in_size=0;
 				server->recieve=0;
@@ -252,7 +254,7 @@ int main_menu(server_t *server){
 
 	// perform selection
 	fflush(stdout);
-	if(server->is_banned==0) {
+	if(is_banned(server)==0) {
 		switch(selection){
 			case 0:
 				break;

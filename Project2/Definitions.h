@@ -39,6 +39,7 @@
 	int in_group_chat;
 	int in_private_chat;
 	int valid_destination;
+	int is_banned;
 	sem_t mutex;
 	char username_private_chat[CREDENTIAL_SIZE];
 	}server_t;

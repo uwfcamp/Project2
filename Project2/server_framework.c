@@ -177,6 +177,8 @@ int main(int argc, char const *argv[])
 				case 14: // case of confirming user exists
 					confirm_existence(destination, current);
 					break;
+				case 15: // check if user is banned
+					check_if_banned(username, current);
 			}
                     }
                 }

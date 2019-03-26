@@ -108,3 +108,29 @@ void s_logout(char * username, char * password, client_list_t *client){
 	}
 	return;
 }
+void check_if_banned(char * username, client_list_t * current){
+	FILE * fp;
+	char * token;
+	char temp[BUFFER_SIZE];
+	char search[3];
+	int done = 0;
+	search[0]=(char)DELIMITER;
+	search[1]='\n';
+	search[2]='\0';
+	fp = fopen("logins.txt", "r");
+	while((fgets(temp, BUFFER_SIZE, fp) != NULL) && !done) {
+		token = strtok(temp, search);
+		if(!strcmp(username, token)) {//username matches currently read username
+			token = strtok(NULL, search);
+			token = strtok(NULL, search);
+			if(atoi(token)==1)//user is banned
+				sprintf(temp, "15%c %c %c %c1", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
+			else //user is not banned
+				sprintf(temp, "15%c %c %c %c0", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
+			printf("%s\n", temp);
+			send(current->socket, temp, strlen(temp), MSG_NOSIGNAL | MSG_DONTWAIT);
+		}			
+	}
+	fclose(fp);
+	return;
+}
