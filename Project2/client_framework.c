@@ -109,7 +109,8 @@ void *server_communication(void *vargp){
 		}
 		// need to create function to handle
 		// the different types of messages
-		if (server->recieve==1 && server->typing==0 && server->logged_in==1){
+		if (server->recieve==1 && server->logged_in==1){
+			pthread_mutex_lock(&server->lock);
 			//mutex 1 lock to replace typing variable
 			int mode;
 			char body[BUFFER_SIZE];
@@ -117,7 +118,7 @@ void *server_communication(void *vargp){
 			char password[CREDENTIAL_SIZE];
 			char destination[CREDENTIAL_SIZE];
 			parse_message(server->buffer_in, &mode, username, password, destination, body);
-			printf("%s\n", server->buffer_in);
+			//printf("%s\n", server->buffer_in); // Remove Later
 			/*
 ********************MY EDITS*******************************************
 *****************selective rendering of group and private messages*****
@@ -153,23 +154,24 @@ void *server_communication(void *vargp){
 					server->is_admin = atoi(body);
 					break;
 			}
+			pthread_mutex_unlock(&server->lock);
 			//mutex 1 unlock to replace typing variable
 
 			// once the recieved message has been utalyzed,
 			// the buffer must be cleared, except in instances
 			// where the main thread must handle the response.
 			switch(mode) {
-				case 5: case 13: case 8: case 9: case 14: case 15: case 16:
+				case 5: case 13: case 8: case 9: case 14: case 15: case 16: case 4:
 					server->buffered_in_size=0;
 					clear_string(server->buffer_in, BUFFER_SIZE);
-					server->recieve=2;
-				case 4:
+					server->recieve=0;
 					sem_post(&server->mutex);
 					break;
 				default:
 					clear_string(server->buffer_in, BUFFER_SIZE);
 					server->buffered_in_size=0;
 					server->recieve=0;
+					break;
 			}
 		}
 	}
@@ -197,7 +199,6 @@ server_t *build_server_structure(void){
 	server->recieve=0;
 	server->connected=1;
 	server->logged_in=0;
-	server->typing=0;
 	server->in_group_chat=0;
 	server->in_private_chat=0;
 	server->username_private_chat[0]='\0';

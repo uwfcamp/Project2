@@ -20,7 +20,7 @@ void group_chat(server_t *server){
 			// preload header to buffer_out
 			sprintf(server->buffer_out,"7%c%s%c%s%c %c", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
 			// mutex 1 lock to replace typing variable
-			server->typing=1;
+			pthread_mutex_lock(&server->lock);
 			//read user input untill the message exists and return has been hit
 			do {
 				printf("Enter _q to abort\n");
@@ -36,7 +36,7 @@ void group_chat(server_t *server){
 				server->buffered_out_size=strlen(server->buffer_out)+1;
 				server->send=1;
 			}
-			server->typing=0;
+			pthread_mutex_unlock(&server->lock);
 			// mutex 1 unlock to replace typing variable
 		}
 
@@ -68,7 +68,7 @@ void private_chat(server_t *server){
 			dest_valid = get_destination(destination, server);
 			if(dest_valid == 0) {	//changed from (dest_valid != 1) to prevent -1 from passing
 //***************************Exchange for mutex semaphore!!!!!!					
-				server->typing=1;// mutex 1 lock to replace typing variable
+				pthread_mutex_lock(&server->lock);// mutex 1 lock to replace typing variable
 				//preload header info into server message
 				sprintf(server->buffer_out,"6%c%s%c%s%c%s%c", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, destination, (char)DELIMITER);
 					char message[BUFFER_SIZE-strlen(server->buffer_out)];
@@ -83,7 +83,7 @@ void private_chat(server_t *server){
 				if (strcmp(message, "_q\n")) {
 					strcat(server->buffer_out, message);	//concatenate string message to buffer_out
 					server->buffered_out_size=strlen(server->buffer_out)+1;
-					server->typing=0;
+					pthread_mutex_unlock(&server->lock);
 					server->send=1;//set send pending variable
 //***************************Exchange for mutex semaphore!!!!!!					
 					while(server->send==1);
@@ -107,7 +107,7 @@ void logout(server_t *server) {
 	server->buffered_out_size=strlen(server->buffer_out)+1;
 //***************************Exchange for mutex semaphore!!!!!!		
 	server->send=1;	//set send pending variable
-	server->typing=0;
+	pthread_mutex_unlock(&server->lock);
 	return;
 }
 
@@ -123,7 +123,6 @@ void request_users(server_t *server){
 	server->buffered_out_size=strlen(server->buffer_out)+1;
 	server->send=1;
 	sem_wait(&server->mutex);
-	server->recieve=0;
 }
 
 /*
@@ -163,7 +162,6 @@ void g_chat_history(server_t *server){
 	server->buffered_out_size=strlen(server->buffer_out)+1;
 	server->send=1;
 	sem_wait(&server->mutex);
-	server->recieve=0;
 	return;
 }
 
@@ -192,7 +190,6 @@ void p_chat_history(server_t *server) {
 
 			// wait for the response from the server
 			sem_wait(&server->mutex);
-			server->recieve=0;
 			if(server->valid_destination == 0)
 				printf("User does not exist\n");
 		}
@@ -203,7 +200,6 @@ void p_chat_history(server_t *server) {
 	server->buffered_out_size=strlen(server->buffer_out)+1;
 	server->send=1;
 	sem_wait(&server->mutex);
-	server->recieve=0;
 
 	return;
 }
@@ -233,13 +229,11 @@ int get_destination(char * destination, server_t *server) {
 
 		// wait for the response from the server
 		sem_wait(&server->mutex);
-		server->recieve= 0;
 
 		// check if the server says the destination is valid - Here i'm just reusing the login successful bit but a new response field may be defined as needed
 		if (server->valid_destination==0)
 			printf("INVALID TARGET\n");
 		// let the listening thread know it is okay to read new messages
-		server->recieve=0;
 
 	// if the server responds that the user is still attempting
 	// to register, then the username must already be in use.
@@ -284,11 +278,9 @@ void change_password(server_t *server) {
 	//send message to server then wait for response
 	server->send=1;
 	sem_wait(&server->mutex);
-	//printf("%s\n", new_buffer);
 		
 	//change server->password to password1
 	strcpy(server->password, password1);
-	printf("PASSWORD SUCCESSFULLY CHANGED\n");
 
 	return;
 }

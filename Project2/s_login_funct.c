@@ -127,7 +127,6 @@ void check_if_banned(char * username, client_list_t * current){
 				sprintf(temp, "15%c %c %c %c1", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
 			else //user is not banned
 				sprintf(temp, "15%c %c %c %c0", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
-			printf("%s\n", temp);
 			send(current->socket, temp, strlen(temp), MSG_NOSIGNAL | MSG_DONTWAIT);
 		}			
 	}

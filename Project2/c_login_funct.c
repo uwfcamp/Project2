@@ -164,7 +164,6 @@ int is_banned(server_t *server) {
 	server->buffered_out_size = strlen(server->buffer_out)+1;
 	server->send=1;
 	sem_wait(&server->mutex);
-	server->recieve=0;
 	if(server->is_banned == 1){
 		printf("YOU WERE BANNED, GOODBYE!\n");
 		return 1;

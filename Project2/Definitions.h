@@ -35,7 +35,6 @@
 	int recieve;		// 0 if nothing has been recieved, 1 if something has
 	int connected;		// 0 if not connected, 1 if connected
 	int logged_in;		// 0 if not logged in, 1 if logged in
-	int typing;
 	int in_group_chat;
 	int is_admin;
 	int in_private_chat;
