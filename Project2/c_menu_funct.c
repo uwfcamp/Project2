@@ -2,6 +2,9 @@
 #include "c_menu_funct.h"
 #include "parse.h"
 
+/*
+**************************client side public message function*************************
+*/
 void group_chat(server_t *server){
 	char input[BUFFER_SIZE];
 	server->in_group_chat=1;
@@ -12,11 +15,13 @@ void group_chat(server_t *server){
 		printf("\n-=| PRESS Q THEN ENTER TO EXIT |=-\n\n");
 		fgets(input, BUFFER_SIZE, stdin);
 		
-		if (input[0] == '\n') {
+		if (input[0] == '\n') {	//if the enter key was pressed
 			while(server->send==1);
+			// preload header to buffer_out
 			sprintf(server->buffer_out,"7%c%s%c%s%c %c", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
 			// mutex 1 lock to replace typing variable
 			server->typing=1;
+			//read user input untill the message exists and return has been hit
 			do {
 				printf("Enter _q to abort\n");
 				printf("YOUR MESSAGE: ");
@@ -25,6 +30,7 @@ void group_chat(server_t *server){
 				if(strlen(message)<=1)
 					printf("MESSAGE CANNOT BE NULL\n");
 			}while(strlen(message)<=1);
+			//if message is "_q" then cancel message
 			if (strcmp(input, "_q\n")) {
 				strcat(server->buffer_out, message);
 				server->buffered_out_size=strlen(server->buffer_out)+1;
@@ -41,26 +47,28 @@ void group_chat(server_t *server){
 
 
 /*
-************************************MY EDITS *******************************************
 **************************client side private message function*************************
 */
 void private_chat(server_t *server){
 	char input[BUFFER_SIZE];
 	char destination[CREDENTIAL_SIZE]={0};
-	int p_exit = -1;
-
+	int dest_valid = -1;// 0=target valid, 1=target invalid
+// set system variable
 	server->in_private_chat=1;
 	do{
 		printf("\n-=|            PRIVATE CHAT             |=-");
 		printf("\n-=| HIT ENTER TO SEND A PRIVATE MESSAGE |=-");
 		printf("\n-=|     PRESS Q THEN ENTER TO EXIT      |=-\n\n");
+		// read user input
 		fgets(input, BUFFER_SIZE, stdin);
+		// if input is a null string get user message
 		if (input[0]=='\n'){
 			while(server->send==1);
-			p_exit = get_destination(destination, server);
-			// mutex 1 lock to replace typing variable
-			if(p_exit != 1) {
-				server->typing=1;
+			// 
+			dest_valid = get_destination(destination, server);
+			if(dest_valid == 0) {	//changed from (dest_valid != 1) to prevent -1 from passing
+				server->typing=1;// mutex 1 lock to replace typing variable
+				//preload header info into server message
 				sprintf(server->buffer_out,"6%c%s%c%s%c%s%c", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, destination, (char)DELIMITER);
 					char message[BUFFER_SIZE-strlen(server->buffer_out)];
 				do {
