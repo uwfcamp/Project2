@@ -6,5 +6,6 @@
 	int login_menu(server_t *server);
 	void registration_input(server_t *server);
 	void login_input(server_t *server);
+	int is_banned(server_t *server);
 
 #endif
