@@ -182,6 +182,7 @@ server_t *build_server_structure(void){
 	server->buffer_out[0]='\0';
 	server->buffered_out_size=0;
 	server->send=0;
+	server->is_banned=0;
 	server->recieve=0;
 	server->connected=1;
 	server->logged_in=0;
@@ -251,34 +252,44 @@ int main_menu(server_t *server){
 
 	// perform selection
 	fflush(stdout);
-	switch(selection){
-		case 0:
-			break;
-		case 1:
-			request_users(server);
-			break;
-		case 2:
-			group_chat(server);
-			break;
-		case 3:
-			private_chat(server);
-			break;
-		case 4: //view chat history
-			chat_history(server);
-			break;
-		case 5: //file transfer
-			break;
-		case 6: //change password
-			change_password(server);
-			break;
-		case 7:
-			logout(server);
-			server->logged_in=0;
-			server->username[0]='\0';
-			server->password[0]='\0';
-			break;
-		case 8:
-			break;
+	if(server->is_banned==0) {
+		switch(selection){
+			case 0:
+				break;
+			case 1:
+				request_users(server);
+				break;
+			case 2:
+				group_chat(server);
+				break;
+			case 3:
+				private_chat(server);
+				break;
+			case 4: //view chat history
+				chat_history(server);
+				break;
+			case 5: //file transfer
+				break;
+			case 6: //change password
+				change_password(server);
+				break;
+			case 7:
+				logout(server);
+				server->logged_in=0;
+				server->username[0]='\0';
+				server->password[0]='\0';
+				break;
+			case 8:
+				break;
+		}
+	}
+	else {
+		printf("YOU HAVE BEEN BANNED, GOODBYE!\n");
+		logout(server);
+		server->logged_in=0;
+		server->username[0]='\0';
+		server->password[0]='\0';
+		selection = 7;
 	}
 
 	return selection;
