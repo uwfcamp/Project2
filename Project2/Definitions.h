@@ -37,6 +37,7 @@
 	int logged_in;		// 0 if not logged in, 1 if logged in
 	int typing;
 	int in_group_chat;
+	int is_admin;
 	int in_private_chat;
 	int valid_destination;
 	int is_banned;

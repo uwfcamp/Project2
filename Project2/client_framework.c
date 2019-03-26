@@ -4,6 +4,7 @@
 #include "parse.h"
 #include "c_menu_funct.h"
 #include "c_login_funct.h"
+#include "c_admin_funct.h"
 #define IP_ADDRESS "127.0.0.1"
 
 
@@ -113,55 +114,60 @@ void *server_communication(void *vargp){
 			char password[CREDENTIAL_SIZE];
 			char destination[CREDENTIAL_SIZE];
 			parse_message(server->buffer_in, &mode, username, password, destination, body);
+			printf("%s\n", server->buffer_in);
 			/*
 ********************MY EDITS*******************************************
 *****************selective rendering of group and private messages*****
 */
 			// print out chat messages
-			if ((mode==6) && (server->in_private_chat==1 && destination[0]!=' ')){
-				printf("%s: %s", username, body);
+			switch (mode) {
+				case 6:
+					if (server->in_private_chat==1)
+						printf("%s: %s", username, body);
+					break;
+				case 7:
+					if(server->in_group_chat==1)
+						printf("%s: %s", username, body);
+					break;
+				case 5: case 8: case 9:
+					printf("\n%s\n", body);
+					break;
+				case 13: case 14:
+					if (strcmp(body, "Y")==0)
+						server->valid_destination=1;
+					else
+						server->valid_destination=0;
+					break;
+				case 4:
+					strcpy(server->password, body);
+					printf("PASSWORD SUCCESSFULLY CHANGED\n");
+					break;
+				case 15:
+					server->is_banned=atoi(body);
+					break;
+				case 16:
+					printf("body = %d\n", atoi(body));
+					server->is_admin = atoi(body);
+					break;
 			}
-			else if ((mode==7) && (server->in_group_chat==1 && destination[0]==' ')){
-				printf("%s: %s", username, body);
-			}
-//*************************************************************			
-			else if (mode==5||mode==8||mode==9){
-				printf("\n%s\n", body);
-			}
-			else if (mode==13 || mode == 14) {
-				if (strcmp(body, "Y")==0){
-					server->valid_destination=1;
-				}
-				else {
-					server->valid_destination=0;
-				}
-			}
-			else if (mode==4){
-				strcpy(server->password, body);
-				printf("PASSWORD SUCCESSFULLY CHANGED\n");
-			}
-			else if (mode == 15)
-				server->is_banned=atoi(body);
-
 			//mutex 1 unlock to replace typing variable
 
 			// once the recieved message has been utalyzed,
 			// the buffer must be cleared, except in instances
 			// where the main thread must handle the response.
-			
-			if(mode !=5 && mode != 13 && mode != 8 && mode != 9 && mode != 14 && mode != 15){
-				clear_string(server->buffer_in, BUFFER_SIZE);
-				server->buffered_in_size=0;
-				server->recieve=0;
+			switch(mode) {
+				case 5: case 13: case 8: case 9: case 14: case 15: case 16:
+					server->buffered_in_size=0;
+					clear_string(server->buffer_in, BUFFER_SIZE);
+					server->recieve=2;
+				case 4:
+					sem_post(&server->mutex);
+					break;
+				default:
+					clear_string(server->buffer_in, BUFFER_SIZE);
+					server->buffered_in_size=0;
+					server->recieve=0;
 			}
-			else{
-				server->buffered_in_size=0;
-				clear_string(server->buffer_in, BUFFER_SIZE);
-				server->recieve=2;
-				sem_post(&server->mutex);
-			}
-			if(mode == 4)
-				sem_post(&server->mutex);
 		}
 	}
 	return NULL;
@@ -282,6 +288,7 @@ int main_menu(server_t *server){
 				server->password[0]='\0';
 				break;
 			case 8:
+				admin_login(server);
 				break;
 		}
 	}

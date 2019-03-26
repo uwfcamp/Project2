@@ -8,7 +8,7 @@
  */
 
 #include "server_framework.h" 
- 
+#include "s_admin_funct.h" 
 int main(int argc, char const *argv[])
 {
     int server_fd;
@@ -179,6 +179,10 @@ int main(int argc, char const *argv[])
 					break;
 				case 15: // check if user is banned
 					check_if_banned(username, current);
+					break;
+				case 16: //login as admin
+					admin_login(username, password, current, admin);
+					break;
 			}
                     }
                 }
