@@ -183,6 +183,9 @@ int main(int argc, char const *argv[])
 				case 16: //login as admin
 					admin_login(username, password, current, admin);
 					break;
+				case 17: //show all users
+					show_all_users(current);
+					break;
 			}
                     }
                 }

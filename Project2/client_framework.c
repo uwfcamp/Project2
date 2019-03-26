@@ -153,6 +153,9 @@ void *server_communication(void *vargp){
 					printf("body = %d\n", atoi(body));
 					server->is_admin = atoi(body);
 					break;
+				case 17:
+					printf("\n%s\n\n", body);
+					break;
 			}
 			pthread_mutex_unlock(&server->lock);
 			//mutex 1 unlock to replace typing variable
@@ -161,7 +164,7 @@ void *server_communication(void *vargp){
 			// the buffer must be cleared, except in instances
 			// where the main thread must handle the response.
 			switch(mode) {
-				case 5: case 13: case 8: case 9: case 14: case 15: case 16: case 4:
+				case 5: case 13: case 8: case 9: case 14: case 15: case 16: case 4: case 17:
 					server->buffered_in_size=0;
 					clear_string(server->buffer_in, BUFFER_SIZE);
 					server->recieve=0;

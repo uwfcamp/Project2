@@ -235,3 +235,23 @@ void change_password(char * body, client_list_t * current) {
 	send(current->socket, temp, strlen(temp), MSG_NOSIGNAL | MSG_DONTWAIT);
 	return;
 }
+void show_all_users(client_list_t *current) {
+	FILE * fp;
+	char temp[BUFFER_SIZE];
+	char search[3];
+	char * token;
+	char new_buffer[BUFFER_SIZE];
+	search[0]=(char)DELIMITER;
+	search[1]='\n';
+	search[2]='\0';
+	sprintf(new_buffer, "17%c %c %c %cLIST OF ALL USERS: ", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
+	fp = fopen("logins.txt", "r");
+	while(fgets(temp, BUFFER_SIZE, fp) != NULL) {
+		token = strtok(temp, search);
+		strcat(new_buffer, token);
+		strcat(new_buffer, " ");
+	}
+	fclose(fp);
+	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+	return;
+}

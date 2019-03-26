@@ -11,4 +11,6 @@
 	void validate_user(char * destination, client_list_t *clientList, client_list_t *current);
 	void confirm_existence(char * destination, client_list_t * current);
 	void change_password(char * body, client_list_t * current);
+	void show_all_users(client_list_t * current);
+
 #endif

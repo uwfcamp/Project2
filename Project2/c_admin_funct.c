@@ -40,13 +40,25 @@ void admin_menu(server_t *server) {
 		menu_choice[strlen(menu_choice)-1]=0;
 	}while(atoi(menu_choice) < 0 && atoi(menu_choice) > 2);
 	switch(atoi(menu_choice)) {
-		case '0'://exit case
+		case 0://exit case
+			printf("\nEXITING ADMIN MENU\n");
 			server->is_admin = 0;
 			break;
-		case '1'://ban case
+		case 1://ban case
+			ban_user(server);
 			break;
-		case '2'://kick case
+		case 2://kick case
+			kick_user(server);
 			break;	
 	}
+	return;
+}
+void ban_user(server_t *server) {
+	show_all_users(server);
+	return;
+}
+
+void kick_user(server_t *server) {
+	show_all_users(server);
 	return;
 }

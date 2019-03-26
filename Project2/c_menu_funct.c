@@ -177,7 +177,7 @@ void p_chat_history(server_t *server) {
 	do {
 		server->valid_destination = 0;	//set validity to default to false
 //******replace with function to print all registered users********		
-		request_users(server);	//prints all active users to the screen
+		show_all_users(server);	//prints all active users to the screen
 		printf("PRIVATE CHAT HISTORY BETWEEN YOU AND: ");
 		fgets(destination, CREDENTIAL_SIZE, stdin);
 		destination[strlen(destination)-1]='\0';
@@ -282,5 +282,13 @@ void change_password(server_t *server) {
 	//change server->password to password1
 	strcpy(server->password, password1);
 
+	return;
+}
+
+void show_all_users(server_t *server) {
+	sprintf(server->buffer_out, "17%c%s%c%s%c %c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
+	server->buffered_out_size = strlen(server->buffer_out) + 1;
+	server->send=1;
+	sem_wait(&server->mutex);
 	return;
 }
