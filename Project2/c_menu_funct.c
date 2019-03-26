@@ -128,19 +128,19 @@ void request_users(server_t *server){
 
 /*
 **************************client side request chat log function*************************
-****************prints either group or private chat history to the screen**************
+****************selects either group or private chat history**************
 */
 void chat_history(server_t *server) {
 	char menuChoice[CREDENTIAL_SIZE];
-	while (menuChoice != 0){
+	while (menuChoice != 0){//keep prompting for selection until quit
 		printf("\n-=| CHAT HISTORY |=-");
 		printf("\n1. Group Chat");
 		printf("\n2. Private Chat");
 		printf("\n0. QUIT");
 		printf("\n\nENTER SELECTION: ");
-		fflush(stdin);
-		fgets(menuChoice, CREDENTIAL_SIZE, stdin);
-		menuChoice[strlen(menuChoice)-1]='\0';
+		fflush(stdin);//clear input line
+		fgets(menuChoice, CREDENTIAL_SIZE, stdin);//read menu choice from stdin
+		menuChoice[strlen(menuChoice)-1]='\0';//set last character for null terminated string
 		if(atoi(menuChoice) == 1)
 			g_chat_history(server);
 		else if(atoi(menuChoice) == 2)
@@ -150,9 +150,15 @@ void chat_history(server_t *server) {
 	}
 	return;
 }
+
+/*
+**************************client side print group chat log function*************************
+************************prints group chat history to the screen**************
+*/
 void g_chat_history(server_t *server){
 	while(server->send==1);
 	printf("\n-=| Group Chat History |=-");
+	//compose server message
 	sprintf(server->buffer_out, "8%c%s%c%s%c %c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
 	server->buffered_out_size=strlen(server->buffer_out)+1;
 	server->send=1;
@@ -160,12 +166,20 @@ void g_chat_history(server_t *server){
 	server->recieve=0;
 	return;
 }
+
+/*
+**************************client side print private chat log function*************************
+**************************prints private chat history to the screen**************
+*/
 void p_chat_history(server_t *server) {
 	char destination[CREDENTIAL_SIZE];
+//**int valid is apparently redundent and unused	
 	int valid =0;
+	//loop the prompt until a valid target is selected
 	do {
-		server->valid_destination = 0;	
-		request_users(server);
+		server->valid_destination = 0;	//set validity to default to false
+//******replace with function to print all registered users********		
+		request_users(server);	//prints all active users to the screen
 		printf("PRIVATE CHAT HISTORY BETWEEN YOU AND: ");
 		fgets(destination, CREDENTIAL_SIZE, stdin);
 		destination[strlen(destination)-1]='\0';
@@ -182,6 +196,7 @@ void p_chat_history(server_t *server) {
 			if(server->valid_destination == 0)
 				printf("User does not exist\n");
 		}
+//******* !valid seems unneccesary as it is not modified by the function		
 	} while(!valid && server->valid_destination==0);
 	printf("\n-=| Private Chat History with %s |=-", destination);
 	sprintf(server->buffer_out, "9%c%s%c%s%c%s%c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, destination, (char)DELIMITER);
