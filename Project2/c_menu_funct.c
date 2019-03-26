@@ -27,12 +27,12 @@ void group_chat(server_t *server){
 				printf("YOUR MESSAGE: ");
 				fgets(message, BUFFER_SIZE-strlen(server->buffer_out), stdin);
 				fflush(stdin);
-				if(strlen(message)<=1)
+				if(strlen(message)<=1)//reject strings of length 0
 					printf("MESSAGE CANNOT BE NULL\n");
 			}while(strlen(message)<=1);
 			//if message is "_q" then cancel message
 			if (strcmp(input, "_q\n")) {
-				strcat(server->buffer_out, message);
+				strcat(server->buffer_out, message);//concatenate string message to buffer_out
 				server->buffered_out_size=strlen(server->buffer_out)+1;
 				server->send=1;
 			}
@@ -53,7 +53,7 @@ void private_chat(server_t *server){
 	char input[BUFFER_SIZE];
 	char destination[CREDENTIAL_SIZE]={0};
 	int dest_valid = -1;// 0=target valid, 1=target invalid
-// set system variable
+	// set system variable
 	server->in_private_chat=1;
 	do{
 		printf("\n-=|            PRIVATE CHAT             |=-");
@@ -67,6 +67,7 @@ void private_chat(server_t *server){
 			// 
 			dest_valid = get_destination(destination, server);
 			if(dest_valid == 0) {	//changed from (dest_valid != 1) to prevent -1 from passing
+//***************************Exchange for mutex semaphore!!!!!!					
 				server->typing=1;// mutex 1 lock to replace typing variable
 				//preload header info into server message
 				sprintf(server->buffer_out,"6%c%s%c%s%c%s%c", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, destination, (char)DELIMITER);
@@ -74,15 +75,17 @@ void private_chat(server_t *server){
 				do {
 					printf("Enter _q to abort\nYOUR MESSAGE: ");
 					fgets(message, BUFFER_SIZE-strlen(server->buffer_out), stdin);
-					if(strlen(message)<=1){
+					if(strlen(message)<=1){//reject strings of length 0
 						printf("MESSAGE CANNOT BE NULL\n");
 					}
 				}while(strlen(message)<=1);
+				//if message is "_q" then cancel message
 				if (strcmp(message, "_q\n")) {
-					strcat(server->buffer_out, message);	
+					strcat(server->buffer_out, message);	//concatenate string message to buffer_out
 					server->buffered_out_size=strlen(server->buffer_out)+1;
 					server->typing=0;
-					server->send=1;
+					server->send=1;//set send pending variable
+//***************************Exchange for mutex semaphore!!!!!!					
 					while(server->send==1);
 				}
 			}
@@ -92,27 +95,41 @@ void private_chat(server_t *server){
 	}while((strlen(input)!=2) || (input[0] != 'q' && input[0] !='Q'));
 	server->in_private_chat=0;
 }
-//******************************************************************************************
 
+/*
+**************************client side logout function*************************
+**************marks user inactive in user file, returns UI to login screen
+*/
 void logout(server_t *server) {
+	//compose logout server message
 	sprintf(server->buffer_out, "3%c%s%c%s%c %c " , (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
 	printf("logging out\n");
 	server->buffered_out_size=strlen(server->buffer_out)+1;
-	server->send=1;	
+//***************************Exchange for mutex semaphore!!!!!!		
+	server->send=1;	//set send pending variable
 	server->typing=0;
 	return;
 }
 
 
-
+/*
+**************************client side request user list function*************************
+*************************prints all online users to the screen***********************
+*/
 void request_users(server_t *server){
 	while(server->send==1);
+	//compose server message
 	sprintf(server->buffer_out, "5%c%s%c%s%c %c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
 	server->buffered_out_size=strlen(server->buffer_out)+1;
 	server->send=1;
 	sem_wait(&server->mutex);
 	server->recieve=0;
 }
+
+/*
+**************************client side request chat log function*************************
+****************prints either group or private chat history to the screen**************
+*/
 void chat_history(server_t *server) {
 	char menuChoice[CREDENTIAL_SIZE];
 	while (menuChoice != 0){
