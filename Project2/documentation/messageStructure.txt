@@ -14,3 +14,4 @@ mode  username  password  destination body          description
 12    andre     pass321   XmalcomX                  kick XmalcomX
 13    andre     pass321   God                       query if user God is online
 14    andre     pass321   ToothFairy                qeury if user ToothFairy exists
+15    andre     pass321                             check if andre has been banned     
