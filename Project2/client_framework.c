@@ -23,6 +23,8 @@ int main(int argc, char const *argv[])
 {
     server = build_server_structure();
     int quit = -1;
+    if(pthread_mutex_init(&server->lock, NULL) !=0)
+	fprintf(stderr, "lock init failed\n");
     sem_init(&server->mutex, 0, 1);
     sem_wait(&server->mutex);
     if ((server->socket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
@@ -66,6 +68,7 @@ int main(int argc, char const *argv[])
     pthread_join(tid, NULL);
     disconnect(server);
     sem_destroy(&server->mutex);
+    pthread_mutex_destroy(&server->lock);
     return 0;
 }
 
