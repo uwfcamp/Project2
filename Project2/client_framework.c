@@ -223,7 +223,14 @@ void disconnect(server_t *server){
 }
 
 
-
+/* This function will prompt the user for the selection of a menu option,
+ * denoted by a number. The function then checks to ensure a number was
+ * given, and if so, converts it to an integer. If not, the functions asks
+ * again.
+ *
+ * return
+ *	- The integer given by the user.
+ */
 int menu_input(void){
 	char input[CREDENTIAL_SIZE]={0};
 	int valid = 0, i;
@@ -245,6 +252,12 @@ int menu_input(void){
 
 
 
+/* This function will print the entire menu to the screen, and
+ * perform some action based on the user's input.
+ *
+ * return
+ *	- The selection of the user.
+ */
 int main_menu(server_t *server){
 	int selection = -1;
 
