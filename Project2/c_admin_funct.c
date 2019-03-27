@@ -73,6 +73,10 @@ void ban_user(server_t *server, admin_account_t *admin) {
 		if(!server->valid_destination)
 			printf("%s DOES NOT EXIST\n", input);
 	}while(!server->valid_destination);
+	sprintf(server->buffer_out, "11%c%s%c%s%c%s%c ", (char)DELIMITER, admin->username, (char)DELIMITER, admin->password, (char)DELIMITER, input, (char)DELIMITER);
+	server->buffered_out_size = strlen(server->buffer_out)+1;
+	server->send=1;
+	sem_wait(&server->mutex);
 	printf("%s WAS BANNED\n", input);
 	return;
 }
@@ -97,6 +101,10 @@ void kick_user(server_t *server, admin_account_t *admin) {
 		if(!server->valid_destination)
 			printf("%s DOES NOT EXIST\n", input);
 	}while(!server->valid_destination);
+	sprintf(server->buffer_out, "12%c%s%c%s%c%s%c ", (char)DELIMITER, admin->username, (char)DELIMITER, admin->password, (char)DELIMITER, input, (char)DELIMITER);
+	server->buffered_out_size = strlen(server->buffer_out)+1;
+	server->send=1;
+	sem_wait(&server->mutex);
 	printf("%s WAS KICKED\n", input);
 	return;
 }

@@ -159,14 +159,12 @@ void login_input(server_t *server){
 	server->logged_in=1;
 }
 
-int is_banned(server_t *server) {
-	sprintf(server->buffer_out, "15%c%s%c%s%c %c ",(char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
-	server->buffered_out_size = strlen(server->buffer_out)+1;
-	server->send=1;
-	sem_wait(&server->mutex);
-	if(server->is_banned == 1){
-		printf("YOU WERE BANNED, GOODBYE!\n");
-		return 1;
+int is_banned_or_kicked(server_t *server) {
+	if(server->is_banned_or_kicked ==0) {
+		sprintf(server->buffer_out, "15%c%s%c%s%c %c ",(char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
+		server->buffered_out_size = strlen(server->buffer_out)+1;
+		server->send=1;
+		sem_wait(&server->mutex);
 	}
-	return 0;
+	return server->is_banned_or_kicked;
 }

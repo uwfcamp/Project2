@@ -147,7 +147,7 @@ void *server_communication(void *vargp){
 					printf("PASSWORD SUCCESSFULLY CHANGED\n");
 					break;
 				case 15:
-					server->is_banned=atoi(body);
+					server->is_banned_or_kicked=atoi(body);
 					break;
 				case 16:
 					printf("body = %d\n", atoi(body));
@@ -155,6 +155,18 @@ void *server_communication(void *vargp){
 					break;
 				case 17:
 					printf("\n%s\n\n", body);
+					break;
+				case 11:
+					if (atoi(body)==1)
+						server->is_banned_or_kicked = 1;
+					else
+						printf("USER WAS BANNED\n");
+					break;
+				case 12:
+					if (atoi(body)==1)
+						server->is_banned_or_kicked = -1;
+					else
+						printf("USER WAS KICKED\n");
 					break;
 			}
 			pthread_mutex_unlock(&server->lock);
@@ -164,7 +176,7 @@ void *server_communication(void *vargp){
 			// the buffer must be cleared, except in instances
 			// where the main thread must handle the response.
 			switch(mode) {
-				case 5: case 13: case 8: case 9: case 14: case 15: case 16: case 4: case 17:
+				case 5: case 13: case 8: case 9: case 14: case 15: case 16: case 4: case 17: case 11: case 12:
 					server->buffered_in_size=0;
 					clear_string(server->buffer_in, BUFFER_SIZE);
 					server->recieve=0;
@@ -198,7 +210,7 @@ server_t *build_server_structure(void){
 	server->buffer_out[0]='\0';
 	server->buffered_out_size=0;
 	server->send=0;
-	server->is_banned=0;
+	server->is_banned_or_kicked=0;
 	server->recieve=0;
 	server->connected=1;
 	server->logged_in=0;
@@ -280,7 +292,7 @@ int main_menu(server_t *server){
 
 	// perform selection
 	fflush(stdout);
-	if(is_banned(server)==0) {
+	if(is_banned_or_kicked(server)==0) {
 		switch(selection){
 			case 0:
 				break;
@@ -313,13 +325,22 @@ int main_menu(server_t *server){
 				break;
 		}
 	}
-	else {
+	else if(is_banned_or_kicked(server)==1) {
 		printf("YOU HAVE BEEN BANNED, GOODBYE!\n");
 		logout(server);
 		server->logged_in=0;
 		server->username[0]='\0';
 		server->password[0]='\0';
 		selection = 7;
+	}
+	else {
+		printf("YOU HAVE BEEN KICKED, GOODBYE!\n");
+		logout(server);
+		server->logged_in=0;
+		server->username[0]='\0';
+		server->password[0]='\0';
+		selection = 7;
+		
 	}
 
 	return selection;
