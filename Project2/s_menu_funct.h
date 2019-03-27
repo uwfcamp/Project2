@@ -12,5 +12,7 @@
 	void confirm_existence(char * destination, client_list_t * current);
 	void change_password(char * body, client_list_t * current);
 	void show_all_users(client_list_t * current);
-
+	unsigned long atoul(char *value);
+	void recieve_file(char *body, char *destination, client_list_t *current);
+	
 #endif

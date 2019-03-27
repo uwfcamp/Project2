@@ -297,6 +297,7 @@ int main_menu(server_t *server){
 				chat_history(server);
 				break;
 			case 5: //file transfer
+				send_file(server);
 				break;
 			case 6: //change password
 				change_password(server);

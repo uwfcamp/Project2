@@ -292,3 +292,110 @@ void show_all_users(server_t *server) {
 	sem_wait(&server->mutex);
 	return;
 }
+
+/* This function will facilitate the transfer of a file from the
+ * client to the server, where it will be stored pending a request
+ * for the file.
+ *
+ * server_t *server
+ *	- data structure containing the necessary info to communicate data to the server.
+ *
+ * return
+ *	- N/A
+ */
+void send_file(server_t *server){
+	char destination[CREDENTIAL_SIZE]={0};
+	char filename[CREDENTIAL_SIZE];
+	int exists = 0;
+	int p_exit = -1;
+	unsigned long size=0;
+
+	printf("\n-=| SEND A FILE |=-\n\n");
+
+	while(server->send==1);
+	// get the filename and destination from the user
+	p_exit = get_destination(destination, server);
+	if (p_exit != 1)
+		exists = get_file_name(filename);
+	if (exists)
+		size = get_file_size(filename);
+	printf("FILE SIZE: %lu\n", size);
+	if(size>0) {
+		sprintf(server->buffer_out,"10%c%s%c%s%c%s%c%s%c%lu", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, destination, (char)DELIMITER, filename, '_', size);
+		server->buffered_out_size=strlen(server->buffer_out)+1;
+		server->send=1;
+		while(server->send==1);
+		FILE *fp = fopen(filename, "rb");
+		if (fp != NULL){
+			do{
+				server->buffered_out_size = fread(server->buffer_out, 1, BUFFER_SIZE, fp);
+				size -= server->buffered_out_size;
+				server->send=1;
+				while(server->send==1);
+			}while(size>0);
+			fclose(fp);
+			printf("FILE SUCCESSFULLY SENT\n");
+		}
+	}
+}
+
+
+
+/* This function will ask the user for the name of a file to transfer.
+ * if the file named cannot be accessed, 0 is returned. If the user
+ * decides to cancel the transfer, 0 is returned. If the file exists,
+ * and is accessed successfully, then 1 is returned.
+ *
+ * char *filename
+ *	- A pointer to a string to place user input into
+ *
+ * return
+ *	- Is the filename given valid? 1=yes, 0=no
+ */
+int get_file_name(char *filename){
+	// prompt user for a filename
+	fflush(stdin);
+	do {
+		printf("Enter _q to abort\n");
+		printf("FILENAME: ");
+		fgets(filename, CREDENTIAL_SIZE, stdin);
+		if (strlen(filename) <=1){
+			printf("FILENAME CANNOT BE NULL\n");
+		}
+		fflush(stdin);
+	} while(strlen(filename)<=1);
+	filename[strlen(filename)-1]='\0';
+
+	// check if user wants to cancel
+	if (strcmp(filename, "_q")==0) {
+		return 0;
+	}
+
+	// try to open the file
+	FILE *fp = fopen(filename, "r");
+	if (fp==NULL)
+		return 0;
+	fclose(fp);
+
+	// file was accessed successfully
+	return 1;
+}
+
+
+
+/* This function will retrieve the size of a given file from the file
+ * description tables in the system. If there is a problem getting the
+ * size of the file, 0 is returned.
+ *
+ * char *filename
+ *	- A pointer to a string containing the file's name
+ *
+ * return
+ *	- An unsigned long, denoting the size of the file
+ */
+unsigned long get_file_size(char *filename){
+	struct stat st;
+	if (stat(filename, &st) == 0)
+		return st.st_size;
+	return 0;
+}

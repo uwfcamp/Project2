@@ -165,7 +165,8 @@ int main(int argc, char const *argv[])
 				case 9:
 					send_private_log(destination, current);
 					break;
-				case 10:
+				case 10:// Recieve files from client
+					recieve_file(body, destination, current);
 					break;
 				case 11:
 					break;

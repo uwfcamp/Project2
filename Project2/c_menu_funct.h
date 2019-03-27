@@ -11,5 +11,8 @@
 	int get_destination(char * destination, server_t *server);
 	void change_password(server_t *server);
 	void show_all_users(server_t *server);
+	void send_file(server_t *server);
+	int get_file_name(char *filename);
+	unsigned long get_file_size(char *filename);
 
 #endif

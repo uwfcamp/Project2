@@ -14,6 +14,7 @@
 	#include <pthread.h>
 	#include <stdlib.h>
 	#include <semaphore.h>
+	#include <sys/stat.h>
 
 	//Global Definitions
 	#define PORT 60001

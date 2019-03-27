@@ -255,3 +255,75 @@ void show_all_users(client_list_t *current) {
 	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
 	return;
 }
+
+/* This function will accept the binary data of a file, and store
+ * it in a file, denoted by the filename given in the body of the
+ * last message.
+ *
+ * char *body
+ *	- a string containing the filename and file size, seperated by an underscore
+ *
+ * char *destination
+ *	- the user that the file is intended for
+ *
+ * client_list_t *current
+ *	- the user that is sending the file
+ *
+ * return
+ *	- N/A
+ */
+void recieve_file(char *body, char *destination, client_list_t *current){
+	char buffer[BUFFER_SIZE];
+	char *filename;
+	char *str_size;
+	unsigned long size;
+	int amount_read;
+
+	// splice the "body" at the last occuring underscore,
+	// which will give us the file's name, and size
+	int i=0;
+	while(body[i]!='\0')
+		i++;
+	while(body[i]!='_')
+		i--;
+	body[i] = '\0';
+	filename = body;
+	str_size = &body[i+1];
+
+	size = atoul(str_size);
+
+	// recieve the actual file data from the client
+	FILE *fp = fopen(filename, "w");
+	while(size>0){
+		amount_read = recv(current->socket , buffer, BUFFER_SIZE, MSG_NOSIGNAL);
+		size-=amount_read;
+		fwrite(buffer, 1, amount_read, fp);
+	}
+	fclose(fp);
+
+	// append this file to the list of files
+	fp = fopen("filelist.txt", "a");
+	fprintf(fp, "%s%c%s%c%s\n", destination, (char)DELIMITER, str_size, (char)DELIMITER, filename);
+	fclose(fp);
+}
+
+
+/* This function will convert a string of numbers to an
+ * unsigned long, and return this value to the user.
+ *
+ * char *value
+ *	- pointer to a string of numbers
+ *
+ * return
+ *	- unsigned long denoting the numerical value of the string
+ */
+unsigned long atoul(char *value){
+	int i=0;
+	unsigned long number = 0;
+	while(value[i]!='\0'){
+		number *= 10;
+		number += value[i] - '0';
+		i++;
+	}
+	return number;
+}
