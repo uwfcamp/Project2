@@ -16,6 +16,6 @@ mode  username  password  destination body          description
 14    andre     pass321   ToothFairy                qeury if user ToothFairy exists
 15    andre     pass321                             check if andre has been banned     
 16    admin     admin123                            login as admin
-17    andre     pass321				                      get list of all users
+17    andre     pass321                             get list of all users
 18    andre     pass321                             request list of files meant for andre
 19    andre     pass321               filename      request a specific file from the server
