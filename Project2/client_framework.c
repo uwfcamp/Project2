@@ -109,6 +109,16 @@ void *server_communication(void *vargp){
 		}
 		// need to create function to handle
 		// the different types of messages
+		if (server->recieve!=0 && server->logged_in==1 && strlen(server->buffer_in)!=0) {
+			pthread_mutex_lock(&server->lock);
+			int mode;
+			char body[BUFFER_SIZE];
+			char username[CREDENTIAL_SIZE];
+			char password[CREDENTIAL_SIZE];
+			char destination[CREDENTIAL_SIZE];
+			parse_message(server->buffer_in, &mode, username, password, destination, body);
+			pthread_mutex_unlock(&server->lock);
+		}
 		if (server->recieve==1 && server->logged_in==1){
 			pthread_mutex_lock(&server->lock);
 			//mutex 1 lock to replace typing variable
@@ -169,7 +179,6 @@ void *server_communication(void *vargp){
 						printf("USER WAS KICKED\n");
 					break;
 			}
-			pthread_mutex_unlock(&server->lock);
 			//mutex 1 unlock to replace typing variable
 
 			// once the recieved message has been utalyzed,
@@ -188,6 +197,7 @@ void *server_communication(void *vargp){
 					server->recieve=0;
 					break;
 			}
+			pthread_mutex_unlock(&server->lock);
 		}
 	}
 	return NULL;

@@ -25,7 +25,9 @@ int login_menu(server_t *server){
 			registration_input(server);
 			break;
 		case 2:
+			pthread_mutex_lock(&server->lock);
 			login_input(server);
+			pthread_mutex_unlock(&server->lock);
 			break;
 	}
 
