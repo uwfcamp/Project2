@@ -15,7 +15,7 @@ void group_chat(server_t *server){
 		printf("\n-=| PRESS Q THEN ENTER TO EXIT |=-\n\n");
 		fgets(input, BUFFER_SIZE, stdin);
 		
-		if (input[0] == '\n') {	//if the enter key was pressed
+		if (input[0] == '\n' && server->is_banned_or_kicked == 0) {	//if the enter key was pressed
 			while(server->send==1);
 			// preload header to buffer_out
 			sprintf(server->buffer_out,"7%c%s%c%s%c %c", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
@@ -27,11 +27,11 @@ void group_chat(server_t *server){
 				printf("YOUR MESSAGE: ");
 				fgets(message, BUFFER_SIZE-strlen(server->buffer_out), stdin);
 				fflush(stdin);
-				if(strlen(message)<=1)//reject strings of length 0
+				if(strlen(message)<=1 && server->is_banned_or_kicked ==0)//reject strings of length 0
 					printf("MESSAGE CANNOT BE NULL\n");
-			}while(strlen(message)<=1);
+			}while(strlen(message)<=1 && server->is_banned_or_kicked==0);
 			//if message is "_q" then cancel message
-			if (strcmp(input, "_q\n")) {
+			if (strcmp(input, "_q\n")&& server->is_banned_or_kicked==0) {
 				strcat(server->buffer_out, message);//concatenate string message to buffer_out
 				server->buffered_out_size=strlen(server->buffer_out)+1;
 				server->send=1;
@@ -40,7 +40,7 @@ void group_chat(server_t *server){
 			// mutex 1 unlock to replace typing variable
 		}
 
-	}while((strlen(input) != 2) || ((input[0] != 'q') && (input[0] !='Q')));
+	}while(((strlen(input) != 2) || ((input[0] != 'q') && (input[0] !='Q'))) && server->is_banned_or_kicked==0);
 	server->in_group_chat=0;
 }
 

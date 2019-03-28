@@ -3,6 +3,7 @@
 
 int login_menu(server_t *server){
 	int selection = -1;
+	server->is_banned_or_kicked = 0;
 
 	// print the menu
 	printf("\n-=| CHATTERBOX CHAT |=-\n\n");
@@ -13,7 +14,7 @@ int login_menu(server_t *server){
 
 	// get the selection
 	do{
-		selection = menu_input();
+		selection = menu_input(server);
 	}while(selection<0 || selection>2);
 
 	// perform selection

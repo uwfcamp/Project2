@@ -11,13 +11,6 @@
 struct sockaddr_in serv_addr;
 server_t *server;
 
-int menu_input(void);
-int main_menu(server_t *server);
-
-server_t *build_server_structure(void);
-void disconnect(server_t *server);
-void *server_communication(void *vargp);
-
 
 int main(int argc, char const *argv[])
 {
@@ -109,20 +102,6 @@ void *server_communication(void *vargp){
 		}
 		// need to create function to handle
 		// the different types of messages
-		if (server->recieve==0 && server->logged_in==1 && strlen(server->buffer_in)!=0) {
-			pthread_mutex_lock(&server->lock);
-			int mode;
-			char body[BUFFER_SIZE];
-			char username[CREDENTIAL_SIZE];
-			char password[CREDENTIAL_SIZE];
-			char destination[CREDENTIAL_SIZE];
-			parse_message(server->buffer_in, &mode, username, password, destination, body);
-			if(mode == 11 || mode == 12){
-				printf("%s\n", server->buffer_in);
-				clear_string(server->buffer_in, BUFFER_SIZE);
-			}
-			pthread_mutex_unlock(&server->lock);
-		}
 		if (server->recieve==1 && server->logged_in==1){
 			pthread_mutex_lock(&server->lock);
 			//mutex 1 lock to replace typing variable
@@ -170,14 +149,18 @@ void *server_communication(void *vargp){
 					printf("\n%s\n\n", body);
 					break;
 				case 11:
-					if (atoi(body)==1)
+					if (atoi(body)==1) {
 						server->is_banned_or_kicked = 1;
+						printf("\nYOU WERE BANNED! PRESS ENTER TO CONTINUE. . .\n");
+					}
 					else
 						printf("USER WAS BANNED\n");
 					break;
 				case 12:
-					if (atoi(body)==1)
+					if (atoi(body)==1){
 						server->is_banned_or_kicked = -1;
+						printf("\nYOU WERE KICKED! PRESS ENTER TO CONTINUE!. . .\n");
+					}
 					else
 						printf("USER WAS KICKED\n");
 					break;
@@ -256,22 +239,24 @@ void disconnect(server_t *server){
  * return
  *	- The integer given by the user.
  */
-int menu_input(void){
+int menu_input(server_t *server){
 	char input[CREDENTIAL_SIZE]={0};
 	int valid = 0, i;
 	do{
 		do {
 			printf("Enter an action: ");
 			fgets(input, CREDENTIAL_SIZE, stdin);
-		}while(strlen(input)<=1);
-		input[strlen(input)-1]=0;
-		for(i=0; input[i]!='\0'; i++){
-			valid = 0;
-			if (input[i]<'0' || input[i]>'9')
-				break;
-			valid = 1;
+		}while(strlen(input)<=1 && server->is_banned_or_kicked == 0);
+		if (server->is_banned_or_kicked == 0) {
+			input[strlen(input)-1]=0;
+			for(i=0; input[i]!='\0'; i++){
+				valid = 0;
+				if (input[i]<'0' || input[i]>'9')
+					break;
+				valid = 1;
+			}
 		}
-	}while(!valid);
+	}while(!valid && server->is_banned_or_kicked == 0);
 	return atoi(input);
 }
 
@@ -285,24 +270,25 @@ int menu_input(void){
  */
 int main_menu(server_t *server){
 	int selection = -1;
+	if(server->is_banned_or_kicked==0) {
+		// print the menu
+		printf("\n-=| MAIN MENU |=-\n\n");
+		printf("1. View current online number\n");
+		printf("2. Enter the group chat\n");
+		printf("3. Enter the private chat\n");
+		printf("4. View chat history\n");
+		printf("5. File transfer\n");
+		printf("6. Change the password\n");
+		printf("7. Logout\n");
+		printf("8. Administrator\n");
+		printf("\n");
 
-	// print the menu
-	printf("\n-=| MAIN MENU |=-\n\n");
-	printf("1. View current online number\n");
-	printf("2. Enter the group chat\n");
-	printf("3. Enter the private chat\n");
-	printf("4. View chat history\n");
-	printf("5. File transfer\n");
-	printf("6. Change the password\n");
-	printf("7. Logout\n");
-	printf("8. Administrator\n");
-	printf("\n");
+		// get the selection
 
-	// get the selection
-	do{
-		selection = menu_input();
-	}while(selection<0 || selection>8);
-
+		do{
+			selection = menu_input(server);
+		}while((selection<0 || selection>8) && server->is_banned_or_kicked==0);
+	}
 	// perform selection
 	fflush(stdout);
 	if(is_banned_or_kicked(server)==0) {
