@@ -1,6 +1,10 @@
 #include "Definitions.h"
 #include "c_login_funct.h"
-
+/****************************************************
+ * This functions as the login menu for the program.
+ * it allows the user to access the login, registration
+ * and exit commands.
+ * *************************************************/
 int login_menu(server_t *server){
 	int selection = -1;
 	server->is_banned_or_kicked = 0;
@@ -19,13 +23,13 @@ int login_menu(server_t *server){
 
 	// perform selection
 	switch(selection){
-		case 0:
+		case 0: // exit case
 			server->connected=0;
 			break;
-		case 1:
+		case 1: // registration case
 			registration_input(server);
 			break;
-		case 2:
+		case 2: // login case
 			pthread_mutex_lock(&server->lock);
 			login_input(server);
 			pthread_mutex_unlock(&server->lock);
@@ -34,6 +38,10 @@ int login_menu(server_t *server){
 
 	return selection;
 }
+/*****************************************
+ * This case handles registration of new users
+ * in the program.
+ * **************************************/
 void registration_input(server_t *server){
 	char username[CREDENTIAL_SIZE]={0};
 	char password1[CREDENTIAL_SIZE]={0};
@@ -161,7 +169,11 @@ void login_input(server_t *server){
 	strcpy(server->password, password);
 	server->logged_in=1;
 }
-
+/*******************************************
+ * this case checks if username is banned or kicked
+ * if user is currently banned, the function returns
+ * a 1.
+ * ****************************************/
 int is_banned_or_kicked(server_t *server) {
 	if(server->is_banned_or_kicked ==0) {
 		sprintf(server->buffer_out, "15%c%s%c%s%c %c ",(char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
