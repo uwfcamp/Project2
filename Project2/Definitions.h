@@ -18,7 +18,7 @@
 
 	//Global Definitions
 	#define PORT 60001
-	#define BUFFER_SIZE 300000
+	#define BUFFER_SIZE 30000
 	#define CREDENTIAL_SIZE 20
 	#define DELIMITER 176
 	#define MAX_TIME_SIZE 50

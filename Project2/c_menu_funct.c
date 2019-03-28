@@ -158,12 +158,14 @@ void chat_history(server_t *server) {
 */
 void g_chat_history(server_t *server){
 	while(server->send==1);
-	printf("\n-=| Group Chat History |=-");
-	//compose server message
-	sprintf(server->buffer_out, "8%c%s%c%s%c %c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
-	server->buffered_out_size=strlen(server->buffer_out)+1;
-	server->send=1;
-	sem_wait(&server->mutex);
+	if(server->is_banned_or_kicked==0) {
+		printf("\n-=| Group Chati History |=-");
+		//compose server message
+		sprintf(server->buffer_out, "8%c%s%c%s%c %c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
+		server->buffered_out_size=strlen(server->buffer_out)+1;
+		server->send=1;
+		sem_wait(&server->mutex);
+	}
 	return;
 }
 
@@ -183,26 +185,27 @@ void p_chat_history(server_t *server) {
 		printf("PRIVATE CHAT HISTORY BETWEEN YOU AND: ");
 		fgets(destination, CREDENTIAL_SIZE, stdin);
 		destination[strlen(destination)-1]='\0';
-		if (strlen(destination) == 0)
+		if (strlen(destination) == 0 && server->is_banned_or_kicked==0)
 			printf("INPUT CANNOT BE NULL\n");
-		else{	
+		else if(server->is_banned_or_kicked==0){	
 			sprintf(server->buffer_out, "14%c%s%c%s%c%s%c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, destination, (char)DELIMITER);
 			server->buffered_out_size=strlen(server->buffer_out)+1;
 			server->send=1;
 
 			// wait for the response from the server
 			sem_wait(&server->mutex);
-			if(server->valid_destination == 0)
+			if(server->valid_destination == 0 && server->is_banned_or_kicked==0)
 				printf("User does not exist\n");
 		}
 //******* !valid seems unneccesary as it is not modified by the function		
-	} while(!valid && server->valid_destination==0);
-	printf("\n-=| Private Chat History with %s |=-", destination);
-	sprintf(server->buffer_out, "9%c%s%c%s%c%s%c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, destination, (char)DELIMITER);
-	server->buffered_out_size=strlen(server->buffer_out)+1;
-	server->send=1;
-	sem_wait(&server->mutex);
-
+	} while(!valid && server->valid_destination==0 && server->is_banned_or_kicked==0);
+	if(server->is_banned_or_kicked==0) {
+		printf("\n-=| Private Chat History with %s |=-", destination);
+		sprintf(server->buffer_out, "9%c%s%c%s%c%s%c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, destination, (char)DELIMITER);
+		server->buffered_out_size=strlen(server->buffer_out)+1;
+		server->send=1;
+		sem_wait(&server->mutex);
+	}
 	return;
 }
 int get_destination(char * destination, server_t *server) {
@@ -249,42 +252,48 @@ void change_password(server_t *server) {
 	char cur_password[CREDENTIAL_SIZE];
 	char password1[CREDENTIAL_SIZE];
 	char password2[CREDENTIAL_SIZE];
+	clear_string(cur_password, CREDENTIAL_SIZE);
+	clear_string(input, CREDENTIAL_SIZE);
+	clear_string(password1, CREDENTIAL_SIZE);
+	clear_string(password2, CREDENTIAL_SIZE);
 	do {
-		do {
+		while(strlen(cur_password)<=1 && server->is_banned_or_kicked==0) {
 			printf("PLEASE ENTER CURRENT PASSWORD: ");
 			fgets(cur_password, CREDENTIAL_SIZE, stdin);
-		}while(strlen(cur_password)<=1);
+		};
 		cur_password[strlen(cur_password)-1]=0;
-		do {
+		while(strlen(password1)<=1 && server->is_banned_or_kicked==0){
 			printf("PLEASE ENTER NEW PASSWORD: ");
 			fgets(password1, CREDENTIAL_SIZE, stdin);
-		}while(strlen(password1)<=1);
-	
-		do {
+		}
+		while(strlen(password2)<=1 && server->is_banned_or_kicked==0) {
 			printf("PLEASE REENTER NEW PASSWORD: ");
 			fgets(password2, CREDENTIAL_SIZE, stdin);
-		}while(strlen(password2)<=1);
-		if(strcmp(password1, password2))
+		}
+		if(strcmp(password1, password2) && server->is_banned_or_kicked==0)
 			printf("PASSWORDS DO NOT MATCH\n");
-		if(strcmp(cur_password, server->password))
+		if(strcmp(cur_password, server->password)&& server->is_banned_or_kicked==0)
 			printf("INCORRECT CURRENT CREDENTIAL\n");
-		if(strcmp(password1, password2) || strcmp(server->password, cur_password)) {
-			printf("ENTER Q TO ABORT, OTHERWISE PRESS ENTER TO CONTINUE\n");
-			fgets(input, CREDENTIAL_SIZE, stdin);
-			if((strlen(input) == 2) && (input[0] == 'q' || input[0] == 'Q'))
+		if((strcmp(password1, password2) || strcmp(server->password, cur_password)) || server->is_banned_or_kicked==0) {
+			if (server->is_banned_or_kicked==0) {
+				printf("ENTER Q TO ABORT, OTHERWISE PRESS ENTER TO CONTINUE\n");
+				fgets(input, CREDENTIAL_SIZE, stdin);
+			}
+			if(((strlen(input) == 2) && (input[0] == 'q' || input[0] == 'Q'))|| server->is_banned_or_kicked!=0)
 				return;
 		}
-	}while (strcmp(password1, password2) || strcmp(server->password, cur_password));
+	}while ((strcmp(password1, password2) || strcmp(server->password, cur_password))&& server->is_banned_or_kicked==0);
 	password1[strlen(password1)-1]=0;
-	sprintf(server->buffer_out, "4%c%s%c%s%c %c%s", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER, password1);
-	server->buffered_out_size = strlen(server->buffer_out)+1;
-	//send message to server then wait for response
-	server->send=1;
-	sem_wait(&server->mutex);
+	if(server->is_banned_or_kicked==0) {
+		sprintf(server->buffer_out, "4%c%s%c%s%c %c%s", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER, password1);
+		server->buffered_out_size = strlen(server->buffer_out)+1;
+		//send message to server then wait for response
+		server->send=1;
+		sem_wait(&server->mutex);
 		
-	//change server->password to password1
-	strcpy(server->password, password1);
-
+		//change server->password to password1
+		strcpy(server->password, password1);
+	}
 	return;
 }
 
