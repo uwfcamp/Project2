@@ -134,11 +134,13 @@ void request_users(server_t *server){
 void chat_history(server_t *server) {
 	char menuChoice[CREDENTIAL_SIZE];
 	while (menuChoice != 0 && server->is_banned_or_kicked==0){//keep prompting for selection until quit
+		pthread_mutex_lock(&server->lock);
 		printf("\n-=| CHAT HISTORY |=-");
 		printf("\n1. Group Chat");
 		printf("\n2. Private Chat");
 		printf("\n0. QUIT");
 		printf("\n\nENTER SELECTION: ");
+		pthread_mutex_unlock(&server->lock);
 		fflush(stdin);//clear input line
 		fgets(menuChoice, CREDENTIAL_SIZE, stdin);//read menu choice from stdin
 		menuChoice[strlen(menuChoice)-1]='\0';//set last character for null terminated string
@@ -159,7 +161,7 @@ void chat_history(server_t *server) {
 void g_chat_history(server_t *server){
 	while(server->send==1);
 	if(server->is_banned_or_kicked==0) {
-		printf("\n-=| Group Chati History |=-");
+		printf("\n-=| Group Chat History |=-");
 		//compose server message
 		sprintf(server->buffer_out, "8%c%s%c%s%c %c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
 		server->buffered_out_size=strlen(server->buffer_out)+1;
