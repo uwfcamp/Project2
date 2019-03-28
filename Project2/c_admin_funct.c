@@ -118,11 +118,19 @@ void ban_user(server_t *server, admin_account_t *admin) {
 	sem_wait(&server->mutex);
 	return;
 }
-
+/**************************************************
+ * Print out a list of active users currently logged
+ * into the server. Then prompt the admin to give a
+ * valid user or enter the _q exit case. after valid
+ * input is entered, send name of user to server to
+ * ban then go back to admin menu.
+ * ***********************************************/
 void kick_user(server_t *server, admin_account_t *admin) {
 	server->valid_destination=0;
 	char input[BUFFER_SIZE];
 	printf("-=| KICK USER |=-\n");
+	//print a list of active users to screen then prompt user to enter
+	//the name of a valid user.
 	do {
 		request_users(server);
 		do {
@@ -132,13 +140,16 @@ void kick_user(server_t *server, admin_account_t *admin) {
 		}while(strlen(input)<1);
 		if (!strcmp(input, "_q"))
 			return;
+		//send the user name to the server to check for validity
 		sprintf(server->buffer_out, "13%c%s%c%s%c%s%c ", (char)DELIMITER, admin->username, (char)DELIMITER, admin->password, (char)DELIMITER, input, (char)DELIMITER);
 		server->buffered_out_size = strlen(server->buffer_out)+1;
 		server->send=1;
 		sem_wait(&server->mutex);
+		//if username is invalid, tell user that the user is invalid.
 		if(!server->valid_destination)
 			printf("%s DOES NOT EXIST\n", input);
 	}while(!server->valid_destination);
+	//if username is valid, set up the request and send it to server so that user will be kicked.
 	sprintf(server->buffer_out, "12%c%s%c%s%c%s%c ", (char)DELIMITER, admin->username, (char)DELIMITER, admin->password, (char)DELIMITER, input, (char)DELIMITER);
 	server->buffered_out_size = strlen(server->buffer_out)+1;
 	server->send=1;
