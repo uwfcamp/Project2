@@ -1,5 +1,3 @@
-// Client side C/C++ program to demonstrate Socket programming
-
 #include "Definitions.h"
 #include "parse.h"
 #include "c_menu_funct.h"
@@ -16,8 +14,10 @@ int main(int argc, char const *argv[])
 {
     server = build_server_structure();
     int quit = -1;
+    //initialize mutex lock
     if(pthread_mutex_init(&server->lock, NULL) !=0)
 	fprintf(stderr, "lock init failed\n");
+    //initialize semaphore
     sem_init(&server->mutex, 0, 1);
     sem_wait(&server->mutex);
     if ((server->socket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
@@ -303,13 +303,13 @@ int main_menu(server_t *server){
 		switch(selection){
 			case 0:
 				break;
-			case 1:
+			case 1: // case of show all online users
 				request_users(server);
 				break;
-			case 2:
+			case 2: // enter group chat
 				group_chat(server);
 				break;
-			case 3:
+			case 3: // enter private chat
 				private_chat(server);
 				break;
 			case 4: //view chat history
@@ -321,17 +321,17 @@ int main_menu(server_t *server){
 			case 6: //change password
 				change_password(server);
 				break;
-			case 7:
+			case 7: // logout case
 				logout(server);
 				server->logged_in=0;
 				server->username[0]='\0';
 				server->password[0]='\0';
 				break;
-			case 8:
+			case 8: // admin login
 				admin_login(server);
 				break;
 		}
-	}
+	}// check if user is banned
 	else if(is_banned_or_kicked(server)==1) {
 		printf("YOU HAVE BEEN BANNED, GOODBYE!\n");
 		logout(server);
@@ -340,7 +340,7 @@ int main_menu(server_t *server){
 		server->password[0]='\0';
 		selection = 7;
 	}
-	else {
+	else { // then user has been kicked
 		printf("YOU HAVE BEEN KICKED, GOODBYE!\n");
 		logout(server);
 		server->logged_in=0;
