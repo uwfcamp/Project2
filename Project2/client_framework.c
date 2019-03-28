@@ -109,7 +109,7 @@ void *server_communication(void *vargp){
 		}
 		// need to create function to handle
 		// the different types of messages
-		if (server->recieve!=0 && server->logged_in==1 && strlen(server->buffer_in)!=0) {
+		if (server->recieve==0 && server->logged_in==1 && strlen(server->buffer_in)!=0) {
 			pthread_mutex_lock(&server->lock);
 			int mode;
 			char body[BUFFER_SIZE];
@@ -117,6 +117,10 @@ void *server_communication(void *vargp){
 			char password[CREDENTIAL_SIZE];
 			char destination[CREDENTIAL_SIZE];
 			parse_message(server->buffer_in, &mode, username, password, destination, body);
+			if(mode == 11 || mode == 12){
+				printf("%s\n", server->buffer_in);
+				clear_string(server->buffer_in, BUFFER_SIZE);
+			}
 			pthread_mutex_unlock(&server->lock);
 		}
 		if (server->recieve==1 && server->logged_in==1){
@@ -160,7 +164,6 @@ void *server_communication(void *vargp){
 					server->is_banned_or_kicked=atoi(body);
 					break;
 				case 16:
-					printf("body = %d\n", atoi(body));
 					server->is_admin = atoi(body);
 					break;
 				case 17:
@@ -350,7 +353,7 @@ int main_menu(server_t *server){
 		server->username[0]='\0';
 		server->password[0]='\0';
 		selection = 7;
-		
+		server->is_banned_or_kicked=0;
 	}
 
 	return selection;

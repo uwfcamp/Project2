@@ -22,11 +22,19 @@ void ban_user(char * destination, client_list_t *clientList, client_list_t *curr
 }
 void kick_user(char * destination, client_list_t *clientList, client_list_t *current) {
 	char new_buffer[BUFFER_SIZE];
+	client_list_t * temp = clientList;
 	//notify admin that client is being kicked
 	sprintf(new_buffer, "12%c %c %c %c0", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
 	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
 
 	//insert kick functionality here
+	sprintf(new_buffer, "12%c %c %c %c1", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
+	while(temp != NULL)
+	{
+		if(strcmp(temp->username, destination)==0)
+			send(temp->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+		temp = temp->next;
+	}
 	printf("%s was kicked\n", destination);
 	return;
 }
