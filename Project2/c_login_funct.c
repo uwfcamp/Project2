@@ -179,6 +179,7 @@ void login_input(server_t *server){
  * a 1.
  * ****************************************/
 int is_banned_or_kicked(server_t *server) {
+	//if client is not currently banned, statement holds true
 	if(server->is_banned_or_kicked ==0) {
 		sprintf(server->buffer_out, "15%c%s%c%s%c %c ",(char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
 		server->buffered_out_size = strlen(server->buffer_out)+1;
