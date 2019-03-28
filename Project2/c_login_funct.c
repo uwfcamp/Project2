@@ -102,7 +102,11 @@ void registration_input(server_t *server){
 	strcpy(server->password, password1);
 	server->logged_in=1;
 }
-
+/***************************************************
+ * This function gets the login input from the client. 
+ * upon getting correct login credentials, the client
+ * will be logged into the server.
+ **************************************************/
 void login_input(server_t *server){
 	char username[CREDENTIAL_SIZE]={0};
 	char password[CREDENTIAL_SIZE]={0};
@@ -151,9 +155,9 @@ void login_input(server_t *server){
 			strtok(NULL, search);
 			strtok(NULL, search);
 			is_banned = strtok(NULL, search);
-			if (atoi(is_banned) == 1)
+			if (atoi(is_banned) == 1) // user is banned from server.
 				printf("USER IS BANNED\n");
-			else
+			else // user is not banned from server
 				valid=1;
 		}
 
