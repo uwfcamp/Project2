@@ -103,7 +103,6 @@ void *server_communication(void *vargp){
 		// need to create function to handle
 		// the different types of messages
 		if (server->recieve==1 && server->logged_in==1){
-			pthread_mutex_lock(&server->lock);
 			//mutex 1 lock to replace typing variable
 			int mode;
 			char body[BUFFER_SIZE];
@@ -119,15 +118,21 @@ void *server_communication(void *vargp){
 			// print out chat messages
 			switch (mode) {
 				case 6:
+					pthread_mutex_lock(&server->lock);
 					if (server->in_private_chat==1)
 						printf("%s: %s", username, body);
+					pthread_mutex_unlock(&server->lock);
 					break;
 				case 7:
+					pthread_mutex_lock(&server->lock);
 					if(server->in_group_chat==1)
 						printf("%s: %s", username, body);
+					pthread_mutex_unlock(&server->lock);
 					break;
 				case 5: case 8: case 9:
+					pthread_mutex_lock(&server->lock);
 					printf("\n%s\n", body);
+					pthread_mutex_unlock(&server->lock);
 					break;
 				case 13: case 14:
 					if (strcmp(body, "Y")==0)
@@ -137,7 +142,9 @@ void *server_communication(void *vargp){
 					break;
 				case 4:
 					strcpy(server->password, body);
+					pthread_mutex_lock(&server->lock);
 					printf("PASSWORD SUCCESSFULLY CHANGED\n");
+					pthread_mutex_unlock(&server->lock);
 					break;
 				case 15:
 					server->is_banned_or_kicked=atoi(body);
@@ -146,7 +153,9 @@ void *server_communication(void *vargp){
 					server->is_admin = atoi(body);
 					break;
 				case 17:
+					pthread_mutex_lock(&server->lock);
 					printf("\n%s\n\n", body);
+					pthread_mutex_unlock(&server->lock);
 					break;
 				case 11:
 					if (atoi(body)==1) {
@@ -183,7 +192,6 @@ void *server_communication(void *vargp){
 					server->recieve=0;
 					break;
 			}
-			pthread_mutex_unlock(&server->lock);
 		}
 	}
 	return NULL;

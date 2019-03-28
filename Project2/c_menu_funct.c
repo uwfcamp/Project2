@@ -54,46 +54,48 @@ void private_chat(server_t *server){
 	char destination[CREDENTIAL_SIZE]={0};
 	int dest_valid = -1;// 0=target valid, 1=target invalid
 	// set system variable
-	server->in_private_chat=1;
-	do{
-		printf("\n-=|            PRIVATE CHAT             |=-");
-		printf("\n-=| HIT ENTER TO SEND A PRIVATE MESSAGE |=-");
-		printf("\n-=|     PRESS Q THEN ENTER TO EXIT      |=-\n\n");
-		// read user input
-		fgets(input, BUFFER_SIZE, stdin);
-		// if input is a null string get user message
-		if (input[0]=='\n'){
-			while(server->send==1);
-			// 
-			dest_valid = get_destination(destination, server);
-			if(dest_valid == 0) {	//changed from (dest_valid != 1) to prevent -1 from passing
-//***************************Exchange for mutex semaphore!!!!!!					
-				pthread_mutex_lock(&server->lock);// mutex 1 lock to replace typing variable
-				//preload header info into server message
-				sprintf(server->buffer_out,"6%c%s%c%s%c%s%c", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, destination, (char)DELIMITER);
-					char message[BUFFER_SIZE-strlen(server->buffer_out)];
-				do {
-					printf("Enter _q to abort\nYOUR MESSAGE: ");
-					fgets(message, BUFFER_SIZE-strlen(server->buffer_out), stdin);
-					if(strlen(message)<=1){//reject strings of length 0
-						printf("MESSAGE CANNOT BE NULL\n");
+	if (server->is_banned_or_kicked ==0) {
+		server->in_private_chat=1;
+		do{
+			printf("\n-=|            PRIVATE CHAT             |=-");
+			printf("\n-=| HIT ENTER TO SEND A PRIVATE MESSAGE |=-");
+			printf("\n-=|     PRESS Q THEN ENTER TO EXIT      |=-\n\n");
+			// read user input
+			fgets(input, BUFFER_SIZE, stdin);
+			// if input is a null string get user message
+			if (input[0]=='\n' && server->is_banned_or_kicked ==0){
+				while(server->send==1);
+				// 
+				dest_valid = get_destination(destination, server);
+				if(dest_valid == 0 && server->is_banned_or_kicked ==0) {	//changed from (dest_valid != 1) to prevent -1 from passing
+//******	*********************Exchange for mutex semaphore!!!!!!					
+					pthread_mutex_lock(&server->lock);// mutex 1 lock to replace typing variable
+					//preload header info into server message
+					sprintf(server->buffer_out,"6%c%s%c%s%c%s%c", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, destination, (char)DELIMITER);
+						char message[BUFFER_SIZE-strlen(server->buffer_out)];
+					do {
+						printf("Enter _q to abort\nYOUR MESSAGE: ");
+						fgets(message, BUFFER_SIZE-strlen(server->buffer_out), stdin);
+						if(strlen(message)<=1 && server->is_banned_or_kicked==0){//reject strings of length 0
+							printf("MESSAGE CANNOT BE NULL\n");
+						}
+					}while(strlen(message)<=1 && server->is_banned_or_kicked==0);
+					//if message is "_q" then cancel message
+					if (strcmp(message, "_q\n") && server->is_banned_or_kicked == 0) {
+						strcat(server->buffer_out, message);	//concatenate string message to buffer_out
+						server->buffered_out_size=strlen(server->buffer_out)+1;
+						pthread_mutex_unlock(&server->lock);
+						server->send=1;//set send pending variable
+	//***************************Exchange for mutex semaphore!!!!!!					
+						while(server->send==1 && server->is_banned_or_kicked==0);
 					}
-				}while(strlen(message)<=1);
-				//if message is "_q" then cancel message
-				if (strcmp(message, "_q\n")) {
-					strcat(server->buffer_out, message);	//concatenate string message to buffer_out
-					server->buffered_out_size=strlen(server->buffer_out)+1;
-					pthread_mutex_unlock(&server->lock);
-					server->send=1;//set send pending variable
-//***************************Exchange for mutex semaphore!!!!!!					
-					while(server->send==1);
 				}
+				// mutex 1 unlock to replace typing variable
 			}
-			// mutex 1 unlock to replace typing variable
-		}
-
-	}while((strlen(input)!=2) || (input[0] != 'q' && input[0] !='Q'));
-	server->in_private_chat=0;
+	
+		}while(((strlen(input)!=2) || (input[0] != 'q' && input[0] !='Q'))&& server->is_banned_or_kicked==0);
+		server->in_private_chat=0;
+	}
 }
 
 /*
@@ -131,7 +133,7 @@ void request_users(server_t *server){
 */
 void chat_history(server_t *server) {
 	char menuChoice[CREDENTIAL_SIZE];
-	while (menuChoice != 0){//keep prompting for selection until quit
+	while (menuChoice != 0 && server->is_banned_or_kicked==0){//keep prompting for selection until quit
 		printf("\n-=| CHAT HISTORY |=-");
 		printf("\n1. Group Chat");
 		printf("\n2. Private Chat");
@@ -140,12 +142,12 @@ void chat_history(server_t *server) {
 		fflush(stdin);//clear input line
 		fgets(menuChoice, CREDENTIAL_SIZE, stdin);//read menu choice from stdin
 		menuChoice[strlen(menuChoice)-1]='\0';//set last character for null terminated string
-		if(atoi(menuChoice) == 1)
+		if (atoi(menuChoice)==0 || server->is_banned_or_kicked != 0)
+			return;
+		else if(atoi(menuChoice) == 1)
 			g_chat_history(server);
 		else if(atoi(menuChoice) == 2)
 			p_chat_history(server);
-		else if(atoi(menuChoice) == 0)
-			return;
 	}
 	return;
 }
@@ -217,27 +219,28 @@ int get_destination(char * destination, server_t *server) {
 				printf("DESTINATION CANNOT BE NULL\n");
 			}
 			fflush(stdin);
-		} while(strlen(destination)<=1);
+		} while(strlen(destination)<=1 && server->is_banned_or_kicked==0);
 		destination[strlen(destination)-1]='\0';
-		if (strcmp(destination, "_q")==0) {
+		if (strcmp(destination, "_q")==0 || server->is_banned_or_kicked!=0) {
 			return 1;
 		}
 		// query the server to validate the desination QUERYUSER is a placeholder for a new request mode integer
-		sprintf(server->buffer_out,"13%c%s%c%s%c%s%c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, destination, (char)DELIMITER);
-		server->buffered_out_size=strlen(server->buffer_out)+1;
-		server->send=1;
-
-		// wait for the response from the server
-		sem_wait(&server->mutex);
-
-		// check if the server says the destination is valid - Here i'm just reusing the login successful bit but a new response field may be defined as needed
-		if (server->valid_destination==0)
-			printf("INVALID TARGET\n");
-		// let the listening thread know it is okay to read new messages
-
-	// if the server responds that the user is still attempting
-	// to register, then the username must already be in use.
-	}while(!server->valid_destination);
+		else {
+			sprintf(server->buffer_out,"13%c%s%c%s%c%s%c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, destination, (char)DELIMITER);
+			server->buffered_out_size=strlen(server->buffer_out)+1;
+			server->send=1;
+	
+			// wait for the response from the server
+			sem_wait(&server->mutex);
+	
+			// check if the server says the destination is valid - Here i'm just reusing the login successful bit but a new response field may be defined as needed
+			if (server->valid_destination==0)
+				printf("INVALID TARGET\n");
+			// let the listening thread know it is okay to read new messages
+		}	
+		// if the server responds that the user is still attempting
+		// to register, then the username must already be in use.
+	}while(!server->valid_destination && server->is_banned_or_kicked==0);
 	server->valid_destination = 0;
 	return 0;
 }
