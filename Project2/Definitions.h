@@ -58,8 +58,8 @@
 	}client_list_t;
 	
 	typedef struct admin_account_s {
-		char username[CREDENTIAL_SIZE];
-		char password[CREDENTIAL_SIZE];
+		char username[CREDENTIAL_SIZE]; // admin username
+		char password[CREDENTIAL_SIZE]; // admin password
 	}admin_account_t;
 
 	
