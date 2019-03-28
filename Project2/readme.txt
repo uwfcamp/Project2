@@ -56,7 +56,7 @@ III. USER INPUT
   1.  server: This process does not require any input files to run. Optionally the user can
       provide a logins.txt formatted appropriately with username, password, and a 0 for client
       not being banned or 1 for a client be banned separated by the ascii character that has
-      the decimal value of 167. On startup of the program, the user will be prompted to enter
+      the decimal value of 176. On startup of the program, the user will be prompted to enter
       a username and password for the admin account on the server.
   
   2.  client: This process does not require any input files to run. The program will take
