@@ -1,0 +1,2 @@
+* client must be notified when file they are trying to download doesn't exist, but client just freezes.
+
