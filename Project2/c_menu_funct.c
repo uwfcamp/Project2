@@ -26,12 +26,13 @@ void group_chat(server_t *server){
 				printf("Enter _q to abort\n");
 				printf("YOUR MESSAGE: ");
 				fgets(message, BUFFER_SIZE-strlen(server->buffer_out), stdin);
+				message[strlen(message)-1]=0;
 				fflush(stdin);
-				if(strlen(message)<=1 && server->is_banned_or_kicked ==0)//reject strings of length 0
+				if(strlen(message)<1 && server->is_banned_or_kicked ==0)//reject strings of length 0
 					printf("MESSAGE CANNOT BE NULL\n");
-			}while(strlen(message)<=1 && server->is_banned_or_kicked==0);
+			}while(strlen(message)<1 && server->is_banned_or_kicked==0);
 			//if message is "_q" then cancel message
-			if (strcmp(input, "_q\n")&& server->is_banned_or_kicked==0) {
+			if (strcmp(message, "_q")&& server->is_banned_or_kicked==0) {
 				strcat(server->buffer_out, message);//concatenate string message to buffer_out
 				server->buffered_out_size=strlen(server->buffer_out)+1;
 				server->send=1;
@@ -56,10 +57,10 @@ void private_chat(server_t *server){
 	// set system variable
 	if (server->is_banned_or_kicked ==0) {
 		server->in_private_chat=1;
+		printf("\n-=|            PRIVATE CHAT             |=-");
+		printf("\n-=| HIT ENTER TO SEND A PRIVATE MESSAGE |=-");
+		printf("\n-=|     PRESS Q THEN ENTER TO EXIT      |=-\n\n");
 		do{
-			printf("\n-=|            PRIVATE CHAT             |=-");
-			printf("\n-=| HIT ENTER TO SEND A PRIVATE MESSAGE |=-");
-			printf("\n-=|     PRESS Q THEN ENTER TO EXIT      |=-\n\n");
 			// read user input
 			fgets(input, BUFFER_SIZE, stdin);
 			// if input is a null string get user message
