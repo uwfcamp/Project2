@@ -1,3 +1,5 @@
 FIXED * client must be notified when file they are trying to download doesn't exist, but client just freezes.
 
 * group chat is not updating with new messages until the user hits enter
+
+* mutex lock unlocks in the wrong place in private chat, if user types _q, it stays locked
