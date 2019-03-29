@@ -126,13 +126,15 @@ int main(int argc, char const *argv[])
 
                     // handle recieved messages
                     if (valread>0){
-			    printf("%s\n", buffer);
+			    //printf("%s\n", buffer); // for debugging only
 			    parse_message(buffer, &mode, username, password, destination, body);
 			switch (mode){
 				case 0: // register user
+					printf("Verifying registration of '%s'\n", username);
 					register_user(username, password, current);
 					break;
 				case 1: // login user
+					printf("Verifying login credentials of '%s'\n", username);
 					login_user(username, password, current);
 					break;
 				case 2:
@@ -143,9 +145,11 @@ int main(int argc, char const *argv[])
 					s_logout(username, password, current);
 					break;
 				case 4: // change password
+					printf("Changing Password of '%s' to '%s'\n", current->username, body);
 					change_password(body, current);
 					break;
 				case 5: //online user query case
+					printf("Sending '%s' a list of all online users\n", current->username);
 					show_users(username, password, clientList, current);
 					break;
 				case 6: // private message
@@ -160,33 +164,43 @@ int main(int argc, char const *argv[])
 					}
 					break;
 				case 8: // send group log
+					printf("Sending group chat log to '%s'\n", current->username);
 					send_group_log(current);
 					break;
 				case 9: //send private log
+					printf("Sending private chat log between '%s' and '%s' to '%s'\n", destination, current->username, current->username);
 					send_private_log(destination, current);
 					break;
 				case 10:// Recieve files from client
+					printf("Recieving file from %s\n", current->username);
 					recieve_file(body, destination, current);
 					break;
 				case 11: // ban user
+					printf("Banning user '%s'\n", destination);
 					ban_user(destination, clientList, current); 
 					break;
 				case 12: //kick user
+					printf("Kicking user '%s'\n", destination);
 					kick_user(destination, clientList, current);
 					break;
 				case 13: // validate user is online
+					printf("Validating if '%s' is online\n", destination);
 					validate_user(destination, clientList, current);
 					break;
 				case 14: // case of confirming user exists
+					printf("Validating that '%s' is an existing user for %s.\n", destination, current->username);
 					confirm_existence(destination, current);
 					break;
 				case 15: // check if user is banned
+					printf("Checking if '%s' is banned.\n", username);
 					check_if_banned(username, current);
 					break;
 				case 16: //login as admin
+					printf("Verifying admin credentials from '%s'.", current->username);
 					admin_login(username, password, current, admin);
 					break;
 				case 17: //show all users
+					printf("Sending list of all users to '%s'\n", current->username);
 					show_all_users(current);
 					break;
 				case 18: // list all files meant for the user
