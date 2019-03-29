@@ -45,15 +45,24 @@ I. SETUP AND COMPILATION
 
 II. RUNNING THE PROGRAM
 
-  1.  server:  
+  1.  server: Begin the server side by executing the command "./server" in the directory the
+      server executable is located in.
       
-  2.  client: 
+  2.  client: Begin the client side by executing the command "./client" in the directory the
+      client executable is located in.
       
 III. USER INPUT
 
-  1.  server:
+  1.  server: This process does not require any input files to run. Optionally the user can
+      provide a logins.txt formatted appropriately with username, password, and a 0 for client
+      not being banned or 1 for a client be banned separated by the ascii character that has
+      the decimal value of 176. On startup of the program, the user will be prompted to enter
+      a username and password for the admin account on the server.
   
-  2.  client:
+  2.  client: This process does not require any input files to run. The program will take
+      user input based on requirements in the sheet. In most cases, there is an exit case for
+      loops of either the letter 'q' or the string "_q". The specific case required will be 
+      shown in each loop.
 
 IV. OUTPUT
 

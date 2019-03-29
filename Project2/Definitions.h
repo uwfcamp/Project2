@@ -18,7 +18,7 @@
 
 	//Global Definitions
 	#define PORT 60001
-	#define BUFFER_SIZE 300000
+	#define BUFFER_SIZE 30000
 	#define CREDENTIAL_SIZE 20
 	#define DELIMITER 176
 	#define MAX_TIME_SIZE 50
@@ -58,8 +58,8 @@
 	}client_list_t;
 	
 	typedef struct admin_account_s {
-		char username[CREDENTIAL_SIZE];
-		char password[CREDENTIAL_SIZE];
+		char username[CREDENTIAL_SIZE]; // admin username
+		char password[CREDENTIAL_SIZE]; // admin password
 	}admin_account_t;
 
 	

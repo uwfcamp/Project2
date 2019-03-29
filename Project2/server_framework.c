@@ -129,10 +129,10 @@ int main(int argc, char const *argv[])
 			    printf("%s\n", buffer);
 			    parse_message(buffer, &mode, username, password, destination, body);
 			switch (mode){
-				case 0:
+				case 0: // register user
 					register_user(username, password, current);
 					break;
-				case 1:
+				case 1: // login user
 					login_user(username, password, current);
 					break;
 				case 2:
@@ -142,16 +142,16 @@ int main(int argc, char const *argv[])
 				case 3: //logout case
 					s_logout(username, password, current);
 					break;
-				case 4:
+				case 4: // change password
 					change_password(body, current);
 					break;
 				case 5: //online user query case
 					show_users(username, password, clientList, current);
 					break;
-				case 6:
+				case 6: // private message
 					private_message(clientList, body, destination, current->username);
 					break;
-				case 7:
+				case 7: // group broadcast
 					if (current->logged_in==1){
 						if (strcmp(destination, " ")==0){
 							broadcast_message(clientList, current->socket, body, current->username);
@@ -159,10 +159,10 @@ int main(int argc, char const *argv[])
 						}
 					}
 					break;
-				case 8:
+				case 8: // send group log
 					send_group_log(current);
 					break;
-				case 9:
+				case 9: //send private log
 					send_private_log(destination, current);
 					break;
 				case 10:// Recieve files from client
@@ -171,7 +171,7 @@ int main(int argc, char const *argv[])
 				case 11: // ban user
 					ban_user(destination, clientList, current); 
 					break;
-				case 12: // kick user
+				case 12: //kick user
 					kick_user(destination, clientList, current);
 					break;
 				case 13: // validate user is online
@@ -192,7 +192,7 @@ int main(int argc, char const *argv[])
 				case 18: // list all files meant for the user
 					show_user_files(current);
 					break;
-				case 19: // send file to user
+				case 19: // send file
 					send_file(body, current);
 					break;
 			}
