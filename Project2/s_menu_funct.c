@@ -1,3 +1,8 @@
+//Curtis Duvall, Nathan Wilkins, and Julian Thayer
+//Systems and Networking II
+//Project 2
+//s_menu_funct.c
+
 #include "Definitions.h"
 #include "parse.h"
 #include "s_menu_funct.h"
