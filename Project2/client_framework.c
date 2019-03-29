@@ -3,6 +3,7 @@
 #include "c_menu_funct.h"
 #include "c_login_funct.h"
 #include "c_admin_funct.h"
+#include "client_framework.h"
 #define IP_ADDRESS "127.0.0.1"
 
 
