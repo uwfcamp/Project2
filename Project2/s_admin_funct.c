@@ -2,15 +2,27 @@
 #include "s_admin_funct.h"
 #include "parse.h"
 
+/********************************************************************
+ * this function loggs a client in as an admin verifying correct admin
+ * username and password combination.
+ *******************************************************************/
 void admin_login(char * username, char * password, client_list_t *current, admin_account_t * admin){
 	char new_buffer[BUFFER_SIZE];
-	if(!strcmp(username, admin->username) && !strcmp(password, admin->password))
+	if(!strcmp(username, admin->username) && !strcmp(password, admin->password)) // username and password match
 		sprintf(new_buffer, "16%c %c %c %c1", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
-	else
+	else// username and password dont match
 		sprintf(new_buffer, "16%c %c %c %c0", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
-	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+	//send response to server
+	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT); 
 	return;
 }
+
+/************************************************************************
+ * This function takes the input response from the client and sends an
+ * an acknowledgement to the admin and a ban message to the client. The
+ * program then goes through the logins.txt file to changed the is_banned
+ * field (the last value) from a '0' to a '1'.
+ ***********************************************************************/
 void ban_user(char * destination, client_list_t *clientList, client_list_t *current) {
 	char new_buffer[BUFFER_SIZE];
 	client_list_t * temp;
@@ -18,7 +30,7 @@ void ban_user(char * destination, client_list_t *clientList, client_list_t *curr
 	sprintf(new_buffer, "11%c %c %c %c0", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
 	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
 
-	//insert ban functionality here
+	//send ban messaget to banned user
 	sprintf(new_buffer, "11%c %c %c %c1", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
 	while(temp != NULL)
 	{
@@ -26,6 +38,7 @@ void ban_user(char * destination, client_list_t *clientList, client_list_t *curr
 			send(temp->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
 		temp = temp->next;
 	}
+	//search through logins.txt to make is_banned field true
 	FILE * fp;
 	char * token;
 	char search[3];
@@ -38,6 +51,7 @@ void ban_user(char * destination, client_list_t *clientList, client_list_t *curr
 	search[1] = '\n';
 	search[2] = 0;
 	fp = fopen("logins.txt", "r");
+	//print logins file to the buffer channging the banned is_banned state to true.
 	while(fgets(temp_buff, BUFFER_SIZE, fp) != NULL) {
 		token = strtok(temp_buff, search);
 		strcpy(user, token);
@@ -52,6 +66,7 @@ void ban_user(char * destination, client_list_t *clientList, client_list_t *curr
 		strcat(new_buffer, temp_buff);
 	}
 	fclose(fp);
+	//create updated logins.txt file
 	fp = fopen("logins.txt", "w");
 	fprintf(fp, "%s", new_buffer);
 	fclose(fp);
