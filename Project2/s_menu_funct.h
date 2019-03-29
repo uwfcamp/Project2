@@ -1,3 +1,8 @@
+//Curtis Duvall, Nathan Wilkins, and Julian Thayer
+//Systems and Networking II
+//Project 2
+//s_menu_funct.h
+
 #ifndef s_menu_funct
 #define s_menu_funct
 	
