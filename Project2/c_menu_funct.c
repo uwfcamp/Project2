@@ -83,11 +83,11 @@ void private_chat(server_t *server){
 							printf("MESSAGE CANNOT BE NULL\n");
 						}
 					}while(strlen(message)<=1 && server->is_banned_or_kicked==0);
+					pthread_mutex_unlock(&server->lock);
 					//if message is "_q" then cancel message
 					if (strcmp(message, "_q\n") && server->is_banned_or_kicked == 0) {
 						strcat(server->buffer_out, message);	//concatenate string message to buffer_out
 						server->buffered_out_size=strlen(server->buffer_out)+1;
-						pthread_mutex_unlock(&server->lock);
 						server->send=1;//set send pending variable
 						//mutex semaphore					
 						while(server->send==1 && server->is_banned_or_kicked==0);
