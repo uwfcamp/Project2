@@ -1,3 +1,8 @@
+//Curtis Duvall, Nathan Wilkins, and Julian Thayer
+//Systems and Networking II
+//Project 2
+//client_framework.c
+
 #include "Definitions.h"
 #include "parse.h"
 #include "c_menu_funct.h"
