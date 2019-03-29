@@ -27,7 +27,6 @@ void group_chat(server_t *server){
 				printf("YOUR MESSAGE: ");
 		//can we put our mutex lock here to restrict the scope		
 				fgets(message, BUFFER_SIZE-strlen(server->buffer_out), stdin);
-				message[strlen(message)-1]=0; 
 		//switch the position of this line and the next
 				fflush(stdin);
 		//can we put our mutex unlock here		
