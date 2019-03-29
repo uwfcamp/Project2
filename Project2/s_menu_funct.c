@@ -327,3 +327,136 @@ unsigned long atoul(char *value){
 	}
 	return number;
 }
+
+/* This function will communicate a list of files, meant for the current
+ * client being processed,to said client. If there are no files meant for
+ * the user, then the user will be told so.
+ *
+ * client_list_t *current
+ *	- A pointer to the structure identifying the current client being processed
+ */
+void show_user_files(client_list_t *current){
+	char readBuffer[BUFFER_SIZE];
+	char sendBuffer[BUFFER_SIZE];
+	sendBuffer[0]='\0';
+	char search[3];
+	search[0]=(char)DELIMITER;
+	search[1]='\n';
+	search[2]='\0';
+	char *destination;
+	char *filename;
+	int filesFound=0;
+
+	// print the header of the message to the sending buffer
+	sprintf(sendBuffer,"18%c%s%c%s%c%s%c", (char)DELIMITER, current->username, (char)DELIMITER, " ", (char)DELIMITER, " ", (char)DELIMITER);
+
+	// open the list of files, to check if there are any files available
+	FILE *fp = fopen("filelist.txt", "r");
+	if (fp != NULL){
+		// read a row at a time
+		while (fgets(readBuffer, BUFFER_SIZE, fp) != NULL){
+			// tokenize the line read into destination and filename
+			destination = strtok(readBuffer, search);
+			strtok(NULL, search);
+			filename = strtok(NULL, search);
+			// check if the destination matches the current client's username, and if so, append file to buffer
+			if (strcmp(destination, current->username)==0){
+				strcat(sendBuffer, filename);
+				strcat(sendBuffer, "\n");
+				filesFound=1;
+			}
+		}
+		fclose(fp);
+	}
+
+	// if the file list does not exist, or no files are found, append a message saying so to the buffer
+	if (!filesFound || fp == NULL){
+		strcat(sendBuffer, "\nNO FILES WERE FOUND FOR YOU\n\n");
+	}
+
+	// send the buffered message to the current client
+	send(current->socket, sendBuffer, strlen(sendBuffer)+1, MSG_NOSIGNAL | MSG_DONTWAIT);
+
+	return;
+}
+
+
+
+/* This function will send a file, named in body, and the client identified
+ * in current, so long as the file is meant for the current user. If not,
+ * it behaves as if the file does not exit.
+ *
+ * char *body
+ *	- A string containing the name of the file being requested
+ * client_list_t *current
+ *	- A pointer to the structure identifying the current client being processed
+ */
+void send_file(char *body, client_list_t *current){
+	char readBuffer[BUFFER_SIZE];
+	char sendBuffer[BUFFER_SIZE];
+	int sendSize;
+	sendBuffer[0]='\0';
+	char *destination;
+	char *filename;
+	char *str_filesize;
+	unsigned long filesize;
+	char search[3];
+	search[0]=(char)DELIMITER;
+	search[1]='\n';
+	search[2]='\0';
+	int fileFound=0;
+
+	// check the file list, and ensure that the requested file exists, and is meant for the requesting user
+	FILE *fp = fopen("filelist.txt", "r");
+	if (fp != NULL){
+		while (fgets(readBuffer, BUFFER_SIZE, fp) != NULL){
+			destination = strtok(readBuffer, search);
+			str_filesize = strtok(NULL, search);
+			filename = strtok(NULL, search);
+			if (strcmp(destination, current->username)==0 && strcmp(body, filename)==0){
+				fileFound=1;
+				break;
+			}
+		}
+		fclose(fp);
+	}
+
+	// the file exists in the file list, now try to load it
+	if (fileFound){
+		// convert the filesize string to an unsigned long
+		filesize = atoul(str_filesize);
+
+		// open the file to be sent
+		fp = fopen(filename, "r");
+		if (fp!=NULL){
+			// if the file was successfully opened, begin the sending process
+			printf("SENDING FILE %s TO %s\n", filename, current->username);
+
+			// send initial message, with the body containing filename_filesize
+			sprintf(sendBuffer, "10%c%s%c %c %c%s_%s", (char)DELIMITER, current->username, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, filename, str_filesize);
+			send(current->socket, sendBuffer, strlen(sendBuffer)+1, MSG_NOSIGNAL | MSG_DONTWAIT);
+
+			// read the file in buffer sized chunks, and send it to the client
+			do{
+				sendSize = fread(sendBuffer, 1, BUFFER_SIZE, fp);
+				filesize -= sendSize;
+				send(current->socket, sendBuffer, sendSize, MSG_NOSIGNAL | MSG_DONTWAIT);
+			}while(filesize>0);
+
+			// close the file
+			fclose(fp);
+			printf("FILE SUCCESSFULLY SENT\n");
+		}
+		else{
+			// if the file could not be opened, reset the fileFound variable
+			fileFound = 0;
+		}
+	}
+
+	// if the file was not found, echo the file request to the client
+	if (!fileFound){
+		sprintf(sendBuffer, "19%c%s%c %c %c ", (char)DELIMITER, current->username, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
+	}
+
+	return;
+}

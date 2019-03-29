@@ -12,5 +12,7 @@
 	server_t *build_server_structure(void);
 	void disconnect(server_t *server);
 	void *server_communication(void *vargp);
-
+	void recieve_file(char *body, server_t *server);
+	unsigned long atoul(char *value);
+	
 #endif

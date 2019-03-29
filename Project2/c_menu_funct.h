@@ -14,5 +14,7 @@
 	void send_file(server_t *server);
 	int get_file_name(char *filename);
 	unsigned long get_file_size(char *filename);
+	void file_menu(server_t *server);
+	void retrieve_file(server_t *server);
 
 #endif

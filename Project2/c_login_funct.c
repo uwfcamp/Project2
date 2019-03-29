@@ -1,10 +1,6 @@
 #include "Definitions.h"
 #include "c_login_funct.h"
-/****************************************************
- * This functions as the login menu for the program.
- * it allows the user to access the login, registration
- * and exit commands.
- * *************************************************/
+
 int login_menu(server_t *server){
 	int selection = -1;
 	server->is_banned_or_kicked = 0;
@@ -23,13 +19,13 @@ int login_menu(server_t *server){
 
 	// perform selection
 	switch(selection){
-		case 0: // exit case
+		case 0:
 			server->connected=0;
 			break;
-		case 1: // registration case
+		case 1:
 			registration_input(server);
 			break;
-		case 2: // login case
+		case 2:
 			pthread_mutex_lock(&server->lock);
 			login_input(server);
 			pthread_mutex_unlock(&server->lock);
@@ -38,10 +34,6 @@ int login_menu(server_t *server){
 
 	return selection;
 }
-/*****************************************
- * This case handles registration of new users
- * in the program.
- * **************************************/
 void registration_input(server_t *server){
 	char username[CREDENTIAL_SIZE]={0};
 	char password1[CREDENTIAL_SIZE]={0};
@@ -102,11 +94,7 @@ void registration_input(server_t *server){
 	strcpy(server->password, password1);
 	server->logged_in=1;
 }
-/***************************************************
- * This function gets the login input from the client. 
- * upon getting correct login credentials, the client
- * will be logged into the server.
- **************************************************/
+
 void login_input(server_t *server){
 	char username[CREDENTIAL_SIZE]={0};
 	char password[CREDENTIAL_SIZE]={0};
@@ -155,9 +143,9 @@ void login_input(server_t *server){
 			strtok(NULL, search);
 			strtok(NULL, search);
 			is_banned = strtok(NULL, search);
-			if (atoi(is_banned) == 1) // user is banned from server.
+			if (atoi(is_banned) == 1)
 				printf("USER IS BANNED\n");
-			else // user is not banned from server
+			else
 				valid=1;
 		}
 
@@ -173,13 +161,8 @@ void login_input(server_t *server){
 	strcpy(server->password, password);
 	server->logged_in=1;
 }
-/*******************************************
- * this case checks if username is banned or kicked
- * if user is currently banned, the function returns
- * a 1.
- * ****************************************/
+
 int is_banned_or_kicked(server_t *server) {
-	//if client is not currently banned, statement holds true
 	if(server->is_banned_or_kicked ==0) {
 		sprintf(server->buffer_out, "15%c%s%c%s%c %c ",(char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
 		server->buffered_out_size = strlen(server->buffer_out)+1;

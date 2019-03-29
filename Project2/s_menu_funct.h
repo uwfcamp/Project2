@@ -14,5 +14,7 @@
 	void show_all_users(client_list_t * current);
 	unsigned long atoul(char *value);
 	void recieve_file(char *body, char *destination, client_list_t *current);
+	void send_file(char *body, client_list_t *current);
+	void show_user_files(client_list_t *current);
 	
 #endif

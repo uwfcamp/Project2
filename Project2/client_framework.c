@@ -1,9 +1,10 @@
+// Client side C/C++ program to demonstrate Socket programming
+
 #include "Definitions.h"
 #include "parse.h"
 #include "c_menu_funct.h"
 #include "c_login_funct.h"
 #include "c_admin_funct.h"
-#include "client_framework.h"
 #define IP_ADDRESS "127.0.0.1"
 
 
@@ -15,10 +16,8 @@ int main(int argc, char const *argv[])
 {
     server = build_server_structure();
     int quit = -1;
-    //initialize mutex lock
     if(pthread_mutex_init(&server->lock, NULL) !=0)
 	fprintf(stderr, "lock init failed\n");
-    //initialize semaphore
     sem_init(&server->mutex, 0, 1);
     sem_wait(&server->mutex);
     if ((server->socket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
@@ -104,6 +103,7 @@ void *server_communication(void *vargp){
 		// need to create function to handle
 		// the different types of messages
 		if (server->recieve==1 && server->logged_in==1){
+			pthread_mutex_lock(&server->lock);
 			//mutex 1 lock to replace typing variable
 			int mode;
 			char body[BUFFER_SIZE];
@@ -119,21 +119,15 @@ void *server_communication(void *vargp){
 			// print out chat messages
 			switch (mode) {
 				case 6:
-					pthread_mutex_lock(&server->lock);
 					if (server->in_private_chat==1)
 						printf("%s: %s", username, body);
-					pthread_mutex_unlock(&server->lock);
 					break;
 				case 7:
-					pthread_mutex_lock(&server->lock);
 					if(server->in_group_chat==1)
 						printf("%s: %s", username, body);
-					pthread_mutex_unlock(&server->lock);
 					break;
 				case 5: case 8: case 9:
-					pthread_mutex_lock(&server->lock);
 					printf("\n%s\n", body);
-					pthread_mutex_unlock(&server->lock);
 					break;
 				case 13: case 14:
 					if (strcmp(body, "Y")==0)
@@ -143,9 +137,7 @@ void *server_communication(void *vargp){
 					break;
 				case 4:
 					strcpy(server->password, body);
-					pthread_mutex_lock(&server->lock);
 					printf("PASSWORD SUCCESSFULLY CHANGED\n");
-					pthread_mutex_unlock(&server->lock);
 					break;
 				case 15:
 					server->is_banned_or_kicked=atoi(body);
@@ -153,10 +145,8 @@ void *server_communication(void *vargp){
 				case 16:
 					server->is_admin = atoi(body);
 					break;
-				case 17:
-					pthread_mutex_lock(&server->lock);
+				case 17: case 18:
 					printf("\n%s\n\n", body);
-					pthread_mutex_unlock(&server->lock);
 					break;
 				case 11:
 					if (atoi(body)==1) {
@@ -174,6 +164,12 @@ void *server_communication(void *vargp){
 					else
 						printf("USER WAS KICKED\n");
 					break;
+				case 19:
+					printf("\nTHERE WAS AN ERROR RETRIEVING THE FILE\nTRY A DIFFERENT FILE\n\n");
+					break;
+				case 10:
+					recieve_file(body, server);
+					break;
 			}
 			//mutex 1 unlock to replace typing variable
 
@@ -181,7 +177,7 @@ void *server_communication(void *vargp){
 			// the buffer must be cleared, except in instances
 			// where the main thread must handle the response.
 			switch(mode) {
-				case 5: case 13: case 8: case 9: case 14: case 15: case 16: case 4: case 17: case 11: case 12:
+				case 5: case 13: case 8: case 9: case 14: case 15: case 16: case 4: case 17: case 11: case 12: case 18: case 19: case 10:
 					server->buffered_in_size=0;
 					clear_string(server->buffer_in, BUFFER_SIZE);
 					server->recieve=0;
@@ -193,6 +189,7 @@ void *server_communication(void *vargp){
 					server->recieve=0;
 					break;
 			}
+			pthread_mutex_unlock(&server->lock);
 		}
 	}
 	return NULL;
@@ -304,35 +301,35 @@ int main_menu(server_t *server){
 		switch(selection){
 			case 0:
 				break;
-			case 1: // case of show all online users
+			case 1:
 				request_users(server);
 				break;
-			case 2: // enter group chat
+			case 2:
 				group_chat(server);
 				break;
-			case 3: // enter private chat
+			case 3:
 				private_chat(server);
 				break;
 			case 4: //view chat history
 				chat_history(server);
 				break;
 			case 5: //file transfer
-				send_file(server);
+				file_menu(server);
 				break;
 			case 6: //change password
 				change_password(server);
 				break;
-			case 7: // logout case
+			case 7:
 				logout(server);
 				server->logged_in=0;
 				server->username[0]='\0';
 				server->password[0]='\0';
 				break;
-			case 8: // admin login
+			case 8:
 				admin_login(server);
 				break;
 		}
-	}// check if user is banned
+	}
 	else if(is_banned_or_kicked(server)==1) {
 		printf("YOU HAVE BEEN BANNED, GOODBYE!\n");
 		logout(server);
@@ -341,7 +338,7 @@ int main_menu(server_t *server){
 		server->password[0]='\0';
 		selection = 7;
 	}
-	else { // then user has been kicked
+	else {
 		printf("YOU HAVE BEEN KICKED, GOODBYE!\n");
 		logout(server);
 		server->logged_in=0;
@@ -352,4 +349,74 @@ int main_menu(server_t *server){
 	}
 
 	return selection;
+}
+/* WARNING, ONLY CALL THIS FUNCTION INSIDE THE SERVER COMMUNICATION THREAD
+ * This function will accept the binary data of a file, and store
+ * it in a file, denoted by the filename given in the body of the
+ * last message.
+ *
+ * char *body
+ *	- a string containing the filename and file size, seperated by an underscore
+ *
+ * char *destination
+ *	- the user that the file is intended for
+ *
+ * client_list_t *current
+ *	- the user that is sending the file
+ *
+ * return
+ *	- N/A
+ */
+void recieve_file(char *body, server_t *server){
+	char *filename;
+	char *str_size;
+	unsigned long size;
+	int amount_read;
+
+	// split the "body" at the last occuring underscore,
+	// which will give us the file's name, and size.
+	int i=0;
+	while(body[i]!='\0')
+		i++;
+	while(body[i]!='_')
+		i--;
+	body[i] = '\0';
+	filename = body;
+	str_size = &body[i+1];
+
+	// convert the string of filesize to an unsigned long
+	size = atoul(str_size);
+
+	// recieve the file chunks from the server, and write them to a file
+	FILE *fp = fopen(filename, "w");
+	while(size>0){
+		amount_read = recv(server->socket , server->buffer_in, BUFFER_SIZE, MSG_NOSIGNAL);
+		size-=amount_read;
+		fwrite(server->buffer_in, 1, amount_read, fp);
+	}
+	fclose(fp);
+
+	return;
+}
+
+
+
+/* This function will convert a string of numbers to an
+ * unsigned long, and return this value to the user.
+ *
+ * char *value
+ *	- pointer to a string of numbers
+ *
+ * return
+ *	- unsigned long denoting the numerical value of the string
+ */
+unsigned long atoul(char *value){
+	int i=0;
+	unsigned long number = 0;
+	while(value[i]!='\0'){
+		number *= 10;
+		number += value[i] - '0';
+		i++;
+	}
+	return number;
 }

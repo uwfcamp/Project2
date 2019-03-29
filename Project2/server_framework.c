@@ -168,10 +168,10 @@ int main(int argc, char const *argv[])
 				case 10:// Recieve files from client
 					recieve_file(body, destination, current);
 					break;
-				case 11:
+				case 11: // ban user
 					ban_user(destination, clientList, current); 
 					break;
-				case 12:
+				case 12: // kick user
 					kick_user(destination, clientList, current);
 					break;
 				case 13: // validate user is online
@@ -188,6 +188,12 @@ int main(int argc, char const *argv[])
 					break;
 				case 17: //show all users
 					show_all_users(current);
+					break;
+				case 18: // list all files meant for the user
+					show_user_files(current);
+					break;
+				case 19: // send file to user
+					send_file(body, current);
 					break;
 			}
                     }
