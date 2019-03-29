@@ -70,9 +70,14 @@ void ban_user(char * destination, client_list_t *clientList, client_list_t *curr
 	fp = fopen("logins.txt", "w");
 	fprintf(fp, "%s", new_buffer);
 	fclose(fp);
-	printf("%s was banned\n", destination);
+	printf("%s WAS BANNED\n", destination);
 	return;
 }
+/*******************************************************************************
+ * This function will take the input from the admin and acknowledge to the admin
+ * that it recieved its command. It will search through the active clients and 
+ * send out the kick message to the appropriate client.
+ ******************************************************************************/
 void kick_user(char * destination, client_list_t *clientList, client_list_t *current) {
 	char new_buffer[BUFFER_SIZE];
 	client_list_t * temp = clientList;
@@ -80,14 +85,15 @@ void kick_user(char * destination, client_list_t *clientList, client_list_t *cur
 	sprintf(new_buffer, "12%c %c %c %c0", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
 	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
 
-	//insert kick functionality here
+	//kick functionality here
 	sprintf(new_buffer, "12%c %c %c %c1", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
+	//find the correct client to be kicked and send him the kicked message.
 	while(temp != NULL)
 	{
 		if(strcmp(temp->username, destination)==0)
 			send(temp->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
 		temp = temp->next;
 	}
-	printf("%s was kicked\n", destination);
+	printf("%s WAS KICKED\n", destination);
 	return;
 }
