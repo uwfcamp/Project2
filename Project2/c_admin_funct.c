@@ -1,3 +1,8 @@
+//Curtis Duvall, Nathan Wilkins, and Julian Thayer
+//Systems and Networking II
+//Project 2
+//c_admin_funct.c
+
 #include "Definitions.h"
 #include "c_login_funct.h"
 #include "c_menu_funct.h"
