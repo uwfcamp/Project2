@@ -69,7 +69,7 @@ void private_chat(server_t *server){
 				// 
 				dest_valid = get_destination(destination, server);
 				if(dest_valid == 0 && server->is_banned_or_kicked ==0) {	//changed from (dest_valid != 1) to prevent -1 from passing
-//******	*********************Exchange for mutex semaphore!!!!!!					
+					// mutex semaphore					
 					pthread_mutex_lock(&server->lock);// mutex 1 lock to replace typing variable
 					//preload header info into server message
 					sprintf(server->buffer_out,"6%c%s%c%s%c%s%c", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, destination, (char)DELIMITER);
@@ -87,7 +87,7 @@ void private_chat(server_t *server){
 						server->buffered_out_size=strlen(server->buffer_out)+1;
 						pthread_mutex_unlock(&server->lock);
 						server->send=1;//set send pending variable
-	//***************************Exchange for mutex semaphore!!!!!!					
+						//mutex semaphore					
 						while(server->send==1 && server->is_banned_or_kicked==0);
 					}
 				}
@@ -108,7 +108,7 @@ void logout(server_t *server) {
 	sprintf(server->buffer_out, "3%c%s%c%s%c %c " , (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
 	printf("logging out\n");
 	server->buffered_out_size=strlen(server->buffer_out)+1;
-//***************************Exchange for mutex semaphore!!!!!!		
+			//mutex semaphore		
 	server->send=1;	//set send pending variable
 	pthread_mutex_unlock(&server->lock);
 	return;
@@ -187,7 +187,7 @@ void p_chat_history(server_t *server) {
 		show_all_users(server);	//prints all active users to the screen
 		printf("PRIVATE CHAT HISTORY BETWEEN YOU AND: ");
 		fgets(destination, CREDENTIAL_SIZE, stdin);
-		destination[strlen(destination)-1]='\0';
+		destination[strlen(destination)-1]='\0';	//format as null terminated string
 		if (strlen(destination) == 0 && server->is_banned_or_kicked==0)
 			printf("INPUT CANNOT BE NULL\n");
 		else if(server->is_banned_or_kicked==0){	
@@ -211,6 +211,11 @@ void p_chat_history(server_t *server) {
 	}
 	return;
 }
+
+/*
+**************************client side function to validate a target user*************************
+****************************************
+*/
 int get_destination(char * destination, server_t *server) {
 	server->valid_destination = 0;
 	do{
@@ -230,7 +235,7 @@ int get_destination(char * destination, server_t *server) {
 		if (strcmp(destination, "_q")==0 || server->is_banned_or_kicked!=0) {
 			return 1;
 		}
-		// query the server to validate the desination QUERYUSER is a placeholder for a new request mode integer
+		// query the server to validate the desination
 		else {
 			sprintf(server->buffer_out,"13%c%s%c%s%c%s%c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, destination, (char)DELIMITER);
 			server->buffered_out_size=strlen(server->buffer_out)+1;
@@ -244,12 +249,17 @@ int get_destination(char * destination, server_t *server) {
 				printf("INVALID TARGET\n");
 			// let the listening thread know it is okay to read new messages
 		}	
-		// if the server responds that the user is still attempting
-		// to register, then the username must already be in use.
+		// if the server responds that the user is still attempting to register,
+		// then the username must already be in use.
 	}while(!server->valid_destination && server->is_banned_or_kicked==0);
 	server->valid_destination = 0;
 	return 0;
 }
+
+/*
+**************************client side function to change password*************************
+**************************forms a structured request to the server and updates password element**************
+*/
 void change_password(server_t *server) {
 	char input[CREDENTIAL_SIZE];
 	char cur_password[CREDENTIAL_SIZE];
@@ -259,6 +269,7 @@ void change_password(server_t *server) {
 	clear_string(input, CREDENTIAL_SIZE);
 	clear_string(password1, CREDENTIAL_SIZE);
 	clear_string(password2, CREDENTIAL_SIZE);
+	//loop until both new passwords match password ma
 	do {
 		while(strlen(cur_password)<=1 && server->is_banned_or_kicked==0) {
 			printf("PLEASE ENTER CURRENT PASSWORD: ");
