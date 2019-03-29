@@ -1,3 +1,9 @@
+//Curtis Duvall, Nathan Wilkins, and Julian Thayer
+//Systems and Networking II
+//Project 2
+//Definitions.h
+
+
 #ifndef Definitions
 #define Definitions
 	#include <stdio.h>
