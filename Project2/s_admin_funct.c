@@ -1,3 +1,8 @@
+//Curtis Duvall, Nathan Wilkins, and Julian Thayer
+//Systems and Networking II
+//Project 2
+//s_admin_funct.c
+
 #include "Definitions.h"
 #include "s_admin_funct.h"
 #include "parse.h"
