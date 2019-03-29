@@ -4,4 +4,8 @@ FIXED * group chat is not updating with new messages until the user hits enter
 
 FIXED * mutex lock unlocks in the wrong place in private chat, if user types _q, it stays locked
 
-FIXED * after client was kicked, it would have errors after relogging back in. it was fixed by adding a sem_wait() and acknowledgement response from the server when logging out. 
+FIXED * after client was kicked, it would have errors after relogging back in. it was fixed by 
+adding a sem_wait() and acknowledgement response from the server when logging out. 
+
+FIXED * after admin boots person, if the person was logged in. they wouldnt be forced off. A critical
+pointer was left unitialized which prevented ban notification from being sent to online user.
