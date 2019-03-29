@@ -1,3 +1,8 @@
+//Curtis Duvall, Nathan Wilkins, and Julian Thayer
+//Systems and Networking II
+//Project 2
+//s_login_funct.h
+
 #ifndef s_login_funct
 #define s_login_funct
 	
