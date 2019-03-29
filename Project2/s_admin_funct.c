@@ -30,7 +30,7 @@ void admin_login(char * username, char * password, client_list_t *current, admin
  ***********************************************************************/
 void ban_user(char * destination, client_list_t *clientList, client_list_t *current) {
 	char new_buffer[BUFFER_SIZE];
-	client_list_t * temp;
+	client_list_t * temp = clientList;
 	//notify admin that client is being banned
 	sprintf(new_buffer, "11%c %c %c %c0", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
 	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
