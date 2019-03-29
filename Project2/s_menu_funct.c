@@ -457,7 +457,9 @@ void send_file(char *body, client_list_t *current){
 
 	// if the file was not found, echo the file request to the client
 	if (!fileFound){
+		printf("FILE NOT FOUND\n");
 		sprintf(sendBuffer, "19%c%s%c %c %c ", (char)DELIMITER, current->username, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
+		send(current->socket, sendBuffer, strlen(sendBuffer)+1, MSG_NOSIGNAL | MSG_DONTWAIT);
 	}
 
 	return;
