@@ -1,3 +1,8 @@
+//Curtis Duvall, Nathan Wilkins, and Julian Thayer
+//Systems and Networking II
+//Project 2
+//c_login_funct.h
+
 #ifndef c_login_funct
 #define c_login_funct
 	#include "Definitions.h"
