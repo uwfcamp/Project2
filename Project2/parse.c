@@ -1,3 +1,8 @@
+//Curtis Duvall, Nathan Wilkins, and Julian Thayer
+//Systems and Networking II
+//Project 2
+//parse.c
+
 #include "parse.h"
 #include "Definitions.h"
 
