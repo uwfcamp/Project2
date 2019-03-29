@@ -1,3 +1,8 @@
+//Curtis Duvall, Nathan Wilkins, and Julian Thayer
+//Systems and Networking II
+//Project 2
+//c_admin_funct.h
+
 #ifndef c_admin_funct
 #define c_admin_funct
 	
