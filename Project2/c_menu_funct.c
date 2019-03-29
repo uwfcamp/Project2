@@ -112,6 +112,7 @@ void logout(server_t *server) {
 	server->buffered_out_size=strlen(server->buffer_out)+1;
 			//mutex semaphore		
 	server->send=1;	//set send pending variable
+	pthread_mutex_unlock(server->lock);
 	sem_wait(&server->mutex);
 	return;
 }
