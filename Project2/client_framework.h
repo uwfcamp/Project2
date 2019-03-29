@@ -1,3 +1,8 @@
+//Curtis Duvall, Nathan Wilkins, and Julian Thayer
+//Systems and Networking II
+//Project 2
+//client_framework.h
+
 #ifndef client_framework
 #define client_framework
 	#include "Definitions.h"
