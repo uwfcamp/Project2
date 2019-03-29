@@ -25,9 +25,12 @@ void group_chat(server_t *server){
 			do {
 				printf("Enter _q to abort\n");
 				printf("YOUR MESSAGE: ");
+		//can we put our mutex lock here to restrict the scope		
 				fgets(message, BUFFER_SIZE-strlen(server->buffer_out), stdin);
-				message[strlen(message)-1]=0;
+				message[strlen(message)-1]=0; 
+		//switch the position of this line and the next
 				fflush(stdin);
+		//can we put our mutex unlock here		
 				if(strlen(message)<1 && server->is_banned_or_kicked ==0)//reject strings of length 0
 					printf("MESSAGE CANNOT BE NULL\n");
 			}while(strlen(message)<1 && server->is_banned_or_kicked==0);
