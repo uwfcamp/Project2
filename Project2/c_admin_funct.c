@@ -134,7 +134,9 @@ void kick_user(server_t *server, admin_account_t *admin) {
 	do {
 		request_users(server);
 		do {
+			pthread_mutex_lock(&server->lock);
 			printf("ENTER NAME OF USER TO KICK OR _q TO ABORT: ");
+			pthread_mutex_unlock(&server->lock);
 			fgets(input, BUFFER_SIZE, stdin);
 			input[strlen(input)-1]=0;
 		}while(strlen(input)<1);

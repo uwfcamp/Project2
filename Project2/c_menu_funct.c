@@ -34,7 +34,7 @@ void group_chat(server_t *server){
 					printf("MESSAGE CANNOT BE NULL\n");
 			}while(strlen(message)<1 && server->is_banned_or_kicked==0);
 			//if message is "_q" then cancel message
-			if (strcmp(message, "_q")&& server->is_banned_or_kicked==0) {
+			if (strcmp(message, "_q\n")&& server->is_banned_or_kicked==0) {
 				strcat(server->buffer_out, message);//concatenate string message to buffer_out
 				server->buffered_out_size=strlen(server->buffer_out)+1;
 				server->send=1;
@@ -59,10 +59,10 @@ void private_chat(server_t *server){
 	// set system variable
 	if (server->is_banned_or_kicked ==0) {
 		server->in_private_chat=1;
-		printf("\n-=|            PRIVATE CHAT             |=-");
-		printf("\n-=| HIT ENTER TO SEND A PRIVATE MESSAGE |=-");
-		printf("\n-=|     PRESS Q THEN ENTER TO EXIT      |=-\n\n");
 		do{
+			printf("\n-=|            PRIVATE CHAT             |=-");
+			printf("\n-=| HIT ENTER TO SEND A PRIVATE MESSAGE |=-");
+			printf("\n-=|     PRESS Q THEN ENTER TO EXIT      |=-\n\n");
 			// read user input
 			fgets(input, BUFFER_SIZE, stdin);
 			// if input is a null string get user message
@@ -108,11 +108,11 @@ void private_chat(server_t *server){
 void logout(server_t *server) {
 	//compose logout server message
 	sprintf(server->buffer_out, "3%c%s%c%s%c %c " , (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
-	printf("logging out\n");
+	printf("LOGGING OUT\n");
 	server->buffered_out_size=strlen(server->buffer_out)+1;
 			//mutex semaphore		
 	server->send=1;	//set send pending variable
-	pthread_mutex_unlock(&server->lock);
+	sem_wait(&server->mutex);
 	return;
 }
 
@@ -290,7 +290,7 @@ void change_password(server_t *server) {
 			printf("PASSWORDS DO NOT MATCH\n");
 		if(strcmp(cur_password, server->password)&& server->is_banned_or_kicked==0)
 			printf("INCORRECT CURRENT CREDENTIAL\n");
-		if((strcmp(password1, password2) || strcmp(server->password, cur_password)) || server->is_banned_or_kicked==0) {
+		if((strcmp(password1, password2) || strcmp(server->password, cur_password)) && server->is_banned_or_kicked==0) {
 			if (server->is_banned_or_kicked==0) {
 				printf("ENTER Q TO ABORT, OTHERWISE PRESS ENTER TO CONTINUE\n");
 				fgets(input, CREDENTIAL_SIZE, stdin);

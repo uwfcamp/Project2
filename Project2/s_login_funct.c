@@ -101,6 +101,9 @@ int register_user(char *username, char *password, client_list_t *client){
 }
 void s_logout(char * username, char * password, client_list_t *client){
 	if (strcmp(client->username, username)==0 && strcmp(client->password, password)==0){
+		char new_buffer[BUFFER_SIZE];
+		sprintf(new_buffer, "3%c %c %c %c ", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
+		send(client->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
 		printf("Logging out %s\n", username);
 		client->logged_in=0;
 		strcpy(client->username, "\0");

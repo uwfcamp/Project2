@@ -180,6 +180,8 @@ void *server_communication(void *vargp){
 				case 10:
 					recieve_file(body, server);
 					break;
+				case 3:
+					printf("YOU LOGGED OFF");
 			}
 			//mutex 1 unlock to replace typing variable
 
@@ -187,7 +189,7 @@ void *server_communication(void *vargp){
 			// the buffer must be cleared, except in instances
 			// where the main thread must handle the response.
 			switch(mode) {
-				case 5: case 13: case 8: case 9: case 14: case 15: case 16: case 4: case 17: case 11: case 12: case 18: case 19: case 10:
+				case 5: case 13: case 8: case 9: case 14: case 15: case 16: case 4: case 17: case 11: case 12: case 18: case 19: case 10: case 3:
 					server->buffered_in_size=0;
 					clear_string(server->buffer_in, BUFFER_SIZE);
 					server->recieve=0;
@@ -225,6 +227,7 @@ server_t *build_server_structure(void){
 	server->recieve=0;
 	server->connected=1;
 	server->logged_in=0;
+	server->is_banned_or_kicked=0;
 	server->in_group_chat=0;
 	server->in_private_chat=0;
 	server->username_private_chat[0]='\0';
