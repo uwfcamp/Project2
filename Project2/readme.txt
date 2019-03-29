@@ -1,7 +1,7 @@
-Curtis Duvall, Nathan Wilkins, and Julian Thayer
-Systems and Networking II
-Project 2
-readme.txt
+//Curtis Duvall, Nathan Wilkins, and Julian Thayer
+//Systems and Networking II
+//Project 2
+//readme.txt
 
 \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\CONTENTS\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 \\  I.    -   SETUP AND COMPILATION                                                          \\
