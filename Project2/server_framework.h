@@ -1,3 +1,8 @@
+//Curtis Duvall, Nathan Wilkins, and Julian Thayer
+//Systems and Networking II
+//Project 2
+//server_framework.h
+
 #ifndef server_framework
 #define server_framework
 
