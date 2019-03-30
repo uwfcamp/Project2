@@ -79,6 +79,8 @@ int main(int argc, char const *argv[])
 void *server_communication(void *vargp){
 	// send message to server
 	server_t *server = (server_t *)vargp;
+	char pingMessage[CREDENTIAL_SIZE];
+	sprintf(pingMessage,"20%c %c %c %c ", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
 
 	while(server->connected){
 
@@ -108,7 +110,7 @@ void *server_communication(void *vargp){
 		}
 		// need to create function to handle
 		// the different types of messages
-		if (server->recieve==1 && server->logged_in==1){
+		if (server->recieve==1){
 			//mutex 1 lock to replace typing variable
 			int mode;
 			char body[BUFFER_SIZE];
@@ -187,6 +189,10 @@ void *server_communication(void *vargp){
 					break;
 				case 3:
 					printf("YOU LOGGED OFF");
+					break;
+				case 20:
+                                        send(server->socket , pingMessage , strlen(pingMessage), MSG_NOSIGNAL | MSG_DONTWAIT);
+					break;
 			}
 			//mutex 1 unlock to replace typing variable
 
@@ -199,6 +205,8 @@ void *server_communication(void *vargp){
 					clear_string(server->buffer_in, BUFFER_SIZE);
 					server->recieve=0;
 					sem_post(&server->mutex);
+					break;
+				case 0: case 1: case 2:
 					break;
 				default:
 					clear_string(server->buffer_in, BUFFER_SIZE);

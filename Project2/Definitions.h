@@ -21,6 +21,7 @@
 	#include <stdlib.h>
 	#include <semaphore.h>
 	#include <sys/stat.h>
+	#include <sys/time.h>
 
 	//Global Definitions
 	#define PORT 60001
@@ -28,6 +29,7 @@
 	#define CREDENTIAL_SIZE 20
 	#define DELIMITER 176
 	#define MAX_TIME_SIZE 50
+	#define TIMEOUT_INTERVAL 15
 
 	typedef struct server_s{
 	int socket;		// identifier for the server socket
@@ -61,6 +63,8 @@
 	int connected;			// 0 if not connected, 1 if connected
 	struct client_list_s *last;	// pointer to the previous element in the list
 	struct client_list_s *next;	// pointer to the next element in the list
+	struct timeval *last_reception;
+	int ping;
 	}client_list_t;
 	
 	typedef struct admin_account_s {

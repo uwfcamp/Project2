@@ -17,6 +17,7 @@ int main(int argc, char const *argv[])
     int addrlen = sizeof(address);
     int valid=0;
     char verify_password[CREDENTIAL_SIZE];
+
     client_list_t *clientList = (client_list_t *) malloc(sizeof(client_list_t));
     clientList->socket=0;
     clientList->connected=0;
@@ -25,6 +26,14 @@ int main(int argc, char const *argv[])
     clientList->next=NULL;
     clientList->username[0]='\0';
     clientList->password[0]='\0';
+    clientList->last_reception =(struct timeval *) malloc(sizeof(struct timeval));
+    clientList->ping=0;
+
+    pthread_t tid;
+    if (pthread_create(&tid, NULL, ping_connections, (void *)clientList)){
+	fprintf(stderr,"ERROR: could not create keep alive thread\n");
+    }
+
     admin_account_t *admin = (admin_account_t *) malloc(sizeof(admin_account_t));
     memset(&address, '\0', sizeof address);
     address.sin_family = AF_INET;
@@ -65,13 +74,14 @@ int main(int argc, char const *argv[])
 ************************************MY EDITS *******************************************
 ********************************allow immediate reuse of server socket******************
 */	
-	int on=1;
-	 if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) != 0)
+    int on=1;
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) != 0)
     {
         perror("In socket");
         exit(EXIT_FAILURE);
     }
 //***************************************************************************************
+
     printf("STATUS: binding socket to address\n");
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address))<0)
     {
@@ -126,8 +136,9 @@ int main(int argc, char const *argv[])
 
                     // handle recieved messages
                     if (valread>0){
-			    //printf("%s\n", buffer); // for debugging only
-			    parse_message(buffer, &mode, username, password, destination, body);
+			gettimeofday(current->last_reception,NULL);
+			//printf("%s\n", buffer); // for debugging only
+			parse_message(buffer, &mode, username, password, destination, body);
 			switch (mode){
 				case 0: // register user
 					printf("Verifying registration of '%s'\n", username);
@@ -209,13 +220,31 @@ int main(int argc, char const *argv[])
 				case 19: // send file
 					send_file(body, current);
 					break;
+				case 20: // ping response
+					printf("STATUS: ping response recieved from '%s'\n", current->username);
+					break;
 			}
+                    }
+                    else if (current->ping==1){
+                        char pingMessage[CREDENTIAL_SIZE];
+			sprintf(pingMessage,"20%c %c %c %c ", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
+                        send(current->socket , pingMessage , strlen(pingMessage), MSG_NOSIGNAL | MSG_DONTWAIT);
+			current->ping=0;
+			printf("STATUS: ping sent to '%s'\n", current->username);
+                    }
+
+                    struct timeval time;
+                    gettimeofday(&time, NULL);
+                    if ((time.tv_sec - current->last_reception->tv_sec)>TIMEOUT_INTERVAL){
+			current->connected=0;
+                        remove_connection(clientList, current->socket);
                     }
                 }
             // move to the next element in the list
             current = current->next;
         }
     }
+    pthread_join(tid, NULL);
     close(server_fd);
     free(admin);
     printf("STATUS: connection broken\n");
@@ -236,6 +265,9 @@ void new_connection(client_list_t *clientList, int socket){
 	end->next->logged_in=0;
 	end->next->username[0]='\0';
 	end->next->password[0]='\0';
+	end->next->last_reception =(struct timeval *) malloc(sizeof(struct timeval));
+	gettimeofday(end->next->last_reception, NULL);
+	end->next->ping = 0;
     }
     else{ // there are no connections
         clientList->socket = socket;
@@ -243,35 +275,43 @@ void new_connection(client_list_t *clientList, int socket){
 	clientList->logged_in=0;
 	clientList->username[0]='\0';
 	clientList->password[0]='\0';
+	gettimeofday(clientList->last_reception, NULL);
+	clientList->ping = 0;
     }
     printf("STATUS: new connection added, socket:%d\n", socket);
 
 }
 
-void remove_connection(client_list_t **clientList, int target_socket){
+
+
+/* This function will remove the connection with the target_socket
+ * from the list of clients.
+ *
+ * int target_socket
+ *	- an integer identifying the socket to remove from the connection list
+ *
+ * client_list_t * clientList
+ *	- a link list of all the client connections
+ */
+void remove_connection(client_list_t *clientList, int target_socket){
     // special case, where the target being
     // removed is the first element in the
     // link-list. A double pointer is passed
     // because of the second part of this case.
-    if ((*clientList)->socket == target_socket){
-        if ((*clientList)->next==NULL){
-            (*clientList)->socket = 0;
-            (*clientList)->connected = 0;
-            (*clientList)->logged_in = 0;
-            (*clientList)->username[0]='\0';
-            (*clientList)->password[0]='\0';
-        }
-        else{
-            client_list_t *temp = (*clientList);
-            (*clientList)=(*clientList)->next;
-            (*clientList)->last = NULL;
-            free(temp);
-        }
+
+    printf("STATUS: removing connection at socket '%d'\n", target_socket);
+    if (clientList->socket == target_socket){
+        clientList->socket = 0;
+        clientList->connected = 0;
+        clientList->logged_in = 0;
+        clientList->username[0]='\0';
+        clientList->password[0]='\0';
+	clientList->ping=0;
         return;
     }
 
     // look for the correct element in the link list
-    client_list_t *target = *clientList;
+    client_list_t *target = clientList;
     while(target->socket != target_socket && target != NULL)
         target = target->next;
 
@@ -282,4 +322,23 @@ void remove_connection(client_list_t **clientList, int target_socket){
 		target->next->last = target->last;
         free(target);
     }
+}
+
+
+
+/*
+ *
+ */
+void *ping_connections(void *vargp){
+	while(1){
+		client_list_t *current = (client_list_t *)vargp;
+		while (current!=NULL){
+			if (current->connected==1 && current->ping==0){
+				current->ping=1;
+			}
+			current=current->next;
+		}
+		sleep(TIMEOUT_INTERVAL/2);
+	}
+	return NULL;
 }

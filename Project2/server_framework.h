@@ -12,6 +12,7 @@
 	#include "s_login_funct.h"
 	
 	void new_connection(client_list_t *clientList, int socket);
-	void remove_connection(client_list_t **clientList, int target_socket);
+	void remove_connection(client_list_t *clientList, int target_socket);
+	void *ping_connections(void *vargp);
 
 #endif
