@@ -19,3 +19,4 @@ mode  username  password  destination body          description
 17    andre     pass321                             get list of all users
 18    andre     pass321                             request list of files meant for andre
 19    andre     pass321               filename      request a specific file from the server
+20                                                  ping the client to see if it is still connected, message is echoed back
