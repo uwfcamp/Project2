@@ -50,7 +50,7 @@ II. RUNNING THE PROGRAM
       server executable is located in.
       
   2.  client: Before execution make sure your client is in a different directory than the
-      server is in.Begin the client side by executing the command "./client" in the directory
+      server is in. Begin the client side by executing the command "./client" in the directory
       the client executable is located in.
       
 III. USER INPUT
