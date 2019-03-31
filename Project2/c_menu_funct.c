@@ -288,7 +288,8 @@ void change_password(server_t *server) {
 	clear_string(password2, CREDENTIAL_SIZE);
 	//loop until both new passwords match password ma
 	do {
-		while(strlen(cur_password)<=1 && server->is_banned_or_kicked==0) {
+		while(strlen(cur_password)<=1 && server->is_banned_or_kicked==0) 
+		{
 			printf("PLEASE ENTER CURRENT PASSWORD: ");
 			fgets(cur_password, CREDENTIAL_SIZE, stdin);
 		};
