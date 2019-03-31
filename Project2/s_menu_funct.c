@@ -265,7 +265,7 @@ void send_private_log(char * destination, client_list_t *current) {
 	sprintf(new_buffer, "9%c %c %c %c\n", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
 	FILE * fp;
 	char * token;
-	char search[1];
+	char search[2];
 	search[0] = (char)DELIMITER;
 	search[1] = '\0';
 	char u_to[CREDENTIAL_SIZE];
