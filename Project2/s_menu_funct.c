@@ -9,6 +9,20 @@
 
 
 
+/* This function will send a message to all online users
+ *
+ * client_list_t *clientList
+ *	- link list of all the clients
+ * int sender_socket
+ *	- the socket of the client sending the message
+ * char *message
+ *	- string containing the message to be sent
+ * char *sender
+ *	- string containing the username of the client sending the message
+ *
+ * return
+ *	- N/A
+ */
 void broadcast_message(client_list_t *clientList, int sender_socket, char *message, char *sender){
     char new_buffer[BUFFER_SIZE];
     sprintf(new_buffer, "7%c%s%c%s%c%s%c%s", (char)DELIMITER, sender, (char)DELIMITER, " ", (char)DELIMITER, " ", (char)DELIMITER, message);
@@ -23,6 +37,21 @@ void broadcast_message(client_list_t *clientList, int sender_socket, char *messa
 
 
 
+/* This function will send a message to a specific user, and
+ * only that user.
+ *
+ * client_list_t *clientList
+ *	- link list of all the clients
+ * char *message
+ *	- string containing the message to be sent
+ * char *destination
+ *	- string containing the username of the client the message is for
+ * char *sender
+ *	- string containing the username of the client sending the message
+ *
+ * return
+ *	- N/A
+ */
 void private_message(client_list_t *clientList, char *message, char *destination, char *sender){
     int i=0;
     char new_buffer[BUFFER_SIZE];
@@ -42,6 +71,20 @@ void private_message(client_list_t *clientList, char *message, char *destination
     	printf("STATUS: message could not be sent to %s\n", destination);
 }
 
+
+
+/* This function will log a message into the group chat log file.
+ * It will log the time of the message, who sent the message, and
+ * the message itself.
+ *
+ * char *username
+ *	- string containing the username of the client sending the message
+ * char *body
+ *	- the message itself
+ *
+ * return
+ *	- N/A
+ */
 void log_into_group(char *username, char *body){
 	FILE *fp;
 	fp=fopen("groupchat.txt", "a");
@@ -61,6 +104,21 @@ void log_into_group(char *username, char *body){
 }
 
 
+
+/* This function will log a message into the private chat log file.
+ * It will log the time of the message, who sent the message, who
+ * the message is for, and the message itself.
+ *
+ * char *sender
+ *	- string containing the username of the client sending the message
+ * char *reciever
+ *	- string containing the username of the client the message is meant for
+ * char *body
+ *	- the message itself
+ *
+ * return
+ *	- N/A
+ */
 void log_into_private(char *sender, char *reciever, char *body){
 	FILE *fp;
 	fp=fopen("privatechat.txt","a");
@@ -81,6 +139,21 @@ void log_into_private(char *sender, char *reciever, char *body){
 
 
 
+/* This function will send a message to the client, with the body containing
+ * a list of all online users, and mode 5.
+ *
+ * char *username
+ *	- the current client's username
+ * char *password
+ *	- the current client's password
+ * client_list_t *clientList
+ *	- link list of all clients
+ * client_list_t *current
+ *	- the current client checking for online users
+ *
+ * return
+ *	- N/A
+ */
 void show_users(char * username, char * password, client_list_t *clientList, client_list_t *current){
 	char new_buffer[BUFFER_SIZE];
 	int i=0;
@@ -104,6 +177,15 @@ void show_users(char * username, char * password, client_list_t *clientList, cli
 
 
 
+/* This function will send a message to the client, with the body containing
+ * all group chat messages.
+ *
+ * client_list_t *current
+ *	- the current client trying to check for group chat messages
+ *
+ * return
+ *	- N/A
+ */
 void send_group_log(client_list_t *current) {
 	char new_buffer[BUFFER_SIZE];
 	char temp[BUFFER_SIZE];
@@ -115,6 +197,20 @@ void send_group_log(client_list_t *current) {
 	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
 	fclose(fp);
 }
+
+
+
+/* This function will send a message to the client, with the body containing
+ * all messages between the client and another specified user.
+ *
+ * char *destination
+ *	- the username that the client is checking for private messages with
+ * client_list_t *current
+ *	- the current client trying to check for private messages
+ *
+ * return
+ *	- N/A
+ */
 void send_private_log(char * destination, client_list_t *current) {
 	char new_buffer[BUFFER_SIZE];
 	char temp[BUFFER_SIZE];
@@ -158,6 +254,23 @@ void send_private_log(char * destination, client_list_t *current) {
 	return;
 }
 
+
+
+/* This function will confirm to the current client whether another user is online,
+ * by sending a mode 13 message, with a character in the body of the message.
+ * Y = yes, the user is online
+ * N = no, the user is not online
+ *
+ * char *destination
+ *	- the username that the client is checking online status about
+ * client_list_t *clientList
+ *	- link list of all clients
+ * client_list_t *current
+ *	- the current client trying to check the online status of another user
+ *
+ * return
+ *	- N/A
+ */
 void validate_user(char * destination, client_list_t * clientList, client_list_t * current) {
 	char new_buffer[BUFFER_SIZE];
 	client_list_t *list = clientList;
@@ -174,6 +287,22 @@ void validate_user(char * destination, client_list_t * clientList, client_list_t
 	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
 	return;
 }
+
+
+
+/* This function will confirm to the current client whether another user exists,
+ * by sending a mode 14 message, with a character in the body of the message.
+ * Y = yes, the user exists
+ * N = no, the user does not exist
+ *
+ * char *destination
+ *	- the username that the client is checking to see exists
+ * client_list_t *current
+ *	- A pointer to the structure identifying client asking the server about the user
+ *
+ * return
+ *	- N/A
+ */
 void confirm_existence(char * destination, client_list_t * current){
 	FILE * fp;
 	fp = fopen("logins.txt", "r");
@@ -203,6 +332,20 @@ void confirm_existence(char * destination, client_list_t * current){
 	return;
 }
 
+
+
+/* This function will send a file, named in body, and the client identified
+ * in current, so long as the file is meant for the current user. If not,
+ * it behaves as if the file does not exit.
+ *
+ * char *body
+ *	- A string containing the new username for the client
+ * client_list_t *current
+ *	- A pointer to the structure identifying client changing their password
+ *
+ * return
+ *	- N/A
+ */
 void change_password(char * body, client_list_t * current) {
 	FILE * fp;
 	char search[3];
@@ -240,6 +383,18 @@ void change_password(char * body, client_list_t * current) {
 	send(current->socket, temp, strlen(temp), MSG_NOSIGNAL | MSG_DONTWAIT);
 	return;
 }
+
+
+
+/* This function will send a message to the current client being processed,
+ * containing a list of all registered users.
+ *
+ * client_list_t *current
+ *	- A pointer to the structure identifying the client asking for a list of users
+ *
+ * return
+ *	- N/A
+ */
 void show_all_users(client_list_t *current) {
 	FILE * fp;
 	char temp[BUFFER_SIZE];
@@ -267,10 +422,8 @@ void show_all_users(client_list_t *current) {
  *
  * char *body
  *	- a string containing the filename and file size, seperated by an underscore
- *
  * char *destination
  *	- the user that the file is intended for
- *
  * client_list_t *current
  *	- the user that is sending the file
  *
@@ -318,7 +471,6 @@ void recieve_file(char *body, char *destination, client_list_t *current){
  *
  * char *value
  *	- pointer to a string of numbers
- *
  * return
  *	- unsigned long denoting the numerical value of the string
  */
@@ -341,6 +493,9 @@ unsigned long atoul(char *value){
  *
  * client_list_t *current
  *	- A pointer to the structure identifying the current client being processed
+ *
+ * return
+ *	- N/A
  */
 void show_user_files(client_list_t *current){
 	char readBuffer[BUFFER_SIZE];
@@ -397,6 +552,9 @@ void show_user_files(client_list_t *current){
  *	- A string containing the name of the file being requested
  * client_list_t *current
  *	- A pointer to the structure identifying the current client being processed
+ *
+ * return
+ *	- N/A
  */
 void send_file(char *body, client_list_t *current){
 	char readBuffer[BUFFER_SIZE];
