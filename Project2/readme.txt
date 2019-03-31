@@ -58,7 +58,7 @@ III. USER INPUT
   1.  server: This process does not require any input files to run. Optionally the user can
       provide a logins.txt formatted appropriately with username, password, and a 0 for client
       not being banned or 1 for a client be banned separated by the ascii character that has
-      the decimal value of 176. On startup of the program, the user will be prompted to enter
+      the decimal value of DELIMITER in the Definitions.h file. On startup of the program, the user will be prompted to enter
       a username and password for the admin account on the server.
   
   2.  client: This process does not require any input files to run. The program will take
@@ -77,7 +77,7 @@ IV. OUTPUT
       
       a.  logins.txt: This files contains all of the usernames, passwords, and the details
           signifying which users are banned. These details are shown by line with each value
-          separated by the ascii character with the decimal value of 176. for the isbanned
+          separated by the ascii character with the decimal value of DELIMITER in the Definitions.h file. for the isbanned
           detail. a 0 signifies the user is not banned and a 1 signifies that the user is
           banned.
           
@@ -85,11 +85,17 @@ IV. OUTPUT
           all of the group chat logs in a running chat log. With a timestamp followed by the
           user who the broadcast came from preceeding the message. The maximum size that this
           file can be for the program to function properly is the size of BUFFER_SIZE ascii
-          characters as specified in Definitions.h
+          characters as specified in the Definitions.h file.
           
-      c.  privatechat.txt
+      c.  privatechat.txt: This file is the repository of all private communication. It
+          it contains the timestamp a private message was sent, the sender, the reciever, then
+          the actual message. All of these values are a unique line for each message and each
+          value is separated by the delimiter ascii char with the decimal value of DELIMITER
+          in the Definitions.h file.
       
-      d.  filelist.txt
+      d.  filelist.txt: This file is a repository the reciepient of the file, the size of the
+          file, and the name of the file with each value separated by the ascii character of
+          the decimal value DELIMITER as specified in the Definitions.h file.
 
   2.  client:
   
