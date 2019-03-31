@@ -15,6 +15,8 @@ void group_chat(server_t *server){
 	server->in_group_chat=1;
 	do{
 		char message[BUFFER_SIZE-strlen(server->buffer_out)];
+//****Recomended change for optimization: multiple printf's put the program in a blocked state
+		//printf("\n-=| GROUP CHAT |=-\n-=| HIT ENTER TO TYPE A MESSAGE |=-\n-=| PRESS Q THEN ENTER TO EXIT |=-\n\n");		
 		printf("\n-=| GROUP CHAT |=-");
 		printf("\n-=| HIT ENTER TO TYPE A MESSAGE |=-");
 		printf("\n-=| PRESS Q THEN ENTER TO EXIT |=-\n\n");
@@ -30,11 +32,11 @@ void group_chat(server_t *server){
 			do {
 				printf("Enter _q to abort\n");
 				printf("YOUR MESSAGE: ");
-		//can we put our mutex lock here to restrict the scope		
+//can we put our mutex lock here to restrict the scope		
 				fgets(message, BUFFER_SIZE-strlen(server->buffer_out), stdin);
-		//switch the position of this line and the next
+//switch the position of this line and the next
 				fflush(stdin);
-		//can we put our mutex unlock here		
+//can we put our mutex unlock here		
 				if(strlen(message)<1 && server->is_banned_or_kicked ==0)//reject strings of length 0
 					printf("MESSAGE CANNOT BE NULL\n");
 			}while(strlen(message)<1 && server->is_banned_or_kicked==0);
@@ -65,6 +67,8 @@ void private_chat(server_t *server){
 	if (server->is_banned_or_kicked ==0) {
 		server->in_private_chat=1;
 		do{
+// suggested optimization
+			//printf("\n-=|            PRIVATE CHAT             |=-\n-=| HIT ENTER TO SEND A PRIVATE MESSAGE |=-\n-=|     PRESS Q THEN ENTER TO EXIT      |=-\n\n");
 			printf("\n-=|            PRIVATE CHAT             |=-");
 			printf("\n-=| HIT ENTER TO SEND A PRIVATE MESSAGE |=-");
 			printf("\n-=|     PRESS Q THEN ENTER TO EXIT      |=-\n\n");
@@ -83,7 +87,9 @@ void private_chat(server_t *server){
 						char message[BUFFER_SIZE-strlen(server->buffer_out)];
 					do {
 						printf("Enter _q to abort\nYOUR MESSAGE: ");
+//recomended optimization the critical section is too large move mutex lock here		
 						fgets(message, BUFFER_SIZE-strlen(server->buffer_out), stdin);
+// mutex unlock						
 						if(strlen(message)<=1 && server->is_banned_or_kicked==0){//reject strings of length 0
 							printf("MESSAGE CANNOT BE NULL\n");
 						}
@@ -143,6 +149,7 @@ void request_users(server_t *server){
 void chat_history(server_t *server) {
 	char menuChoice[CREDENTIAL_SIZE];
 	while (menuChoice != 0 && server->is_banned_or_kicked==0){//keep prompting for selection until quit
+//this mutex is unneccessary put the list in a single printf!!!		
 		pthread_mutex_lock(&server->lock);
 		printf("\n-=| CHAT HISTORY |=-");
 		printf("\n1. Group Chat");
@@ -151,7 +158,9 @@ void chat_history(server_t *server) {
 		printf("\n\nENTER SELECTION: ");
 		pthread_mutex_unlock(&server->lock);
 		fflush(stdin);//clear input line
+//mutex lock here		
 		fgets(menuChoice, CREDENTIAL_SIZE, stdin);//read menu choice from stdin
+//mutex unlock		
 		menuChoice[strlen(menuChoice)-1]='\0';//set last character for null terminated string
 		if (atoi(menuChoice)==0 || server->is_banned_or_kicked != 0)
 			return;
@@ -195,6 +204,9 @@ void p_chat_history(server_t *server) {
 		show_all_users(server);	//prints all active users to the screen
 		printf("PRIVATE CHAT HISTORY BETWEEN YOU AND: ");
 		fgets(destination, CREDENTIAL_SIZE, stdin);
+/*
+************Memory Leak if string is length 0 destination[-1] is corrupted memory
+*/
 		destination[strlen(destination)-1]='\0';	//format as null terminated string
 		if (strlen(destination) == 0 && server->is_banned_or_kicked==0)
 			printf("INPUT CANNOT BE NULL\n");
@@ -215,7 +227,7 @@ void p_chat_history(server_t *server) {
 		sprintf(server->buffer_out, "9%c%s%c%s%c%s%c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, destination, (char)DELIMITER);
 		server->buffered_out_size=strlen(server->buffer_out)+1;
 		server->send=1;
-		sem_wait(&server->mutex);
+		sem_wait(&server->mutex); //wait for server to respond with chat log
 	}
 	return;
 }
