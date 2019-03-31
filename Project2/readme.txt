@@ -101,7 +101,8 @@ IV. OUTPUT
           file, and the name of the file with each value separated by the ascii character of
           the decimal value DELIMITER as specified in the Definitions.h file.
 
-  2.  client: Upon starting, the client will prompt the user to select what it wants to do 
+  2.  client: Ensure that the client executable is moved to a separate directory from the server 
+      executable. Upon execution the client will prompt the user to select what it wants to do 
       based off of its menu options. The output will be based off of the requirements in 
       the project specifications sheet.
   
