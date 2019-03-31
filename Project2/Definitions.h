@@ -31,6 +31,7 @@
 	#define MAX_TIME_SIZE 50
 	#define TIMEOUT_INTERVAL 15
 
+	// data structure on the client side, for communicating with the server
 	typedef struct server_s{
 	int socket;		// identifier for the server socket
 	char username[CREDENTIAL_SIZE];	// store the username of the user
@@ -44,17 +45,18 @@
 	int recieve;		// 0 if nothing has been recieved, 1 if something has
 	int connected;		// 0 if not connected, 1 if connected
 	int logged_in;		// 0 if not logged in, 1 if logged in
-	int in_group_chat;
-	int is_admin;
-	int in_private_chat;
-	int valid_destination;
-	int is_banned_or_kicked;
-	sem_t mutex;
-	pthread_mutex_t lock;
-	char username_private_chat[CREDENTIAL_SIZE];
-	struct timeval *last_reception;
+	int in_group_chat;	// 0 if not in group chat, 1 otherwise
+	int is_admin;		// 0 if not administrator, 1 otherwise
+	int in_private_chat;	// 0 if not in private chat, 1 otherwise
+	int valid_destination;  // 0 if destination of message is not valid, 1 otherwise
+	int is_banned_or_kicked;// -1 if user has been kicked out, 0 if not, and 1 if banned
+	sem_t mutex;		// semaphore for waiting until messages are processed by the communication thread
+	pthread_mutex_t lock;	// lock, to block messages from printing while typing
+	char username_private_chat[CREDENTIAL_SIZE]; // username of the person your private chat message is for
+	struct timeval *last_reception; // time stamp for the last time a message was recieved from the server
 	}server_t;
 	
+	// link list data structure on the server side, for communicating with all the clients
 	typedef struct client_list_s{
 	int logged_in;			// 0 if the client is not logged in, 1 otherwise
 	char username[CREDENTIAL_SIZE];	// the client's username
@@ -64,8 +66,8 @@
 	int connected;			// 0 if not connected, 1 if connected
 	struct client_list_s *last;	// pointer to the previous element in the list
 	struct client_list_s *next;	// pointer to the next element in the list
-	struct timeval *last_reception;
-	int ping;
+	struct timeval *last_reception; // time stamp for the last time a message was recieved from the client
+	int ping;			// 0 if a ping does not need to be sent, 1 if a ping does need to be sent
 	}client_list_t;
 	
 	typedef struct admin_account_s {
