@@ -273,8 +273,13 @@ void send_private_log(char * destination, client_list_t *current) {
 	char u_from[CREDENTIAL_SIZE];
 	char u_timestamp[CREDENTIAL_SIZE];
 	char message[BUFFER_SIZE-CREDENTIAL_SIZE*3];
+	
+	// open the private chat log file
 	fp = fopen("privatechat.txt", "r");
+	
+	// loop through file, and add logged messages to the message being sent to the client
 	while(fgets(temp, BUFFER_SIZE, fp)!=NULL) {
+		// break up line from file into data fields
 		clear_string(u_timestamp, CREDENTIAL_SIZE);
 		clear_string(u_to, CREDENTIAL_SIZE);
 		clear_string(u_from, CREDENTIAL_SIZE);
@@ -287,16 +292,24 @@ void send_private_log(char * destination, client_list_t *current) {
 		strcpy(u_to, token);
 		token = strtok(NULL, search);	
 		strcpy(message, token);
+		
+		// if the message read is between the client requesting and the user they designated
 		if(((strcmp(u_from, current->username) == 0) && (strcmp(u_to, destination))==0) || ((strcmp(u_to, current->username)==0) && strcmp(u_from, destination)==0)) {
+			// add the message read to the message being sent in the proper format
 			sprintf(temp, "%s - %s: %s\n", u_timestamp, u_from, message);
 			strcat(log, temp);
 		}
 		clear_string(temp, BUFFER_SIZE);
 	}
+	// if there are no messages for the client, let them know
 	if(strlen(log)==0)
 		sprintf(log, "Sorry, there is no chat history between you and %s\n", destination);
 	strcat(new_buffer, log);
+	
+	// send the message to the client
 	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+	
+	// close the private chat log file
 	fclose(fp);
 	return;
 }
@@ -321,8 +334,11 @@ void send_private_log(char * destination, client_list_t *current) {
 void validate_user(char * destination, client_list_t * clientList, client_list_t * current) {
 	char new_buffer[BUFFER_SIZE];
 	client_list_t *list = clientList;
+	
+	// loop through link list to find the designated user
 	while(list != NULL) { // search list for username
 		if(strcmp(destination, list->username)==0) { //username matches name in list
+			// send message in the affirmative
 			sprintf(new_buffer, "13%c %c %c %cY", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
 			send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
 			return;
@@ -330,6 +346,8 @@ void validate_user(char * destination, client_list_t * clientList, client_list_t
 		else
 			list = list->next;
 	}
+	
+	// send message in the negative
 	sprintf(new_buffer, "13%c %c %c %cN", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
 	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
 	return;
@@ -351,8 +369,10 @@ void validate_user(char * destination, client_list_t * clientList, client_list_t
  *	- N/A
  */
 void confirm_existence(char * destination, client_list_t * current){
+	// open file containing usernames and logins
 	FILE * fp;
 	fp = fopen("logins.txt", "r");
+	
 	char search[3];
 	char temp[BUFFER_SIZE];
 	char * token;
@@ -360,21 +380,35 @@ void confirm_existence(char * destination, client_list_t * current){
 	search[2]='\0';
 	search[1]='\n';
 	search[0]=DELIMITER;
+	
+	// create formatted message to send to client
 	sprintf(new_buffer, "14%c %c %c %c", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
+	
+	// loop through lines in login file
 	while(fgets(temp, BUFFER_SIZE, fp)!=NULL){
 		token = strtok(temp, search);
+		
+		// if the designated user exists
 		if(strcmp(token, destination)==0){
-			//a match was found
+			// add a Y to the message, confirming existance of user
 			strcat(new_buffer, "Y");
+			
+			// send message to client
 			send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+			
+			// close login file
 			fclose(fp);
 			return;
 		}
 		clear_string(temp, BUFFER_SIZE);
 	}	
-	//a match was not found
+	// add an N to the message, saying user does not exist
 	strcat(new_buffer, "N");
+	
+	// send message to client
 	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+	
+	// close login file
 	fclose(fp);
 	return;
 }
