@@ -1,12 +1,10 @@
-/* This file will perform the basic functions of the server, such as
- * broadcasting messages from clients to other clients, transferring
- * files from one client to another, and checking for users that are
- * online or exist.
- *
- * @NAME s_menu_funct
- * @AUTHORS Curtis Duvall, Nathan Wilkins, and Julian Thayer
- * @INFO Systems and Networking II - Project 2
- */
+//Curtis Duvall, Nathan Wilkins, and Julian Thayer
+//Systems and Networking II
+//Project 2
+//s_menu_funct.c
+
+
+
 #include "Definitions.h"
 #include "parse.h"
 #include "s_menu_funct.h"
