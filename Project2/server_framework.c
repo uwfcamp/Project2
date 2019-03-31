@@ -22,6 +22,18 @@ int main(int argc, char const *argv[])
     int addrlen = sizeof(address);
     int valid=0;
     char verify_password[CREDENTIAL_SIZE];
+    char temp[BUFFER_SIZE];
+    FILE * fp;
+    fp = fopen("groupchat.txt", "a");
+    fclose(fp);
+    fopen("groupchat.txt", "r");
+    char * errorcheck = fgets(temp, BUFFER_SIZE, fp);
+    if(errorcheck==NULL || strlen(temp) ==1) { //makes first line in groupchat a new line so that no errors occur when trying to get groupchat log when no history exists
+	fclose(fp);
+	fp=fopen("groupchat.txt", "w");
+	fprintf(fp, "-=| GROUP CHAT LOG |=-\n");
+    }
+    fclose(fp);
 
     // create the root of the client link list,
     // for keeping track of the clients.

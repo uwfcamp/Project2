@@ -164,7 +164,6 @@ void chat_history(server_t *server) {
 void g_chat_history(server_t *server){
 	while(server->send==1);
 	if(server->is_banned_or_kicked==0) {
-		printf("\n-=| Group Chat History |=-");
 		//compose server message
 		sprintf(server->buffer_out, "8%c%s%c%s%c %c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
 		server->buffered_out_size=strlen(server->buffer_out)+1;
