@@ -13,13 +13,9 @@
 void group_chat(server_t *server){
 	char input[BUFFER_SIZE];
 	server->in_group_chat=1;
+	printf("\n-=| GROUP CHAT |=-\n-=| HIT ENTER TO TYPE A MESSAGE |=-\n-=| PRESS Q THEN ENTER TO EXIT |=-\n\n");		
 	do{
 		char message[BUFFER_SIZE-strlen(server->buffer_out)];
-//****Recomended change for optimization: multiple printf's put the program in a blocked state
-		//printf("\n-=| GROUP CHAT |=-\n-=| HIT ENTER TO TYPE A MESSAGE |=-\n-=| PRESS Q THEN ENTER TO EXIT |=-\n\n");		
-		printf("\n-=| GROUP CHAT |=-");
-		printf("\n-=| HIT ENTER TO TYPE A MESSAGE |=-");
-		printf("\n-=| PRESS Q THEN ENTER TO EXIT |=-\n\n");
 		fgets(input, BUFFER_SIZE, stdin);
 		
 		if (input[0] == '\n' && server->is_banned_or_kicked == 0) {	//if the enter key was pressed
@@ -30,8 +26,7 @@ void group_chat(server_t *server){
 			pthread_mutex_lock(&server->lock);
 			//read user input untill the message exists and return has been hit
 			do {
-				printf("Enter _q to abort\n");
-				printf("YOUR MESSAGE: ");
+				printf("YOUR MESSAGE OR ENTER _q TO ABORT: ");
 //can we put our mutex lock here to restrict the scope		
 				fgets(message, BUFFER_SIZE-strlen(server->buffer_out), stdin);
 //can we put our mutex unlock here		
@@ -66,10 +61,7 @@ void private_chat(server_t *server){
 		server->in_private_chat=1;
 		do{
 // suggested optimization
-			//printf("\n-=|            PRIVATE CHAT             |=-\n-=| HIT ENTER TO SEND A PRIVATE MESSAGE |=-\n-=|     PRESS Q THEN ENTER TO EXIT      |=-\n\n");
-			printf("\n-=|            PRIVATE CHAT             |=-");
-			printf("\n-=| HIT ENTER TO SEND A PRIVATE MESSAGE |=-");
-			printf("\n-=|     PRESS Q THEN ENTER TO EXIT      |=-\n\n");
+			printf("\n-=|            PRIVATE CHAT             |=-\n-=| HIT ENTER TO SEND A PRIVATE MESSAGE |=-\n-=|     PRESS Q THEN ENTER TO EXIT      |=-\n\n");
 			// read user input
 			fgets(input, BUFFER_SIZE, stdin);
 			// if input is a null string get user message
@@ -149,11 +141,7 @@ void chat_history(server_t *server) {
 	while (menuChoice != 0 && server->is_banned_or_kicked==0){//keep prompting for selection until quit
 //this mutex is unneccessary put the list in a single printf!!!		
 		pthread_mutex_lock(&server->lock);
-		printf("\n-=| CHAT HISTORY |=-");
-		printf("\n1. Group Chat");
-		printf("\n2. Private Chat");
-		printf("\n0. QUIT");
-		printf("\n\nENTER SELECTION: ");
+		printf("\n-=| CHAT HISTORY |=-\n1. Group Chat\n2. Private Chat\n0. QUIT\n\nENTER SELECTION: ");
 		pthread_mutex_unlock(&server->lock);
 //mutex lock here		
 		fgets(menuChoice, CREDENTIAL_SIZE, stdin);//read menu choice from stdin
@@ -235,8 +223,7 @@ int get_destination(char * destination, server_t *server) {
 		// prompt user for a destination
 		do {
 			request_users(server);
-			printf("Enter _q to abort\n");
-			printf("DESTINATION: ");
+			printf("Enter _q to abort\nDESTINATION: ");
 			fgets(destination, CREDENTIAL_SIZE, stdin);
 			if (strlen(destination) <=1){
 				printf("DESTINATION CANNOT BE NULL\n");
@@ -398,8 +385,7 @@ void send_file(server_t *server){
 int get_file_name(char *filename){
 	// prompt user for a filename
 	do {
-		printf("Enter _q to abort\n");
-		printf("FILENAME: ");
+		printf("Enter _q to abort\nFILENAME: ");
 		fgets(filename, CREDENTIAL_SIZE, stdin);
 		if (strlen(filename) <=1){
 			printf("FILENAME CANNOT BE NULL\n");
@@ -462,11 +448,7 @@ void file_menu(server_t *server){
 
 	// keep looping this menu until the user quits
 	while (menuChoice != 0){
-		printf("\n-=| FILE TRANSFER |=-");
-		printf("\n1. Send a file");
-		printf("\n2. Recieve a file");
-		printf("\n0. QUIT");
-		printf("\n\nEnter an action: ");
+		printf("\n-=| FILE TRANSFER |=-\n1. Send a file\n2. Recieve a file\n0. QUIT\n\nEnter an action: ");
 
 		// get input, and verify it is valid
 		do{

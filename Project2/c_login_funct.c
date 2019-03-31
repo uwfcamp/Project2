@@ -18,11 +18,7 @@ int login_menu(server_t *server){
 	}
 
 	// print the menu
-	printf("\n-=| CHATTERBOX CHAT |=-\n\n");
-	printf("1. Registration\n");
-	printf("2. Login\n");
-	printf("0. Quit\n");
-	printf("\n");
+	printf("\n-=| CHATTERBOX CHAT |=-\n\n1. Registration\n2. Login\n0. Quit\n\n");
 
 	// get the selection
 	do{
