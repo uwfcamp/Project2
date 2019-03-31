@@ -34,7 +34,7 @@ void group_chat(server_t *server){
 				printf("YOUR MESSAGE: ");
 //can we put our mutex lock here to restrict the scope		
 				fgets(message, BUFFER_SIZE-strlen(server->buffer_out), stdin);
-//switch the position of this line and the next
+//Warning this line is not linux supported
 				fflush(stdin);
 //can we put our mutex unlock here		
 				if(strlen(message)<1 && server->is_banned_or_kicked ==0)//reject strings of length 0
@@ -184,7 +184,7 @@ void g_chat_history(server_t *server){
 		sprintf(server->buffer_out, "8%c%s%c%s%c %c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
 		server->buffered_out_size=strlen(server->buffer_out)+1;
 		server->send=1;
-		sem_wait(&server->mutex);
+		sem_wait(&server->mutex);//wait for server response
 	}
 	return;
 }
@@ -199,8 +199,7 @@ void p_chat_history(server_t *server) {
 	int valid =0;
 	//loop the prompt until a valid target is selected
 	do {
-		server->valid_destination = 0;	//set validity to default to false
-//******replace with function to print all registered users********		
+		server->valid_destination = 0;	//set validity to default to false		
 		show_all_users(server);	//prints all active users to the screen
 		printf("PRIVATE CHAT HISTORY BETWEEN YOU AND: ");
 		fgets(destination, CREDENTIAL_SIZE, stdin);
@@ -286,14 +285,14 @@ void change_password(server_t *server) {
 	clear_string(input, CREDENTIAL_SIZE);
 	clear_string(password1, CREDENTIAL_SIZE);
 	clear_string(password2, CREDENTIAL_SIZE);
-	//loop until both new passwords match password ma
+	//loop until both new passwords match each other and the user gets the current password correct
 	do {
 		while(strlen(cur_password)<=1 && server->is_banned_or_kicked==0) 
 		{
 			printf("PLEASE ENTER CURRENT PASSWORD: ");
 			fgets(cur_password, CREDENTIAL_SIZE, stdin);
-		};
-		cur_password[strlen(cur_password)-1]=0;
+		}		
+		cur_password[strlen(cur_password)-1]=0; //replace \n from fgets with null character
 		while(strlen(password1)<=1 && server->is_banned_or_kicked==0){
 			printf("PLEASE ENTER NEW PASSWORD: ");
 			fgets(password1, CREDENTIAL_SIZE, stdin);
@@ -302,10 +301,11 @@ void change_password(server_t *server) {
 			printf("PLEASE REENTER NEW PASSWORD: ");
 			fgets(password2, CREDENTIAL_SIZE, stdin);
 		}
-		if(strcmp(password1, password2) && server->is_banned_or_kicked==0)
+		if(strcmp(password1, password2) && server->is_banned_or_kicked==0)//test that both passwords match
 			printf("PASSWORDS DO NOT MATCH\n");
 		if(strcmp(cur_password, server->password)&& server->is_banned_or_kicked==0)
 			printf("INCORRECT CURRENT CREDENTIAL\n");
+		//if the passwords didn't match offer chance to cancel changes
 		if((strcmp(password1, password2) || strcmp(server->password, cur_password)) && server->is_banned_or_kicked==0) {
 			if (server->is_banned_or_kicked==0) {
 				printf("ENTER Q TO ABORT, OTHERWISE PRESS ENTER TO CONTINUE\n");
@@ -315,7 +315,7 @@ void change_password(server_t *server) {
 				return;
 		}
 	}while ((strcmp(password1, password2) || strcmp(server->password, cur_password))&& server->is_banned_or_kicked==0);
-	password1[strlen(password1)-1]=0;
+	password1[strlen(password1)-1]=0;//replace \n from fgets with null character
 	if(server->is_banned_or_kicked==0) {
 		sprintf(server->buffer_out, "4%c%s%c%s%c %c%s", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER, password1);
 		server->buffered_out_size = strlen(server->buffer_out)+1;
@@ -329,11 +329,15 @@ void change_password(server_t *server) {
 	return;
 }
 
+/*
+**************************client side function to request a list of registered users************************
+**************************forms a structured request to the server and waits for the response**************
+*/
 void show_all_users(server_t *server) {
 	sprintf(server->buffer_out, "17%c%s%c%s%c %c ", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER);
 	server->buffered_out_size = strlen(server->buffer_out) + 1;
 	server->send=1;
-	sem_wait(&server->mutex);
+	sem_wait(&server->mutex);//wait for server to reply
 	return;
 }
 
