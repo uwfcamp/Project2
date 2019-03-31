@@ -24,10 +24,15 @@
  *	- N/A
  */
 void broadcast_message(client_list_t *clientList, int sender_socket, char *message, char *sender){
+    // create the formatted message to be sent
     char new_buffer[BUFFER_SIZE];
     sprintf(new_buffer, "7%c%s%c%s%c%s%c%s", (char)DELIMITER, sender, (char)DELIMITER, " ", (char)DELIMITER, " ", (char)DELIMITER, message);
+
+    // loop through all the nodes of the link list
     while(clientList != NULL){
+	// if the client is connected and logged in
         if (clientList->socket != sender_socket && clientList->connected==1 && clientList->logged_in==1){
+		// send message
 	        send(clientList->socket , new_buffer , strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
 	}
         clientList=clientList->next;
@@ -55,11 +60,20 @@ void broadcast_message(client_list_t *clientList, int sender_socket, char *messa
 void private_message(client_list_t *clientList, char *message, char *destination, char *sender){
     int i=0;
     char new_buffer[BUFFER_SIZE];
+	
+    // log the message into the private message log
     log_into_private(sender, destination, message);
+	
+    // create formatted message for sending to clients
     sprintf(new_buffer, "6%c%s%c%s%c%s%c%s", (char)DELIMITER, sender, (char)DELIMITER, " ", (char)DELIMITER, destination, (char)DELIMITER, message);
+
+    // loop through all clients in link list
     while(clientList != NULL){
+	// check if the client matches the target user
         if (strcmp(destination, clientList->username)==0){
+		// if the client is online and logged in
 		if (clientList->connected==1 && clientList->logged_in==1){
+			// send the message to the client
 	        	send(clientList->socket , new_buffer , strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
                 	printf("STATUS: message sent to %s\n", destination);
 			i++;
@@ -67,6 +81,8 @@ void private_message(client_list_t *clientList, char *message, char *destination
 	}
         clientList=clientList->next;
     }
+
+    // if the user was not online to recieve the message, print the message to the console
     if(i==0)
     	printf("STATUS: message could not be sent to %s\n", destination);
 }
@@ -86,9 +102,11 @@ void private_message(client_list_t *clientList, char *message, char *destination
  *	- N/A
  */
 void log_into_group(char *username, char *body){
+	// open group chat log file
 	FILE *fp;
 	fp=fopen("groupchat.txt", "a");
 
+	// figure out current time, and create string of the time
 	time_t rawtime;
 	time(&rawtime);
 	struct tm *info = localtime(&rawtime);
@@ -97,6 +115,7 @@ void log_into_group(char *username, char *body){
 	strcpy(timestamp,asctime(info));
 	timestamp[strlen(timestamp)-1]='\0'; // removing newline
 
+	// print the timestamp, sending client, and the message to the group chat log file
 	fprintf(fp, "%s - %s: %s",timestamp, username, body);
 
 	fclose(fp);
@@ -120,9 +139,11 @@ void log_into_group(char *username, char *body){
  *	- N/A
  */
 void log_into_private(char *sender, char *reciever, char *body){
+	// open private chat log file
 	FILE *fp;
 	fp=fopen("privatechat.txt","a");
 
+	// figure out current time, and create string of the time
 	time_t rawtime;
 	time(&rawtime);
 	struct tm *info = localtime(&rawtime);
@@ -131,6 +152,7 @@ void log_into_private(char *sender, char *reciever, char *body){
 	strcpy(timestamp,asctime(info));
 	timestamp[strlen(timestamp)-1]='\0'; // removing newline
 
+	// print the timestamp, sending client, recieving client, and the message to the private chat log file
 	fprintf(fp, "%s%c%s%c%s%c%s", timestamp, (char)DELIMITER, sender, (char)DELIMITER, reciever, (char)DELIMITER, body);
 
 	fclose(fp);
