@@ -204,9 +204,6 @@ void p_chat_history(server_t *server) {
 		show_all_users(server);	//prints all active users to the screen
 		printf("PRIVATE CHAT HISTORY BETWEEN YOU AND: ");
 		fgets(destination, CREDENTIAL_SIZE, stdin);
-/*
-************Memory Leak if string is length 0 destination[-1] is corrupted memory
-*/
 		destination[strlen(destination)-1]='\0';	//format as null terminated string
 		if (strlen(destination) == 0 && server->is_banned_or_kicked==0)
 			printf("INPUT CANNOT BE NULL\n");
