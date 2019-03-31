@@ -12,7 +12,10 @@
  * *************************************************/
 int login_menu(server_t *server){
 	int selection = -1;
-	server->is_banned_or_kicked = 0;
+	if (server->is_banned_or_kicked != 0) {
+		server->connected=0;
+		return 0;
+	}
 
 	// print the menu
 	printf("\n-=| CHATTERBOX CHAT |=-\n\n");
@@ -135,10 +138,12 @@ void login_input(server_t *server){
 	do{
 		// prompt user for a username
 		do {
-			printf("USERNAME: ");
+			printf("ENTER _q TO ABORT\nUSERNAME: ");
 			fgets(username, CREDENTIAL_SIZE, stdin);
 		} while (strlen(username)<=1);
 		username[strlen(username)-1]=0;
+		if (strcmp(username, "_q")==0)
+			return;
 		// prompt user for a password
 		do {
 			printf("PASSWORD: ");

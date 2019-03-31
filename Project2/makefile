@@ -10,6 +10,7 @@ CFILES1 = server_framework.c server_framework.c s_login_funct.c s_login_funct.h 
 CFILES2 = client_framework.c client_framework.h c_login_funct.c c_login_funct.h c_menu_funct.c c_menu_funct.h c_admin_funct.h c_admin_funct.c
 CFILES3 = parse.c parse.h Definitions.h
 BINARYS = server client
+TXTFILES = logins.txt privatechat.txt groupchat.txt filename.txt
 
 all: $(BINARYS)
 
@@ -37,6 +38,9 @@ c_admin_funct.o: $(CFILES2) $(CFILES3)
 parse.o: $(CFILES3)
 	$(CC) -c $(CFLAGS) parse.c
 	
-.PHONY : clean
+.PHONY : clean cleaner
 clean:
 	rm $(BINARYS) $(OBJECTS1) $(OBJECTS2) $(OBJECTS3)
+
+cleaner: 
+	rm $(TXTFILES)

@@ -34,8 +34,6 @@ void group_chat(server_t *server){
 				printf("YOUR MESSAGE: ");
 //can we put our mutex lock here to restrict the scope		
 				fgets(message, BUFFER_SIZE-strlen(server->buffer_out), stdin);
-//Warning this line is not linux supported
-				fflush(stdin);
 //can we put our mutex unlock here		
 				if(strlen(message)<1 && server->is_banned_or_kicked ==0)//reject strings of length 0
 					printf("MESSAGE CANNOT BE NULL\n");
@@ -157,7 +155,6 @@ void chat_history(server_t *server) {
 		printf("\n0. QUIT");
 		printf("\n\nENTER SELECTION: ");
 		pthread_mutex_unlock(&server->lock);
-		fflush(stdin);//clear input line
 //mutex lock here		
 		fgets(menuChoice, CREDENTIAL_SIZE, stdin);//read menu choice from stdin
 //mutex unlock		
@@ -236,7 +233,6 @@ int get_destination(char * destination, server_t *server) {
 	server->valid_destination = 0;
 	do{
 		// prompt user for a destination
-		fflush(stdin);
 		do {
 			request_users(server);
 			printf("Enter _q to abort\n");
@@ -245,7 +241,6 @@ int get_destination(char * destination, server_t *server) {
 			if (strlen(destination) <=1){
 				printf("DESTINATION CANNOT BE NULL\n");
 			}
-			fflush(stdin);
 		} while(strlen(destination)<=1 && server->is_banned_or_kicked==0);
 		destination[strlen(destination)-1]='\0';
 		if (strcmp(destination, "_q")==0 || server->is_banned_or_kicked!=0) {
@@ -402,7 +397,6 @@ void send_file(server_t *server){
  */
 int get_file_name(char *filename){
 	// prompt user for a filename
-	fflush(stdin);
 	do {
 		printf("Enter _q to abort\n");
 		printf("FILENAME: ");
@@ -410,7 +404,6 @@ int get_file_name(char *filename){
 		if (strlen(filename) <=1){
 			printf("FILENAME CANNOT BE NULL\n");
 		}
-		fflush(stdin);
 	} while(strlen(filename)<=1);
 	filename[strlen(filename)-1]='\0';
 

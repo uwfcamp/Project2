@@ -382,7 +382,6 @@ int main_menu(server_t *server){
 		server->username[0]='\0';
 		server->password[0]='\0';
 		selection = 7;
-		server->is_banned_or_kicked=0;
 	}
 
 	return selection;
