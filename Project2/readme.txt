@@ -79,7 +79,9 @@ IV. OUTPUT
           
       b.  groupchat.txt: This file is the repository for all group communication. It contains
           all of the group chat logs in a running chat log. With a timestamp followed by the
-          user who the broadcast came from preceeding the message.
+          user who the broadcast came from preceeding the message. The maximum size that this
+          file can be for the program to function properly is the size of BUFFER_SIZE ascii
+          characters as specified in Definitions.h
           
       c.  privatechat.txt
       
