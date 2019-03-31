@@ -265,9 +265,10 @@ void send_private_log(char * destination, client_list_t *current) {
 	sprintf(new_buffer, "9%c %c %c %c\n", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
 	FILE * fp;
 	char * token;
-	char search[2];
+	char search[3];
 	search[0] = (char)DELIMITER;
-	search[1] = '\0';
+	search[1] = '\n';
+	search[2] = '\0';
 	char u_to[CREDENTIAL_SIZE];
 	char u_from[CREDENTIAL_SIZE];
 	char u_timestamp[CREDENTIAL_SIZE];
@@ -287,7 +288,7 @@ void send_private_log(char * destination, client_list_t *current) {
 		token = strtok(NULL, search);	
 		strcpy(message, token);
 		if(((strcmp(u_from, current->username) == 0) && (strcmp(u_to, destination))==0) || ((strcmp(u_to, current->username)==0) && strcmp(u_from, destination)==0)) {
-			sprintf(temp, "%s - %s: %s", u_timestamp, u_from, message);
+			sprintf(temp, "%s - %s: %s\n", u_timestamp, u_from, message);
 			strcat(log, temp);
 		}
 		clear_string(temp, BUFFER_SIZE);
