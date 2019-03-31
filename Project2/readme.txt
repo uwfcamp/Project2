@@ -40,7 +40,8 @@ I. SETUP AND COMPILATION
       quotes("), type the command "make". This command will produce two executable files named
       "server" and "client". "server" is an executable that runs the server side of the project 
       description and "client" is an executable that runs the client side of the project 
-      description.
+      description. After successful compilation. Put the client executable in a separate 
+      directory from the server(This will be mentioned a few times to make sure this is done).
 
 
 II. RUNNING THE PROGRAM
@@ -48,8 +49,9 @@ II. RUNNING THE PROGRAM
   1.  server: Begin the server side by executing the command "./server" in the directory the
       server executable is located in.
       
-  2.  client: Begin the client side by executing the command "./client" in the directory the
-      client executable is located in.
+  2.  client: Before execution make sure your client is in a different directory than the
+      server is in.Begin the client side by executing the command "./client" in the directory
+      the client executable is located in.
       
 III. USER INPUT
 
@@ -62,7 +64,9 @@ III. USER INPUT
   2.  client: This process does not require any input files to run. The program will take
       user input based on requirements in the sheet. In most cases, there is an exit case for
       loops are either the letter 'q' or the string "_q". The specific case required will be 
-      shown in each loop.
+      shown in each loop. For the file transfer to work, the client executable must be in a
+      different directory than the server with the file to transfer residing in the clients
+      directory.
 
 IV. OUTPUT
 
