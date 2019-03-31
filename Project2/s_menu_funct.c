@@ -415,12 +415,11 @@ void confirm_existence(char * destination, client_list_t * current){
 
 
 
-/* This function will send a file, named in body, and the client identified
- * in current, so long as the file is meant for the current user. If not,
- * it behaves as if the file does not exit.
+/* This function will change the password of the client, to the password
+ * in body, and update the login file.
  *
  * char *body
- *	- A string containing the new username for the client
+ *	- A string containing the new password for the client
  * client_list_t *current
  *	- A pointer to the structure identifying client changing their password
  *
@@ -440,8 +439,14 @@ void change_password(char * body, client_list_t * current) {
 	char new_contents[BUFFER_SIZE];
 	char is_banned[CREDENTIAL_SIZE];
 	clear_string(new_contents, BUFFER_SIZE);
+	
+	// open the file containing login information
 	fp = fopen("logins.txt", "r");
+	
+	// read through every line of the login file
 	while (fgets(temp, BUFFER_SIZE, fp) != NULL) {
+		
+		// break the line into seperate data fields
 		token = strtok(temp, search);
 		strcpy(username, token);
 		token = strtok(NULL, search);
@@ -449,16 +454,31 @@ void change_password(char * body, client_list_t * current) {
 		token = strtok(NULL, search);
 		strcpy(is_banned,token);
 		clear_string(temp, BUFFER_SIZE);
+		
+		// if the username on the current line does not match the client changing their password
 		if(strcmp(username, current->username)) {
+			// print user login information to the temporary string
 			sprintf(temp, "%s%c%s%c%s\n", username, (char)DELIMITER, password, (char)DELIMITER, is_banned);
 			strcat(new_contents, temp);
 		}
 	}
+	
+	// close the file containing login information
 	fclose(fp);
+	
+	// overwrite the login file with new information
 	fopen("logins.txt", "w");
+	
+	// print all the logins in the temporary string
 	fprintf(fp, "%s", new_contents);
+	
+	// print the curent clients login to the file, with their new password
        	fprintf(fp, "%s%c%s%c%s", current->username, (char)DELIMITER, body, (char)DELIMITER, current->is_banned);
+	
+	// close the login file
 	fclose(fp);
+	
+	// send confirmation to the client that their password has changed
 	strcpy(current->password, body);
 	sprintf(temp, "4%c %c %c %c ", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
 	send(current->socket, temp, strlen(temp), MSG_NOSIGNAL | MSG_DONTWAIT);
@@ -485,14 +505,28 @@ void show_all_users(client_list_t *current) {
 	search[0]=(char)DELIMITER;
 	search[1]='\n';
 	search[2]='\0';
+	
+	// create the formatted message to send to client in the output buffer
 	sprintf(new_buffer, "17%c %c %c %cLIST OF ALL USERS: ", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
+	
+	// open the file containing the login information
 	fp = fopen("logins.txt", "r");
+	
+	// loop through all the logins
 	while(fgets(temp, BUFFER_SIZE, fp) != NULL) {
+		
+		// remove excess characters from the string, leaving only the username
 		token = strtok(temp, search);
+		
+		// append the username to the output buffer
 		strcat(new_buffer, token);
 		strcat(new_buffer, " ");
 	}
+	
+	// close the login file
 	fclose(fp);
+	
+	// send the list of users to the client
 	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
 	return;
 }
@@ -518,7 +552,7 @@ void recieve_file(char *body, char *destination, client_list_t *current){
 	unsigned long size;
 	int amount_read;
 
-	// splice the "body" at the last occuring underscore,
+	// split the "body" at the last occuring underscore,
 	// which will give us the file's name, and size
 	int i=0;
 	while(body[i]!='\0')
@@ -529,6 +563,7 @@ void recieve_file(char *body, char *destination, client_list_t *current){
 	filename = body;
 	str_size = &body[i+1];
 
+	// convert the size in string to an unsigned long
 	size = atoul(str_size);
 
 	// recieve the actual file data from the client
@@ -540,7 +575,7 @@ void recieve_file(char *body, char *destination, client_list_t *current){
 	}
 	fclose(fp);
 
-	// append this file to the list of files
+	// append this file to the list of  existing files
 	fp = fopen("filelist.txt", "a");
 	fprintf(fp, "%s%c%s%c%s\n", destination, (char)DELIMITER, str_size, (char)DELIMITER, filename);
 	fclose(fp);
