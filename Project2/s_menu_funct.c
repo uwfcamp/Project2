@@ -1,8 +1,12 @@
-//Curtis Duvall, Nathan Wilkins, and Julian Thayer
-//Systems and Networking II
-//Project 2
-//s_menu_funct.c
-
+/* This file will perform the basic functions of the server, such as
+ * broadcasting messages from clients to other clients, transferring
+ * files from one client to another, and checking for users that are
+ * online or exist.
+ *
+ * @NAME s_menu_funct
+ * @AUTHORS Curtis Duvall, Nathan Wilkins, and Julian Thayer
+ * @INFO Systems and Networking II - Project 2
+ */
 #include "Definitions.h"
 #include "parse.h"
 #include "s_menu_funct.h"
@@ -181,7 +185,11 @@ void show_users(char * username, char * password, client_list_t *clientList, cli
 	int i=0;
 	char temp[CREDENTIAL_SIZE];
 	client_list_t *list = clientList;
+
+	// create a formatted message to send to the client
 	sprintf(new_buffer, "5%c %c %c %cCURRENT ONLINE USER LIST: ", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
+
+	// loop through all clients, and add the ones that are online to the message
 	while(list != NULL) {
 		if(list->logged_in == 1){
 			strcat(new_buffer, list->username);
@@ -190,9 +198,13 @@ void show_users(char * username, char * password, client_list_t *clientList, cli
 		}
 		list = list->next;
 	}
+	
+	// add on the number of users found online
 	strcat(new_buffer, "\nCURRENT NUMBER OF ONLINE USERS: ");
 	sprintf(temp, "%d\n", i);
 	strcat(new_buffer, temp);
+	
+	// send the message of users online to the client
 	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
 	return;	
 }
@@ -211,12 +223,22 @@ void show_users(char * username, char * password, client_list_t *clientList, cli
 void send_group_log(client_list_t *current) {
 	char new_buffer[BUFFER_SIZE];
 	char temp[BUFFER_SIZE];
+	
+	// create formatted message to send to client
 	sprintf(new_buffer, "8%c %c %c %c\n", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
+	
+	// open group chat log file
 	FILE * fp;
 	fp = fopen("groupchat.txt", "r");
+	
+	// loop through file, adding lines to the message to send
 	while(fgets(temp, BUFFER_SIZE, fp)!=NULL)
-		strcat(new_buffer, temp);	
+		strcat(new_buffer, temp);
+	
+	//send message to client
 	send(current->socket, new_buffer, strlen(new_buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+	
+	// close the group chat log file
 	fclose(fp);
 }
 
@@ -238,6 +260,8 @@ void send_private_log(char * destination, client_list_t *current) {
 	char temp[BUFFER_SIZE];
 	char log[BUFFER_SIZE];
 	clear_string(log, BUFFER_SIZE);
+	
+	// create formatted message to send to client
 	sprintf(new_buffer, "9%c %c %c %c\n", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
 	FILE * fp;
 	char * token;
