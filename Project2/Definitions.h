@@ -52,6 +52,7 @@
 	sem_t mutex;
 	pthread_mutex_t lock;
 	char username_private_chat[CREDENTIAL_SIZE];
+	struct timeval *last_reception;
 	}server_t;
 	
 	typedef struct client_list_s{

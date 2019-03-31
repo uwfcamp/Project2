@@ -78,6 +78,8 @@ int main(int argc, char const *argv[])
 // being recieved.
 void *server_communication(void *vargp){
 	// send message to server
+	struct timeval *current_time = (struct timeval *)malloc(sizeof(struct timeval));
+	gettimeofday(current_time, NULL);
 	server_t *server = (server_t *)vargp;
 	char pingMessage[CREDENTIAL_SIZE];
 	sprintf(pingMessage,"20%c %c %c %c ", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
@@ -102,6 +104,7 @@ void *server_communication(void *vargp){
 			//check if any data was actually recieved
 			if (server->buffered_in_size>0) {
 				server->recieve=1;
+				gettimeofday(server->last_reception, NULL);
 			}
 			else if (err == EAGAIN || err == EWOULDBLOCK)
 				server->buffered_in_size=0;
@@ -215,7 +218,14 @@ void *server_communication(void *vargp){
 					break;
 			}
 		}
+		gettimeofday(current_time, NULL);
+		if ((current_time->tv_sec - server->last_reception->tv_sec)>TIMEOUT_INTERVAL){
+			printf("\n\nIT SEEMS THE SERVER IS NO LONGER RESPONDING\n\nTRY AGAIN LATER\n\n");
+			server->connected=0;
+		}
 	}
+	free(current_time);
+	exit(0);
 	return NULL;
 }
 
@@ -244,7 +254,8 @@ server_t *build_server_structure(void){
 	server->in_group_chat=0;
 	server->in_private_chat=0;
 	server->username_private_chat[0]='\0';
-
+	server->last_reception = (struct timeval *)malloc(sizeof(struct timeval));
+	gettimeofday(server->last_reception, NULL);
 	return server;
 }
 
@@ -256,6 +267,7 @@ server_t *build_server_structure(void){
 // communication is done.
 void disconnect(server_t *server){
 	close(server->socket);
+	free(server->last_reception);
 	free(server->buffer_in);
 	free(server->buffer_out);
 	free(server);

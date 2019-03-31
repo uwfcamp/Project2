@@ -86,17 +86,26 @@ void registration_input(server_t *server){
 		server->buffered_out_size=strlen(server->buffer_out)+1;
 		server->send=1;
 
-		// wait for the response from the server
-		while(!server->recieve);
+		// do-while loop ensures the server message is not just a ping
+		int was_ping;
+		do{
+			// wait for the response from the server
+			while(!server->recieve);
 
-		// check if the server says the user is logged in
-		if (server->buffer_in[0] == '0')
-			printf("COULD NOT CREATE ACCOUNT, TRY A DIFFERENT USERNAME\n");
-		else
-			valid=1;
+			// check if the server says the user is logged in
+			if (server->buffer_in[0] == '0')
+				printf("COULD NOT CREATE ACCOUNT, TRY A DIFFERENT USERNAME\n");
+			else
+				valid=1;
 
-		// let the listening thread know it is okay to read new messages
-		server->recieve=0;
+			if (server->buffer_in[0]=='2' && server->buffer_in[1]=='0')
+				was_ping=1;
+			else
+				was_ping=0;
+
+			// let the listening thread know it is okay to read new messages
+			server->recieve=0;
+		}while(was_ping);
 
 	// if the server responds that the user is still attempting
 	// to register, then the username must already be in use.
@@ -107,6 +116,9 @@ void registration_input(server_t *server){
 	strcpy(server->password, password1);
 	server->logged_in=1;
 }
+
+
+
 /***************************************************
  * This function gets the login input from the client. 
  * upon getting correct login credentials, the client
@@ -140,34 +152,43 @@ void login_input(server_t *server){
 		server->buffered_out_size=strlen(server->buffer_out)+1;
 		server->send=1;
 
-		// wait for the response from the server
-		while(!server->recieve);
+		// do-while loop ensures the server message is not just a ping
+		int was_ping;
+		do{
+			// wait for the response from the server
+			while(!server->recieve);
 
-		// check if the server says the user is logged in
-		if (server->buffer_in[0] == '1')
-			printf("INVALID LOGIN CREDENTIALS\n");
+			// check if the server says the user is logged in
+			if (server->buffer_in[0] == '1')
+				printf("INVALID LOGIN CREDENTIALS\n");
 		
-		else {
-			char temp[BUFFER_SIZE];
-			strcpy(temp,server->buffer_in);
-			char * is_banned;
-			char search[3];
-			search[0]=(char)DELIMITER;
-			search[1]='\n';
-			search[2]='\0';
-			strtok(temp, search);
-			strtok(NULL, search);
-			strtok(NULL, search);
-			strtok(NULL, search);
-			is_banned = strtok(NULL, search);
-			if (atoi(is_banned) == 1) // user is banned from server.
-				printf("USER IS BANNED\n");
-			else // user is not banned from server
-				valid=1;
-		}
+			else {
+				char temp[BUFFER_SIZE];
+				strcpy(temp,server->buffer_in);
+				char * is_banned;
+				char search[3];
+				search[0]=(char)DELIMITER;
+				search[1]='\n';
+				search[2]='\0';
+				strtok(temp, search);
+				strtok(NULL, search);
+				strtok(NULL, search);
+				strtok(NULL, search);
+				is_banned = strtok(NULL, search);
+				if (atoi(is_banned) == 1) // user is banned from server.
+					printf("USER IS BANNED\n");
+				else // user is not banned from server
+					valid=1;
+			}
 
-		// let the listening thread know it is okay to read new messages
-		server->recieve=0;
+			if (server->buffer_in[0]=='2' && server->buffer_in[1]=='0')
+				was_ping=1;
+			else
+				was_ping=0;
+
+			// let the listening thread know it is okay to read new messages
+			server->recieve=0;
+		}while(was_ping);
 
 	// if the server responds that the user is still attempting
 	// to register, then the username must already be in use.
@@ -178,6 +199,9 @@ void login_input(server_t *server){
 	strcpy(server->password, password);
 	server->logged_in=1;
 }
+
+
+
 /*******************************************
  * this case checks if username is banned or kicked
  * if user is currently banned, the function returns
