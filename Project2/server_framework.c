@@ -7,8 +7,13 @@
  * @INFO	COP4635 Project 1
  */
 
+
+
 #include "server_framework.h" 
 #include "s_admin_funct.h" 
+
+
+
 int main(int argc, char const *argv[])
 {
     int server_fd;
@@ -18,6 +23,8 @@ int main(int argc, char const *argv[])
     int valid=0;
     char verify_password[CREDENTIAL_SIZE];
 
+    // create the root of the client link list,
+    // for keeping track of the clients.
     client_list_t *clientList = (client_list_t *) malloc(sizeof(client_list_t));
     clientList->socket=0;
     clientList->connected=0;
@@ -29,16 +36,22 @@ int main(int argc, char const *argv[])
     clientList->last_reception =(struct timeval *) malloc(sizeof(struct timeval));
     clientList->ping=0;
 
+    // initialize the thread for pinging the clients
     pthread_t tid;
     if (pthread_create(&tid, NULL, ping_connections, (void *)clientList)){
-	fprintf(stderr,"ERROR: could not create keep alive thread\n");
+	fprintf(stderr,"ERROR: could not create ping thread\n");
     }
 
+    // allocate memory for tracking administrator account
     admin_account_t *admin = (admin_account_t *) malloc(sizeof(admin_account_t));
+
+    // setup values for the address
     memset(&address, '\0', sizeof address);
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons( PORT );
+
+    // create the administrative login credentials before the system fully boots up
     do {
 	    printf("Please enter the administrative account's username: ");
 	    fgets(admin->username, CREDENTIAL_SIZE, stdin);
@@ -58,6 +71,7 @@ int main(int argc, char const *argv[])
 		admin->password[strlen(admin->password)-1]='\0';	
 	    }
     }while(valid != 1);
+
     // Ensure there is a login registry
     FILE *logins = fopen("logins.txt", "a");
     fclose(logins);
@@ -69,7 +83,7 @@ int main(int argc, char const *argv[])
         perror("In socket");
         exit(EXIT_FAILURE);
     }
-	
+
 /*
 ************************************MY EDITS *******************************************
 ********************************allow immediate reuse of server socket******************
@@ -82,6 +96,7 @@ int main(int argc, char const *argv[])
     }
 //***************************************************************************************
 
+    // bind the socket to the address, and ensure that there are no errors
     printf("STATUS: binding socket to address\n");
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address))<0)
     {
@@ -89,6 +104,7 @@ int main(int argc, char const *argv[])
         exit(EXIT_FAILURE);
     }
 
+    // setup the server to listen for new connections
     printf("STATUS: setting server to listen for new connections\n");
     if (listen(server_fd, 20) < 0)
     {
@@ -106,8 +122,10 @@ int main(int argc, char const *argv[])
 
     while(1)
     {
+	// buffer for reading messages from the clients
 	char buffer[BUFFER_SIZE];
 
+	// variables to hold the data in the fields of the messages recieved
 	int mode;
 	char body[BUFFER_SIZE];
 	char username[CREDENTIAL_SIZE];
@@ -136,9 +154,14 @@ int main(int argc, char const *argv[])
 
                     // handle recieved messages
                     if (valread>0){
+			    
+			// a message has been recieved, update the time of last reception
 			gettimeofday(current->last_reception,NULL);
-			//printf("%s\n", buffer); // for debugging only
+			    
+			// parse the recieved message into seperate data fields
 			parse_message(buffer, &mode, username, password, destination, body);
+
+			// perform specific actions based on the mode value
 			switch (mode){
 				case 0: // register user
 					printf("Verifying registration of '%s'\n", username);
@@ -217,15 +240,16 @@ int main(int argc, char const *argv[])
 				case 18: // list all files meant for the user
 					show_user_files(current);
 					break;
-				case 19: // send file
+				case 19: // The client has requested a file
 					send_file(body, current);
 					break;
-				case 20: // ping response
+				case 20: // send a ping to the current client
 					printf("STATUS: ping response recieved from '%s'\n", current->username);
 					break;
 			}
-                    }
+                    }// if there is no message from the client, and ping is set
                     else if (current->ping==1){
+			// send a simple ping message to the client
                         char pingMessage[CREDENTIAL_SIZE];
 			sprintf(pingMessage,"20%c %c %c %c ", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);
                         send(current->socket , pingMessage , strlen(pingMessage), MSG_NOSIGNAL | MSG_DONTWAIT);
@@ -233,6 +257,10 @@ int main(int argc, char const *argv[])
 			printf("STATUS: ping sent to '%s'\n", current->username);
                     }
 
+                    // ensure that it has been less than TIMEOUT_INTERVAL since
+                    // the last message recieved from the current client. If it
+                    // has been longer, then the client has most likely disconnected,
+                    // and should be removed.
                     struct timeval time;
                     gettimeofday(&time, NULL);
                     if ((time.tv_sec - current->last_reception->tv_sec)>TIMEOUT_INTERVAL){
@@ -244,6 +272,9 @@ int main(int argc, char const *argv[])
             current = current->next;
         }
     }
+    // Shut everything down.
+    // Because a server must continually run,
+    // this portion should never be reached.
     pthread_join(tid, NULL);
     close(server_fd);
     free(admin);
@@ -251,6 +282,17 @@ int main(int argc, char const *argv[])
     return 0;
 }
 
+
+
+/* This function will add a new connection socket to the link list, so
+ * that the server can loop through all connections.
+ *
+ * int socket
+ *	- the integer identifier of the socket connected to the client
+ *
+ * client_list_t *clientList
+ *	- link list of all the client connections
+ */
 void new_connection(client_list_t *clientList, int socket){
     // there is at least 1 connection
     if (clientList->connected == 1){
@@ -296,9 +338,7 @@ void new_connection(client_list_t *clientList, int socket){
 void remove_connection(client_list_t *clientList, int target_socket){
     // special case, where the target being
     // removed is the first element in the
-    // link-list. A double pointer is passed
-    // because of the second part of this case.
-
+    // link-list.
     printf("STATUS: removing connection at socket '%d'\n", target_socket);
     if (clientList->socket == target_socket){
         clientList->socket = 0;
@@ -315,7 +355,7 @@ void remove_connection(client_list_t *clientList, int target_socket){
     while(target->socket != target_socket && target != NULL)
         target = target->next;
 
-    // if the element exists, remove it
+    // if the element exists, remove it from the link list
     if (target != NULL){
         target->last->next = target->next;
 	if (target->next != NULL)
@@ -326,8 +366,11 @@ void remove_connection(client_list_t *clientList, int target_socket){
 
 
 
-/*
+/* This is a thread function, which will set the server to ping all the
+ * clients every half a timeout interval.
  *
+ * void *vargp
+ *	- a pointer to the root of the link list containing all the client data
  */
 void *ping_connections(void *vargp){
 	while(1){
