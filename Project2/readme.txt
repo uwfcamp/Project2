@@ -61,12 +61,29 @@ III. USER INPUT
   
   2.  client: This process does not require any input files to run. The program will take
       user input based on requirements in the sheet. In most cases, there is an exit case for
-      loops of either the letter 'q' or the string "_q". The specific case required will be 
+      loops are either the letter 'q' or the string "_q". The specific case required will be 
       shown in each loop.
 
 IV. OUTPUT
 
-  1.  server:
+  1.  server: Upon startup, the server will prompt the user to input the password and username
+      for the server administrator. Then the server will print each transition, request and 
+      ping to and from clients to the screen. Through execution of the program, a logins.txt,
+      groupchat.txt, privatechat.txt, filelist.txt are created.
+      
+      a.  logins.txt: This files contains all of the usernames, passwords, and the details
+          signifying which users are banned. These details are shown by line with each value
+          separated by the ascii character with the decimal value of 176. for the isbanned
+          detail. a 0 signifies the user is not banned and a 1 signifies that the user is
+          banned.
+          
+      b.  groupchat.txt: This file is the repository for all group communication. It contains
+          all of the group chat logs in a running chat log. With a timestamp followed by the
+          user who the broadcast came from preceeding the message.
+          
+      c.  privatechat.txt
+      
+      d.  filelist.txt
 
   2.  client:
   
