@@ -121,8 +121,10 @@ IV. OUTPUT
       b.  Main Menu: this is the primary interface for the client. The main menu acts as a hub connecting 
           all other context specific menues in the client application. All user, chat, history, file 
           and administrative functions are reached from this menu.
+          
           1. View current online number- this action polls the server which prints out the list of 
           active users to the client screen.
+          
           2. Enter the group chat- this submenu evokes the broadcast chat functionality of the 
           application. A message greets the user prompting to continue to the chat propper or 'Q' 
           to return to the main menu. Hitting enter at this screen will proceed to the active chat 
@@ -130,3 +132,13 @@ IV. OUTPUT
           can type a single message followed by the enter key. Incoming messages from other users 
           will also post to this screen with the username of the sender. Hitting enter again will 
           ready the screen for a new message, else hitting 'Q' will return to the main menu.
+          
+          3. Enter the private chat- this submenu evokes the one-to-one private chat functionality 
+          of the application. A message greets the user prompting to continue to the chat propper 
+          or 'Q' to return to the main menu. Hitting enter at this screen will print the list of 
+          current online users before prompting the user to enter one as a destination for the 
+          message. when a valid target is identified proceed to the active chat window a new message 
+          explains that the escape sequence to quit the chat is "_q". The user can type a single 
+          message followed by the enter key. Incoming messages from other users will also post to 
+          this screen with the username of the sender. Hitting enter again will return the user to 
+          the recipient select prompt, else hitting 'Q' will return to the main menu.
