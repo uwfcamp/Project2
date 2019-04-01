@@ -346,9 +346,10 @@ void send_file(server_t *server){
 	p_exit = get_destination(destination, server);
 	if (p_exit != 1)
 		exists = get_file_name(filename);
-	if (exists)
+	if (exists){
 		size = get_file_size(filename);
-	printf("FILE SIZE: %lu\n", size);
+		printf("FILE SIZE: %lu\n", size);
+	}
 	if(size>=0 && exists) {
 		sprintf(server->buffer_out,"10%c%s%c%s%c%s%c%s%c%lu", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, destination, (char)DELIMITER, filename, '_', size);
 		server->buffered_out_size=strlen(server->buffer_out)+1;
@@ -399,8 +400,10 @@ int get_file_name(char *filename){
 
 	// try to open the file
 	FILE *fp = fopen(filename, "r");
-	if (fp==NULL)
+	if (fp==NULL){
+		printf("FILE DOES NOT EXIST\n");
 		return 0;
+	}
 	fclose(fp);
 
 	// file was accessed successfully
