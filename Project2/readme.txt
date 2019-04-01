@@ -104,5 +104,16 @@ IV. OUTPUT
   2.  client: Ensure that the client executable is moved to a separate directory from the server 
       executable. Upon execution the client will prompt the user to select what it wants to do 
       based off of its menu options. The output will be based off of the requirements in 
-      the project specifications sheet.
+      the project specifications sheet. The client interface is broken into several context menues
+      which relate to the operation of the client side application.
+      
+      a.  Login Screen: this context mode relates to the creation and authentication of users for 
+      the chat system. 
+      Registration- defines a new user record and corresponding password stored in logins.txt on the 
+      server side. Upon successful registration the new user is automatically logged in to the system. 
+      Login- is used to enter as an existing registered user found inlogins.txt. This will fail if 
+      the username given does not exist; the password does not match the recorded value, or if the 
+      selected user account is banned by the server administrator.
+      Quit- from this menu, selecting quit will close the client application returning the window to 
+      the system commandline.
   
