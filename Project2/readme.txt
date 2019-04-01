@@ -152,7 +152,7 @@ IV. OUTPUT
             0. Quit- returns the focus to the main menu.
             
           5. File transfer- this submenu prompts the user to choose between the following: 
-            1. Group Chat- will immediately print the list of current active users to the terminal 
+            1. Send a file- will immediately print the list of current active users to the terminal 
             window. the window will then prompt the user to select one as the destination, followed 
             by a prompt for the filename of the file to opload. 
             2. Recieve a file- will notify the user of any files addressed to themself and prompt 
@@ -165,3 +165,11 @@ IV. OUTPUT
           
           7. Logout- this action safely logs the user out of the server and returns the interface 
           to the login screen.
+          
+          8. Administrator- this submenu prompts the user to authenticate with an administrative 
+          account created by the server. Once authenticated the administrator can choose between: 
+            1. Ban a member- will immediately print the list of registered users to the terminal 
+            window. The window will then prompt the user to select one to be banned. 
+            2. Kick a member- will immediately print the list of registered users to the terminal 
+            window. The window will then prompt the user to select one to be kicked. 
+            0. Exit to Main Menu- returns the focus to the main menu.
