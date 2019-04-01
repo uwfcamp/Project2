@@ -1,0 +1,65 @@
+WHEN YOU WANT TO EDIT A FILE, PUT YOUR NAME IN THE POINTER AREA UNDERNEATH THAT FILE'S NAME FIRST.
+IF THE FILE YOU WANT TO EDIT ALREADY HAS A NAME UNDER IT, YOU MUST WAIT TILL THE NAME HAS BEEN REMOVED.
+DO NOT REMOVE YOUR NAME UNTIL AFTER YOU HAVE MADE YOUR CHANGES AND UPLOADED THE FILE.
+IF YOU CREATE A NEW FILE, ADD IT TO THIS LIST AFTER UPLOADING.
+DO NOT MODIFY FILES THAT ARE NOT LISTED IN THE LOGBOOK.
+
+
+
+makefile
+->
+REASON:
+
+client_framework.c-bak
+->
+REASON:
+
+server_framework.c-bak
+->
+REASON:
+
+client_framework.c
+-> 
+REASON: 
+REASON: 3/16/2019 correcting client handling of server login response
+
+server_framework.c
+->
+REASON: 
+REASON: 3/16/2019 Implementing username and password registration/verification
+
+parse.c
+->
+REASON:
+
+Definitions.h
+->
+REASON:
+
+parse.h
+->
+REASON:
+
+Reference.txt
+->
+REASON:
+
+messageFile.txt
+->
+REASON:
+
+messageStructure.txt
+->
+REASON:
+
+readme.txt
+->
+REASON:
+
+userFile.txt
+->
+REASON:
+
+Project2OverView.docx
+->
+REASON:
