@@ -496,14 +496,20 @@ void retrieve_file(server_t *server){
 	server->send=1;
 	sem_wait(&server->mutex);
 
-	//get the user's input
+	// get the user's input
 	printf("WHICH FILE WOULD YOU LIKE TO RETRIEVE: ");
 	fgets(input, CREDENTIAL_SIZE, stdin);
 	input[strlen(input)-1] = '\0';
 
-	// request specific file from server
-	sprintf(server->buffer_out,"19%c%s%c%s%c %c%s", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER, input);
-	server->buffered_out_size = strlen(server->buffer_out) + 1;
-	server->send=1;
-	sem_wait(&server->mutex);
+	// if the user did not input a blank message
+	if (strlen(input)>0){
+		// request specific file from server
+		sprintf(server->buffer_out,"19%c%s%c%s%c %c%s", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, (char)DELIMITER, input);
+		server->buffered_out_size = strlen(server->buffer_out) + 1;
+		server->send=1;
+		sem_wait(&server->mutex);
+	}
+	else{
+		printf("\nFILENAME WAS NULL, NOT REQUESTING A FILE\n");
+	}
 }
