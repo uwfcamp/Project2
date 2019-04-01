@@ -471,7 +471,7 @@ void change_password(char * body, client_list_t * current) {
 	fprintf(fp, "%s", new_contents);
 	
 	// print the curent clients login to the file, with their new password
-       	fprintf(fp, "%s%c%s%c%s", current->username, (char)DELIMITER, body, (char)DELIMITER, current->is_banned);
+       	fprintf(fp, "%s%c%s%c%s\n", current->username, (char)DELIMITER, body, (char)DELIMITER, current->is_banned);
 	
 	// close the login file
 	fclose(fp);
