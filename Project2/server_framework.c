@@ -35,9 +35,9 @@ int main(int argc, char const *argv[])
     }
     fclose(fp);
 	
-    fp = fopen("groupchat.txt", "a");
+    fp = fopen("privatechat.txt", "a");
     fclose(fp);
-    fp = fopen("groupchat.txt", "r");
+    fp = fopen("privatechat.txt", "r");
     errorCheck = fgets(temp, BUFFER_SIZE, fp);
     if(errorCheck == NULL || strlen(temp)==1) {//makes first line in privatechat a new line so that no errors occur when trying to get privatechat log when no history exists
 	fclose(fp);    
