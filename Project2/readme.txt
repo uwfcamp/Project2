@@ -108,12 +108,13 @@ IV. OUTPUT
       which relate to the operation of the client side application.
       
       a.  Login Screen: this context mode relates to the creation and authentication of users for 
-      the chat system. 
-      Registration- defines a new user record and corresponding password stored in logins.txt on the 
-      server side. Upon successful registration the new user is automatically logged in to the system. 
-      Login- is used to enter as an existing registered user found inlogins.txt. This will fail if 
-      the username given does not exist; the password does not match the recorded value, or if the 
-      selected user account is banned by the server administrator.
-      Quit- from this menu, selecting quit will close the client application returning the window to 
-      the system commandline.
+          the chat system. 
+          1-Registration- defines a new user record and corresponding password stored in logins.txt
+          on the server side. Upon successful registration the new user is automatically logged in
+          to the system. 
+          2-Login- is used to enter as an existing registered user found inlogins.txt. This will fail
+          if the username given does not exist; the password does not match the recorded value, or 
+          if the selected user account is banned by the server administrator.
+          0-Quit- from this menu, selecting quit will close the client application returning the window 
+          to the system commandline.
   
