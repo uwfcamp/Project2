@@ -162,3 +162,6 @@ IV. OUTPUT
             
           6. Change the password- this function prompts the user for their current password for 
           re-authentication, followed by the desired new password entered twice for validation.
+          
+          7. Logout- this action safely logs the user out of the server and returns the interface 
+          to the login screen.
