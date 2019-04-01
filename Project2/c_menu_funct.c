@@ -349,7 +349,7 @@ void send_file(server_t *server){
 	if (exists)
 		size = get_file_size(filename);
 	printf("FILE SIZE: %lu\n", size);
-	if(size>0) {
+	if(size>=0) {
 		sprintf(server->buffer_out,"10%c%s%c%s%c%s%c%s%c%lu", (char)DELIMITER, server->username, (char)DELIMITER, server->password, (char)DELIMITER, destination, (char)DELIMITER, filename, '_', size);
 		server->buffered_out_size=strlen(server->buffer_out)+1;
 		server->send=1;
