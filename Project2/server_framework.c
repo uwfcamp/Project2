@@ -26,12 +26,23 @@ int main(int argc, char const *argv[])
     FILE * fp;
     fp = fopen("groupchat.txt", "a");
     fclose(fp);
-    fopen("groupchat.txt", "r");
-    char * errorcheck = fgets(temp, BUFFER_SIZE, fp);
-    if(errorcheck==NULL || strlen(temp) ==1) { //makes first line in groupchat a new line so that no errors occur when trying to get groupchat log when no history exists
+    fp = fopen("groupchat.txt", "r");
+    char * errorCheck = fgets(temp, BUFFER_SIZE, fp);
+    if(errorCheck == NULL || strlen(temp) ==1) { //makes first line in groupchat a new line so that no errors occur when trying to get groupchat log when no history exists
 	fclose(fp);
 	fp=fopen("groupchat.txt", "w");
 	fprintf(fp, "-=| GROUP CHAT LOG |=-\n");
+    }
+    fclose(fp);
+	
+    fp = fopen("groupchat.txt", "a");
+    fclose(fp);
+    fp = fopen("groupchat.txt", "r");
+    errorCheck = fgets(temp, BUFFER_SIZE, fp);
+    if(errorCheck == NULL || strlen(temp)==1) {//makes first line in privatechat a new line so that no errors occur when trying to get privatechat log when no history exists
+	fclose(fp);    
+	fp = fopen("privatechat.txt", "w");
+	fprintf(fp, " %c %c %c \n", (char)DELIMITER, (char)DELIMITER, (char)DELIMITER);//makes first line in groupchat a new line so that no errors occur when trying to get groupchat log when no history exists
     }
     fclose(fp);
 
