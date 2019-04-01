@@ -159,4 +159,6 @@ IV. OUTPUT
             the user to select one for download. If no file exists for that user hitting enter will 
             returnt he user to the chat history submenu. 
             0. Quit- returns the focus to the main menu.
-
+            
+          6. Change the password- this function prompts the user for their current password for 
+          re-authentication, followed by the desired new password entered twice for validation.
