@@ -118,3 +118,15 @@ IV. OUTPUT
           0-Quit- from this menu, selecting quit will close the client application returning the window 
           to the system commandline.
   
+      b.	Main Menu: this is the primary interface for the client. The main menu acts as a hub connecting 
+          all other context specific menues in the client application. All user, chat, history, file 
+          and administrative functions are reached from this menu.
+          1. View current online number- this action polls the server which prints out the list of 
+          active users to the client screen.
+          2. Enter the group chat- this submenu evokes the broadcast chat functionality of the 
+          application. A message greets the user prompting to continue to the chat propper or 'Q' 
+          to return to the main menu. Hitting enter at this screen will proceed to the active chat 
+          window a new message explains that the escape sequence to quit the chat is "_q". The user 
+          can type a single message followed by the enter key. Incoming messages from other users 
+          will also post to this screen with the username of the sender. Hitting enter again will 
+          ready the screen for a new message, else hitting 'Q' will return to the main menu.
