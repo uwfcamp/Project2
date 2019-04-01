@@ -142,3 +142,11 @@ IV. OUTPUT
           message followed by the enter key. Incoming messages from other users will also post to 
           this screen with the username of the sender. Hitting enter again will return the user to 
           the recipient select prompt, else hitting 'Q' will return to the main menu.
+          
+          4. View chat history- this submenu prompts the user to choose between the following:
+            1. Group Chat- will immediately print the public chat log to the terminal window. 
+            2. Private Chat- will print all registered users to the screen and prompt the user to 
+            select one to view the private conversation. If no private conversation exists between 
+            those users, the prompt will notify to that fact. After the chat prints to the screen 
+            the prompt returns to the chat history submenu.
+            0. Quit- returns the focus to the main menu.
