@@ -118,7 +118,7 @@ IV. OUTPUT
           0-Quit- from this menu, selecting quit will close the client application returning the window 
           to the system commandline.
   
-      b.	Main Menu: this is the primary interface for the client. The main menu acts as a hub connecting 
+      b.  Main Menu: this is the primary interface for the client. The main menu acts as a hub connecting 
           all other context specific menues in the client application. All user, chat, history, file 
           and administrative functions are reached from this menu.
           1. View current online number- this action polls the server which prints out the list of 
