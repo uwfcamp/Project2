@@ -465,7 +465,7 @@ void change_password(char * body, client_list_t * current) {
 	fclose(fp);
 	
 	// overwrite the login file with new information
-	fopen("logins.txt", "w");
+	fp = fopen("logins.txt", "w");
 	
 	// print all the logins in the temporary string
 	fprintf(fp, "%s", new_contents);
