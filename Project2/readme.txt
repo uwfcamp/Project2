@@ -150,3 +150,13 @@ IV. OUTPUT
             those users, the prompt will notify to that fact. After the chat prints to the screen 
             the prompt returns to the chat history submenu.
             0. Quit- returns the focus to the main menu.
+            
+          5. File transfer- this submenu prompts the user to choose between the following: 
+            1. Group Chat- will immediately print the list of current active users to the terminal 
+            window. the window will then prompt the user to select one as the destination, followed 
+            by a prompt for the filename of the file to opload. 
+            2. Recieve a file- will notify the user of any files addressed to themself and prompt 
+            the user to select one for download. If no file exists for that user hitting enter will 
+            returnt he user to the chat history submenu. 
+            0. Quit- returns the focus to the main menu.
+
