@@ -21,18 +21,26 @@ do {
     menuOption=get_menu_option(userInput, body);
     switch(menuOption) {
       case 0: // quit case
+        printf("Quiting application\n"); // delete later
         break;
       case 1: // ls case
+        printf("ls case\n"); // delete later
         break;
       case 2: // put case
+        printf("put case\n"); // delete later
         break;
       case 3: // get case
+        printf("get case\n"); // delete later
         break;
       case 4: // pwd case
+        printf("pwd case\n"); // delete later
         break;
       case 5: // help case
+        printf("help case\n"); // delete later
+        print_help();
         break;
       default: // error case
+        printf("error case\n"); // delete later
         printf("INVALID INPUT\n");
         break;
     }
@@ -80,5 +88,9 @@ int get_menu_option(char * userInput, char * body) {
         else if (strcmp(token, "help"))
            return 5;
     }
-    return -1;
+    return -1; // no defined case matches
+}
+void print_help(void) {
+    printf("-=| Client Commands |=-\nhelp: Display all commands for the server\nquit: Quit the server\nls: Display all files on the ftp server\nget <file>: Download file from the ftp server\nput <file>: Upload file to the ftp server\npwd: display the current path\n\n");
+    return;
 }
