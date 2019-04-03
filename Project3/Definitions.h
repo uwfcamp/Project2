@@ -22,9 +22,10 @@
 	#include <semaphore.h>
 	#include <sys/stat.h>
   	#include <sys/time.h>
+	#include <ctype.h>
 
 	//Global Definitions
-	#define USER_INPUT 50
+	#define INPUT_SIZE 50
 	
 	//Structures
 

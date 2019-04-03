@@ -23,4 +23,4 @@ c_framework.o: $(CFILES2)
 	
 .PHONY : clean
 clean:
-  rm $(BINARYS) $(OBJECTS1) $(OBJECTS2)
+	rm $(BINARYS) $(OBJECTS1) $(OBJECTS2)
