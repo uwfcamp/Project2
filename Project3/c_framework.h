@@ -5,5 +5,5 @@
 
 #ifndef c_framework
 #define c_framework
-
+  int get_menu_option(char * userInput);
 #endif
