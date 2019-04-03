@@ -24,7 +24,8 @@
   	#include <sys/time.h>
 
 	//Global Definitions
-
+	#define USER_INPUT 50
+	
 	//Structures
 
 #endif
