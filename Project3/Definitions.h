@@ -1,3 +1,8 @@
+//Curtis Duvall, Nathan Wilkins, and Julian Thayer
+//Systems and Networking II
+//Project 3
+//Definitions.h
+
 #ifndef Definitions
 #define Definitions
 	//libraries
