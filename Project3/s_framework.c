@@ -2,13 +2,13 @@
 #include "s_framework.h"
 int main(void) {
 
-//startup
+	//startup
 
-//option to let user set up IP or use local network as default
+	//option to let user set up IP or use local network as default
 
-//When a client connects, a new thread is created to handle each new connection.
+	//When a client connects, a new thread is created to handle each new connection.
 
-//shutdown
+	//shutdown
 
-    return 0;
+	return 0;
 }
