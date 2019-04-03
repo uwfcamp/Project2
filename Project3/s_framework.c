@@ -5,7 +5,7 @@
 
 #include "Definitions.h"
 #include "s_framework.h"
-int main(void) {
+int main(int argc, char **argv) {
 
 	//startup
 
