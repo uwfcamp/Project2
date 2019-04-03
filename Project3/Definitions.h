@@ -26,6 +26,8 @@
 
 	//Global Definitions
 	#define INPUT_SIZE 50
+	#define IP_LENGTH 16
+	#define DEFAULT_IP "0.0.0.0"
 	
 	//Structures
 

@@ -6,10 +6,26 @@
 #include "Definitions.h"
 #include "s_framework.h"
 int main(int argc, char **argv) {
-
-	//startup
+	server_t *clientList = (server_t *) malloc(sizeof(server_t));
+	clientList->connected=0;
+	clientList->socket=0;
+	clientList->last=NULL;
+	clientList->next=NULL;
+	clientList->ip[0]='\0';
+	char input[INPUT_SIZE];
 
 	//option to let user set up IP or use local network as default
+	do {
+		printf("PRESS ENTER TO USE LOCAL NETWORK AS DEFAULT OR ENTER IP THAT YOU WANT TO USE\n>> ");
+		fgets(input, INPUT_SIZE, stdin);
+		input[strlen(input)-1]=0;
+		if(strlen(input)==0)//user just pressed enter
+			strcpy(clientList->ip, DEFAULT_IP);
+		else if (strlen(input)<16 && strlen(input)>6)//valid IP case
+			strcpy(clientList->ip, input);
+	}while(clientList->ip[0]=='\0');
+	printf("%s\n", clientList->ip);
+	//startup
 
 	//When a client connects, a new thread is created to handle each new connection.
 

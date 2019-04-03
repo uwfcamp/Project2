@@ -6,7 +6,7 @@
 #include "Definitions.h"
 #include "c_framework.h"
 
-int main(int argc, char **argv) {
+int main(void) {
 	char userInput[INPUT_SIZE];
 	char body[INPUT_SIZE];
 	int menuOption=-1;
@@ -39,8 +39,12 @@ int main(int argc, char **argv) {
 				printf("help case\n"); // delete later
 				print_help();
 				break;
+			case -2: // error case for get 
+				printf("Correct syntax for get is: get <file>\n");
+				break;
+			case -3: // error case for put
+				printf("Correct syntax for put is: put <file>\n");
 			default: // error case
-				printf("error case\n"); // delete later
 				printf("INVALID INPUT\n");
 				break;
 		}
@@ -55,10 +59,8 @@ int get_menu_option(char * userInput, char * body) {
 	char * token;
 	int i;
 	token = strtok(userInput, search);
-	printf("userInput = %s\n", userInput);
 	for(i=0;i<strlen(token);i++) {
 		token[i]=tolower(token[i]); 
-	printf("token = %s\n", token);
 	if(strcmp(token ,"quit")==0)
 		return 0;
 	else if (strcmp(token, "ls")==0)
@@ -69,7 +71,7 @@ int get_menu_option(char * userInput, char * body) {
 			return 2;
 		}
 		else //invalid syntax for put
-			return -1;
+			return -3;
 	}
 	else if (strcmp(token, "get")==0){
 		if((token = strtok(NULL, search)) != NULL) {
@@ -77,7 +79,7 @@ int get_menu_option(char * userInput, char * body) {
 			return 3;
 		}
 		else //invalid syntax for get
-			return -1;
+			return -2;
 	}
 	else if (strcmp(token, "pwd")==0)
 		return 4;
