@@ -17,3 +17,11 @@ int main(int argc, char **argv) {
 
 	return 0;
 }
+void print_menu(void) {
+	printf("-=| Server Menu |=-\n");
+	printf("help: Display all commands for ther server.\n");
+	printf("quit: Quit the server.\n");
+	printf("count current: Display number of currently active users.\n");
+	printf("count all: Display the total number of system visitors.\n");
+	return;
+}
