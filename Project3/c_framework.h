@@ -1,7 +1,7 @@
 //Curtis Duvall, Nathan Wilkins, and Julian Thayer
 //Systems and Networking II
 //Project 3
-//readme.txt
+//c_framework.h
 
 #ifndef c_framework
 #define c_framework
