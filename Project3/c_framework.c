@@ -6,7 +6,7 @@
 #include "Definitions.h"
 #include "c_framework.h"
 
-int main(void) {
+int main(int argc, char **argv) {
 	char userInput[INPUT_SIZE];
 	char body[INPUT_SIZE];
 	int menuOption=-1;
