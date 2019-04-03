@@ -51,23 +51,19 @@ int main(void) {
 }
 
 int get_menu_option(char * userInput, char * body) {
-	char search[3];
-	char temp[INPUT_SIZE];
+	char *  search = "\n ";
 	char * token;
 	int i;
-	strcpy(temp, userInput);
-	search[0]='\n';
-	search[1]= ' ';
-	search[3]='\0';
-	if ((token = strtok(temp, search)) != NULL) {
+	token = strtok(userInput, search);
+	printf("userInput = %s\n", userInput);
 	for(i=0;i<strlen(token);i++) {
 		token[i]=tolower(token[i]); 
-	}
-	if(strcmp(token ,"quit"))
+	printf("token = %s\n", token);
+	if(strcmp(token ,"quit")==0)
 		return 0;
-	else if (strcmp(token, "ls"))
+	else if (strcmp(token, "ls")==0)
 		return 1;
-	else if (strcmp(token, "put")) {
+	else if (strcmp(token, "put")==0) {
 		if((token = strtok(NULL, search)) != NULL) {
 			strcpy(body, token);
 			return 2;
@@ -75,7 +71,7 @@ int get_menu_option(char * userInput, char * body) {
 		else //invalid syntax for put
 			return -1;
 	}
-	else if (strcmp(token, "get")){
+	else if (strcmp(token, "get")==0){
 		if((token = strtok(NULL, search)) != NULL) {
 			strcpy(body, token);
 			return 3;
@@ -83,9 +79,9 @@ int get_menu_option(char * userInput, char * body) {
 		else //invalid syntax for get
 			return -1;
 	}
-	else if (strcmp(token, "pwd"))
+	else if (strcmp(token, "pwd")==0)
 		return 4;
-	else if (strcmp(token, "help"))
+	else if (strcmp(token, "help")==0)
 		return 5;
 	}
 	return -1; // no defined case matches
