@@ -21,22 +21,22 @@ int main(void) {
 		menuOption=get_menu_option(userInput, body);
 		switch(menuOption) {
 			case 0: // quit case
-				printf("Quiting application\n"); // delete later
+				//printf("Quiting application\n"); // delete later
 				break;
 			case 1: // ls case
-				printf("ls case\n"); // delete later
+				//printf("ls case\n"); // delete later
 				break;
 			case 2: // put case
-				printf("put case\n"); // delete later
+				//printf("put case\n"); // delete later
 				break;
 			case 3: // get case
-				printf("get case\n"); // delete later
+				//printf("get case\n"); // delete later
 				break;
 			case 4: // pwd case
-				printf("pwd case\n"); // delete later
+				//printf("pwd case\n"); // delete later
 				break;
 			case 5: // help case
-				printf("help case\n"); // delete later
+				//printf("help case\n"); // delete later
 				print_help();
 				break;
 			case -2: // error case for get 
