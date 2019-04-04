@@ -40,3 +40,67 @@ void print_menu(void) {
 	printf("count all: Display the total number of system visitors.\n");
 	return;
 }
+
+int get_menu_option(char * userInput) {
+	char *  search = "\n ";
+	char * token;
+	int i;
+	token = strtok(userInput, search);
+	for(i=0;i<strlen(token);i++) {
+		token[i]=tolower(token[i]); 
+	if(strcmp(token ,"quit")==0)
+		return 0;
+	if(strcmp(token, "help")==1)
+		return 1;
+	else if (strcmp(token, "count")==0){
+		if((token = strtok(NULL, search)) != NULL) {
+			if(strcmp(token, "current")==0)
+				return 2;
+			else if(strcmp(token, "all")==0)
+				return 3;
+			else // invalid command after count
+				return -2;
+		}
+		else //invalid syntax for count
+			return -2;
+	}
+}
+
+void * menuThread(void * param) {
+	char userInput[INPUT_SIZE];
+	int menuOption = -1;
+	print_menu();
+	do {
+		do{
+			printf(">> ");
+			fgets(userInput, INPUT_SIZE, stdin);
+		} while(strlen(userInput) <= 1);
+		menuOption=get_menu_option(userInput);
+		switch(menuOption) {
+			case 0:	//quit case
+				//end all connections
+				//printf("Quiting application\n"); // delete late
+				break;
+			case 1: //help case
+				print_menu();
+				break;
+			case 2: // count current
+				break;
+			case 3: // count all
+				break;
+			case -2: // invalid count syntax 
+				printf("Invalid input for count, try 'count all' or 'count current'\n");
+				break;
+			default: // error case
+				printf("INVALID INPUT\n");
+				break;	
+		}
+		
+	}while(menuOption != 0);
+	pthread_exit(NULL);
+}
+
+void * clientThread(void * param) {
+	
+	pthread_exit(NULL);
+}
