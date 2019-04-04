@@ -24,7 +24,6 @@ int main(int argc, char **argv) {
 		else if (strlen(input)<16 && strlen(input)>6)//valid IP case
 			strcpy(clientList->ip, input);
 	}while(clientList->ip[0]=='\0');
-	printf("%s\n", clientList->ip);
 	//startup
 
 	//When a client connects, a new thread is created to handle each new connection.
