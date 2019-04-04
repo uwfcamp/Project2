@@ -5,6 +5,7 @@
 
 #include "Definitions.h"
 #include "s_framework.h"
+int force_logoff=0;
 int main(int argc, char **argv) {
 	server_t *clientList = (server_t *) malloc(sizeof(server_t));
 	clientList->force_close=0;
@@ -13,6 +14,7 @@ int main(int argc, char **argv) {
 	clientList->last=NULL;
 	clientList->next=NULL;
 	clientList->ip[0]='\0';
+	server_t *firstClient = clientList;
 	char input[INPUT_SIZE];
 	pthread_t connectedUsers[MAX_CONNECTED_USERS];
 	pthread_t menuTID;
@@ -28,11 +30,12 @@ int main(int argc, char **argv) {
 	}while(clientList->ip[0]=='\0');
 	//startup
 
-	pthread_create(&menuTID, NULL, menuThread, (void *)clientList);
-	//When a client connects, a new thread is created to handle each new connection.
+	pthread_create(&menuTID, NULL, menuThread, (void *)firstClient);
+	//while force_logoff != 1 When a client connects, a new thread is created to handle each new connection.
 
 	//shutdown
 	pthread_join(menuTID, NULL);
+	
 	return 0;
 }
 void print_menu(void) {
