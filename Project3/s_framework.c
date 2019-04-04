@@ -14,8 +14,7 @@ int main(int argc, char **argv) {
 	clientList->next=NULL;
 	clientList->ip[0]='\0';
 	char input[INPUT_SIZE];
-	pthread_t menuT;//thread for menu
-
+	pthread_t menuTID;
 	//option to let user set up IP or use local network as default
 	do {
 		printf("PRESS ENTER TO USE LOCAL NETWORK AS DEFAULT OR ENTER IP THAT YOU WANT TO USE\n>> ");
@@ -28,19 +27,15 @@ int main(int argc, char **argv) {
 	}while(clientList->ip[0]=='\0');
 	//startup
 
-	pthread_create(&menuT, NULL, menuThread, (void *) &clientList);
+	pthread_create(&menuTID, NULL, menuThread, (void *)clientList);
 	//When a client connects, a new thread is created to handle each new connection.
 
 	//shutdown
-	pthread_join(&menuT, NULL);
+	pthread_join(menuTID, NULL);
 	return 0;
 }
 void print_menu(void) {
-	printf("-=| Server Menu |=-\n");
-	printf("help: Display all commands for ther server.\n");
-	printf("quit: Quit the server.\n");
-	printf("count current: Display number of currently active users.\n");
-	printf("count all: Display the total number of system visitors.\n");
+	printf("-=| Server Menu |=-\nhelp: Display all commands for ther server.\nquit: Quit the server.\ncount current: Display number of currently active users.\ncount all: Display the total number of system visitors.\n");
 	return;
 }
 
@@ -48,12 +43,12 @@ int get_menu_option(char * userInput) {
 	char *  search = "\n ";
 	char * token;
 	int i;
+	for(i=0;i<strlen(userInput);i++)
+		userInput[i]=tolower(userInput[i]); 
 	token = strtok(userInput, search);
-	for(i=0;i<strlen(token);i++)
-		token[i]=tolower(token[i]); 
 	if(strcmp(token ,"quit")==0)
 		return 0;
-	if(strcmp(token, "help")==1)
+	if(strcmp(token, "help")==0)
 		return 1;
 	else if (strcmp(token, "count")==0){
 		if((token = strtok(NULL, search)) != NULL) {
