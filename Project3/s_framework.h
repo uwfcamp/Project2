@@ -6,6 +6,9 @@
 #ifndef s_framework
 #define s_framework
 
+	pthread_t connectedUsers[MAX_CONNECTED_USERS];
+	pthread_t menuThread;
+	
 	void print_menu(void);
 
 	//SERVER GLOBAL VARIABLES
@@ -16,4 +19,5 @@
 		struct server_s *last;
 		struct server_s *next;
 	}server_t;
+
 #endif
