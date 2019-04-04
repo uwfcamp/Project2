@@ -10,6 +10,8 @@
 	pthread_t menuThread;
 	
 	void print_menu(void);
+	void * menuThread(void * param);
+	void * clientThread(void * param);
 
 	//SERVER GLOBAL VARIABLES
 	typedef struct server_s {
