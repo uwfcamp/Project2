@@ -49,7 +49,7 @@ int get_menu_option(char * userInput) {
 	char * token;
 	int i;
 	token = strtok(userInput, search);
-	for(i=0;i<strlen(token);i++) {
+	for(i=0;i<strlen(token);i++)
 		token[i]=tolower(token[i]); 
 	if(strcmp(token ,"quit")==0)
 		return 0;
@@ -67,6 +67,7 @@ int get_menu_option(char * userInput) {
 		else //invalid syntax for count
 			return -2;
 	}
+	return -1;
 }
 
 void * menuThread(void * param) {
