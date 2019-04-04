@@ -7,12 +7,14 @@
 #include "s_framework.h"
 int main(int argc, char **argv) {
 	server_t *clientList = (server_t *) malloc(sizeof(server_t));
+	clientList->force_close=0;
 	clientList->connected=0;
 	clientList->socket=0;
 	clientList->last=NULL;
 	clientList->next=NULL;
 	clientList->ip[0]='\0';
 	char input[INPUT_SIZE];
+	pthread_t menuT;//thread for menu
 
 	//option to let user set up IP or use local network as default
 	do {
@@ -26,10 +28,11 @@ int main(int argc, char **argv) {
 	}while(clientList->ip[0]=='\0');
 	//startup
 
+	pthread_create(&menuT, NULL, menuThread, (void *) &clientList);
 	//When a client connects, a new thread is created to handle each new connection.
 
 	//shutdown
-
+	pthread_join(&menuT, NULL);
 	return 0;
 }
 void print_menu(void) {
