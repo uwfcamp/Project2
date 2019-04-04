@@ -5,8 +5,6 @@
 
 #ifndef s_framework
 #define s_framework
-
-	pthread_t connectedUsers[MAX_CONNECTED_USERS];
 	
 	void print_menu(void);
 	int get_menu_option(char * userInput);
