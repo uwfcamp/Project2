@@ -14,6 +14,7 @@ int main(int argc, char **argv) {
 	clientList->next=NULL;
 	clientList->ip[0]='\0';
 	char input[INPUT_SIZE];
+	pthread_t connectedUsers[MAX_CONNECTED_USERS];
 	pthread_t menuTID;
 	//option to let user set up IP or use local network as default
 	do {
