@@ -12,7 +12,9 @@ int main(void) {
 	int menuOption=-1;
 
 	//establish connection, prompt if using different IP and get it otherwise user local default
-
+	
+	
+	print_help();
 	do {
 		do{
 			printf(">> ");

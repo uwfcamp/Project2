@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
 	clientList->ip[0]='\0';
 	server_t *firstClient = clientList;
 	char input[INPUT_SIZE];
-	pthread_t connectedUsers[MAX_CONNECTED_USERS];
+	//pthread_t connectedUsers[MAX_CONNECTED_USERS];//uncomment when implimenting connections
 	pthread_t menuTID;
 	//option to let user set up IP or use local network as default
 	do {
@@ -32,7 +32,9 @@ int main(int argc, char **argv) {
 
 	pthread_create(&menuTID, NULL, menuThread, (void *)firstClient);
 	//while force_logoff != 1 When a client connects, a new thread is created to handle each new connection.
+	while(force_logoff != 1) {
 
+	};
 	//shutdown
 	pthread_join(menuTID, NULL);
 	
@@ -70,6 +72,7 @@ int get_menu_option(char * userInput) {
 }
 
 void * menuThread(void * param) {
+	server_t *firstClient = (server_t *)param;
 	char userInput[INPUT_SIZE];
 	int menuOption = -1;
 	print_menu();
@@ -82,6 +85,11 @@ void * menuThread(void * param) {
 		switch(menuOption) {
 			case 0:	//quit case
 				//end all connections
+				while(firstClient != NULL){
+					firstClient->force_close=1;
+					firstClient=firstClient->next;
+				}
+				force_logoff=1;
 				//printf("Quiting application\n"); // delete late
 				break;
 			case 1: //help case
