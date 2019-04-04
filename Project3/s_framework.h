@@ -10,11 +10,13 @@
 	pthread_t menuThread;
 	
 	void print_menu(void);
+	int get_menu_option(char * userInput);
 	void * menuThread(void * param);
 	void * clientThread(void * param);
 
 	//SERVER GLOBAL VARIABLES
 	typedef struct server_s {
+		int force_close;
 		int connected;
 		int socket;
 		char ip[IP_LENGTH];
