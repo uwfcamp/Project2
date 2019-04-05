@@ -46,6 +46,7 @@ int main(void) {
 				break;
 			case -3: // error case for put
 				printf("Correct syntax for put is: put <file>\n");
+				break;
 			default: // error case
 				printf("INVALID INPUT\n");
 				break;

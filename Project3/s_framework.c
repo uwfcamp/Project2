@@ -52,8 +52,10 @@ int get_menu_option(char * userInput) {
 	for(i=0;i<strlen(userInput);i++)
 		userInput[i]=tolower(userInput[i]); 
 	token = strtok(userInput, search);
-	if(strcmp(token ,"quit")==0)
+	if(strcmp(token ,"quit")==0){
+		force_logoff=1;
 		return 0;
+	}
 	if(strcmp(token, "help")==0)
 		return 1;
 	else if (strcmp(token, "count")==0){
