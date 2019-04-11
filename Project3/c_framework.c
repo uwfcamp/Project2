@@ -91,6 +91,9 @@ int main(void) {
 					send(server_socket, buffer, strlen(buffer), MSG_NOSIGNAL);
 					if (errno==EPIPE)
 						force_close=1;
+					int i;
+					for(i=strlen(buffer);i>-1;i--)
+						buffer[i]=0;
 
 					// recieve back the string listing files
 					int size = recv(server_socket, buffer, BUFFER_SIZE, MSG_NOSIGNAL);
@@ -119,6 +122,9 @@ int main(void) {
 					// send the message
 					errno = 0;
 					send(server_socket, buffer, strlen(buffer), MSG_NOSIGNAL);
+					int i;
+					for(i=strlen(buffer);i>-1;i--)
+						buffer[i]=0;
 					if (errno==EPIPE)
 						force_close=1;
 
@@ -139,7 +145,8 @@ int main(void) {
 				break;
 			case 6: // echo case
 				{
-					char buffer[BUFFER_SIZE]={0};
+					char buffer[BUFFER_SIZE];
+					buffer[0]=0;
 					strcpy(buffer, "echo ");
 					strcat(buffer, body);
 
@@ -148,7 +155,9 @@ int main(void) {
 					send(server_socket, buffer, strlen(buffer), MSG_NOSIGNAL);
 					if (errno==EPIPE)
 						force_close=1;
-
+					int i;
+					for(i=strlen(buffer);i>-1;i--)
+						buffer[i]=0;
 					// recieve the same message back
 					int size = recv(server_socket, buffer, INPUT_SIZE * 2, MSG_NOSIGNAL);
 					if (size==0)

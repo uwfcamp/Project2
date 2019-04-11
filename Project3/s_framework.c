@@ -236,7 +236,7 @@ void * clientThread(void * param){
 			char *param = strtok(NULL, "\n");
 			if (strcmp(command, "pwd")==0){
 				char buffer[BUFFER_SIZE];
-				char buffer[0]=0;
+				buffer[0]=0;
 				getcwd(buffer, BUFFER_SIZE);
 				printf("\n%s\n>> ", buffer);
 				fflush(stdout);
@@ -260,6 +260,10 @@ void * clientThread(void * param){
 			else if (strcmp(command, "echo")==0){
 				send(client->socket, param, strlen(param), MSG_NOSIGNAL | MSG_DONTWAIT);
 			}
+			int i;
+			for(i=0;i<BUFFER_SIZE;i++)
+				buffer_in[i]=0;
+
 		}
 
 		// this checks if the connection has been broken
