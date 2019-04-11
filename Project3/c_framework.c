@@ -84,7 +84,7 @@ int main(void) {
 			case 1: // ls case
 				{
 					char buffer[BUFFER_SIZE]={0};
-					strcat(buffer, "ls");
+					strcpy(buffer, "ls");
 
 					// send the message
 					errno = 0;
@@ -114,7 +114,7 @@ int main(void) {
 				//printf("pwd case\n"); // delete later
 				{
 					char buffer[BUFFER_SIZE]={0};
-					strcat(buffer, "pwd");
+					strcpy(buffer, "pwd");
 
 					// send the message
 					errno = 0;
@@ -139,8 +139,8 @@ int main(void) {
 				break;
 			case 6: // echo case
 				{
-					char buffer[INPUT_SIZE * 2]={0};
-					strcat(buffer, "echo ");
+					char buffer[BUFFER_SIZE]={0};
+					strcpy(buffer, "echo ");
 					strcat(buffer, body);
 
 					// send the message

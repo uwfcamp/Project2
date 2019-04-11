@@ -235,7 +235,7 @@ void * clientThread(void * param){
 			char *param = strtok(NULL, "\n");
 			if (strcmp(command, "pwd")==0){
 				char buffer[BUFFER_SIZE]={0};
-				getcwd(&buffer[0], BUFFER_SIZE);
+				getcwd(buffer, BUFFER_SIZE);
 				printf("\n%s\n>> ", buffer);
 				fflush(stdout);
 				send(client->socket, buffer, strlen(buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
@@ -245,6 +245,7 @@ void * clientThread(void * param){
 				DIR *d = opendir("./");
 				struct dirent *dir;
 				if (d != NULL){
+					strcpy(buffer,"\n");
 					while((dir=readdir(d))!=NULL){
 						strcat(buffer, dir->d_name);
 						strcat(buffer, "\n");
