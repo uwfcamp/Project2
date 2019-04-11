@@ -229,19 +229,22 @@ void * clientThread(void * param){
 		errno=0;
 
 		char buffer_in[BUFFER_SIZE];
+		buffer_in[0]=0;//set first element to null
 		// recieve the command from the client and respond accordingly
 		if((recieved=recv(client->socket, buffer_in, BUFFER_SIZE, MSG_NOSIGNAL | MSG_DONTWAIT))>0){
 			char *command = strtok(buffer_in, "\n ");
 			char *param = strtok(NULL, "\n");
 			if (strcmp(command, "pwd")==0){
-				char buffer[BUFFER_SIZE]={0};
+				char buffer[BUFFER_SIZE];
+				char buffer[0]=0;
 				getcwd(buffer, BUFFER_SIZE);
 				printf("\n%s\n>> ", buffer);
 				fflush(stdout);
 				send(client->socket, buffer, strlen(buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
 			}
 			else if (strcmp(command, "ls")==0){
-				char buffer[BUFFER_SIZE]={0};
+				char buffer[BUFFER_SIZE];
+				buffer[0]=0;
 				DIR *d = opendir("./");
 				struct dirent *dir;
 				if (d != NULL){
