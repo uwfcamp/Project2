@@ -88,7 +88,7 @@ int main(void) {
 
 					// send the message
 					errno = 0;
-					send(server_socket, buffer, strlen(buffer), MSG_NOSIGNAL);
+					send(server_socket, buffer, strlen(buffer)+1, MSG_NOSIGNAL);
 					if (errno==EPIPE)
 						force_close=1;
 					int i;
@@ -108,8 +108,48 @@ int main(void) {
 					break;
 				}
 			case 2: // put case
-				//printf("put case\n"); // delete later
+				{
+				char buffer[BUFFER_SIZE]={0};
+				char fileSize_str[BUFFER_SIZE]={0};
+				long long fileSize_num=get_file_size(body);
+				if (fileSize_num>=0){
+					// send initial message to server
+					strcpy(buffer, "put ");
+					strcat(buffer, body);
+					strcat(buffer, " ");
+					sprintf(fileSize_str, "%lld", fileSize_num);
+					strcat(buffer, fileSize_str);
+					send(server_socket, buffer, strlen(buffer)+1, MSG_NOSIGNAL);
+					if (errno==EPIPE)
+						force_close=1;
+
+					// clear out the buffer
+					int i;
+					for(i=strlen(buffer);i>-1;i--)
+						buffer[i]=0;
+
+					// send the contents of the file
+					FILE *fp = fopen(body, "rb");
+					while(fileSize_num>0){
+						// read in up to BUFFER_SIZE bytes
+						size_t bytes_read = fread(buffer,1,BUFFER_SIZE,fp);
+						// decrement the file size tracker
+						fileSize_num-=bytes_read;
+						// send the buffered content
+						send(server_socket,buffer, bytes_read, MSG_NOSIGNAL);
+						// check if sent
+						if (errno==EPIPE){
+							printf("ERROR: CONNECTION BROKEN\n");
+							force_close=1;
+							break;
+						}
+					}
+				}
+				else{
+					printf("ERROR: FILE NOT FOUND\n");
+				}
 				break;
+				}
 			case 3: // get case
 				//printf("get case\n"); // delete later
 				break;
@@ -121,7 +161,7 @@ int main(void) {
 
 					// send the message
 					errno = 0;
-					send(server_socket, buffer, strlen(buffer), MSG_NOSIGNAL);
+					send(server_socket, buffer, strlen(buffer)+1, MSG_NOSIGNAL);
 					int i;
 					for(i=strlen(buffer);i>-1;i--)
 						buffer[i]=0;
@@ -152,7 +192,7 @@ int main(void) {
 
 					// send the message
 					errno = 0;
-					send(server_socket, buffer, strlen(buffer), MSG_NOSIGNAL);
+					send(server_socket, buffer, strlen(buffer)+1, MSG_NOSIGNAL);
 					if (errno==EPIPE)
 						force_close=1;
 					int i;
@@ -245,4 +285,13 @@ int get_menu_option(char * userInput, char * body) {
 void print_help(void) {
 	printf("-=| Client Commands |=-\nhelp: Display all commands for the server\nquit: Quit the server\nls: Display all files on the ftp server\nget <file>: Download file from the ftp server\nput <file>: Upload file to the ftp server\npwd: display the current path\necho <message>: Have the server echo a message back\n\n");
 	return;
+}
+
+
+
+long long get_file_size(char *filename){
+	struct stat st;
+	if (stat(filename, &st) == 0)
+		return st.st_size;
+	return -1;
 }

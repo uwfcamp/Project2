@@ -7,4 +7,5 @@
 #define c_framework
   int get_menu_option(char * userInput, char * body);
   void print_help(void);
+  long long get_file_size(char *filename);
 #endif

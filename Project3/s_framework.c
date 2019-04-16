@@ -1,3 +1,4 @@
+
 //Curtis Duvall, Nathan Wilkins, and Julian Thayer
 //Systems and Networking II
 //Project 3
@@ -240,7 +241,7 @@ void * clientThread(void * param){
 				getcwd(buffer, BUFFER_SIZE);
 				printf("\n%s\n>> ", buffer);
 				fflush(stdout);
-				send(client->socket, buffer, strlen(buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+				send(client->socket, buffer, strlen(buffer)+1, MSG_NOSIGNAL | MSG_DONTWAIT);
 			}
 			else if (strcmp(command, "ls")==0){
 				char buffer[BUFFER_SIZE];
@@ -255,10 +256,25 @@ void * clientThread(void * param){
 					}
 					closedir(d);
 				}
-				send(client->socket, buffer, strlen(buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+				send(client->socket, buffer, strlen(buffer)+1, MSG_NOSIGNAL | MSG_DONTWAIT);
+			}
+			else if (strcmp(command, "put")==0){
+				char buffer[BUFFER_SIZE]={0};
+				param = strtok(param, " \n");
+				char *size_str = strtok(NULL, " \n");
+				FILE *fp = fopen(param, "wb");
+				long long size_num = atoll(size_str);
+				while(size_num>0){
+					recieved = recv(client->socket, buffer, BUFFER_SIZE, MSG_NOSIGNAL);
+					if (recieved == 0)
+						break;
+					size_num-=recieved;
+					fwrite(buffer, 1, recieved, fp);
+				}
+				fclose(fp);
 			}
 			else if (strcmp(command, "echo")==0){
-				send(client->socket, param, strlen(param), MSG_NOSIGNAL | MSG_DONTWAIT);
+				send(client->socket, param, strlen(param)+1, MSG_NOSIGNAL | MSG_DONTWAIT);
 			}
 			int i;
 			for(i=0;i<BUFFER_SIZE;i++)
