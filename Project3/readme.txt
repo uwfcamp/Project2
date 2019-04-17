@@ -67,6 +67,9 @@ III. USER INPUT
   
 IV. OUTPUT
 
-  1.  server:
+  1.  server: Based upon the users input, the progam will display the apropriate output as outlined
+      in the project description. The program will also output the connection making status.
   
-  2.  client:
+  2.  client: Based upon the users input, the program will display the apropriate output as outlined
+      in the project description. 
+  
