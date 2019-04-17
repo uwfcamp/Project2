@@ -36,15 +36,34 @@ I. SETUP AND COMPILATION
 
 II. RUNNING THE PROGRAM
 
-  1.  server: 
+  1.  server: Start the server program by entering "./server". No extra files are neccesary to 
+      run this program. 
       
-  2.  client: 
+  2.  client: Start the client program by entering "./client". No extra files are neccesary to
+      run this program.
       
 III. USER INPUT
 
-  1.  server:
+  1.  server: On startup the user will need to enter the IP address that it wants to connect
+      through or hit enter to use the local default. After that, the user can input "help",
+      "quit", "count current" or "count all"
+      
+      help: Displays a list of all commands available to the user.
+      quit: safely exits the program.
+      count current: Displays the count of all active visitors to the server program.
+      count all: Displays the count of all visitors to the server program.
   
-  2.  client:
+  2.  client: On startup the user will need to enter the IP address that it wants to connect
+      to or hit enter to use the local default. After that, the user can input "help", "quit",
+      "ls", "get <file>", "put <file>", "pwd", and "echo <message>"
+      
+      help: Displays a list of all commands available to the user.
+      quit: safely exits the program.
+      ls: Displays all files in the current working directory.
+      get <file>: Dowload file from FTP server.
+      put <file>: Upload file to FTP server.
+      pwd: Display the present working directory.
+      echo <message>: Have the server echo a message back.
   
 IV. OUTPUT
 
