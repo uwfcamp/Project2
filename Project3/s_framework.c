@@ -133,7 +133,7 @@ int main(int argc, char **argv) {
 
 
 void print_menu(void) {
-	printf("-=| Server Menu |=-\nhelp: Display all commands for ther server.\nquit: Quit the server.\ncount current: Display number of currently active users.\ncount all: Display the total number of system visitors.\n");
+	printf("\n-=| Server Menu |=-\nhelp: Display all commands for ther server.\nquit: Quit the server.\ncount current: Display number of currently active users.\ncount all: Display the total number of system visitors.\n>> ");
 	return;
 }
 
@@ -170,14 +170,14 @@ int get_menu_option(char * userInput) {
 
 
 void * menuThread(void * param) {
-	server_t **firstClient = (server_t **)param;
+	//server_t **firstClient = (server_t **)param; // delete after discussing with team
 	char userInput[INPUT_SIZE];
 	int menuOption = -1;
 	print_menu();
 	do {
 		do{
-			printf(">> ");
 			fgets(userInput, INPUT_SIZE, stdin);
+			printf(">> ");
 		} while(strlen(userInput) <= 1);
 		menuOption=get_menu_option(userInput);
 
@@ -239,8 +239,9 @@ void * clientThread(void * param){
 				char buffer[BUFFER_SIZE];
 				buffer[0]=0;
 				getcwd(buffer, BUFFER_SIZE);
-				printf("\n%s\n>> ", buffer);
-				fflush(stdout);
+				//printf("\n%s\n>> ", buffer);
+				//fflush(stdout);
+				printf("\nSending present working directory through socket %d\n", client->socket);
 				send(client->socket, buffer, strlen(buffer)+1, MSG_NOSIGNAL | MSG_DONTWAIT);
 			}
 			else if (strcmp(command, "ls")==0){
@@ -256,11 +257,13 @@ void * clientThread(void * param){
 					}
 					closedir(d);
 				}
+				printf("\nSending list of all files in present working directory through socket %d\n", client->socket);
 				send(client->socket, buffer, strlen(buffer)+1, MSG_NOSIGNAL | MSG_DONTWAIT);
 			}
 			else if (strcmp(command, "put")==0){
 				char buffer[BUFFER_SIZE]={0};
 				param = strtok(param, " \n");
+				printf("\nRecieving %s from socket %d\n", param, client->socket);
 				char *size_str = strtok(NULL, " \n");
 				FILE *fp = fopen(param, "wb");
 				if (fp != NULL){
@@ -286,6 +289,7 @@ void * clientThread(void * param){
 						send(client->socket, buffer, strlen(buffer)+1, MSG_NOSIGNAL | MSG_DONTWAIT);
 						error=errno;
 						if (error!=EPIPE){
+							printf("\nSending %s to socket %d\n", param, client->socket);
 							while(filesize>0){
 								int i;
 								for (i=0; i<BUFFER_SIZE; i++)
@@ -311,6 +315,7 @@ void * clientThread(void * param){
 				}
 			}
 			else if (strcmp(command, "echo")==0){
+				printf("\nSending request back to socket %d\n", client->socket);
 				send(client->socket, param, strlen(param)+1, MSG_NOSIGNAL | MSG_DONTWAIT);
 			}
 			int i;

@@ -52,7 +52,7 @@ int main(void) {
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_port = htons(PORT);
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
-	int address_length = sizeof(serv_addr);
+	//int address_length = sizeof(serv_addr); // delete after discussing with team
 
 	// Convert IPv4 and IPv6 addresses from text to binary form
 	if(inet_pton(AF_INET, ip, &serv_addr.sin_addr)<=0)
