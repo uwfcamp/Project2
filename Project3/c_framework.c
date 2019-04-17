@@ -109,50 +109,117 @@ int main(void) {
 				}
 			case 2: // put case
 				{
-				char buffer[BUFFER_SIZE]={0};
-				char fileSize_str[BUFFER_SIZE]={0};
-				long long fileSize_num=get_file_size(body);
-				if (fileSize_num>=0){
-					// send initial message to server
-					strcpy(buffer, "put ");
-					strcat(buffer, body);
-					strcat(buffer, " ");
-					sprintf(fileSize_str, "%lld", fileSize_num);
-					strcat(buffer, fileSize_str);
-					send(server_socket, buffer, strlen(buffer)+1, MSG_NOSIGNAL);
-					if (errno==EPIPE)
-						force_close=1;
+					char buffer[BUFFER_SIZE]={0};
+					char fileSize_str[BUFFER_SIZE]={0};
+					long long fileSize_num=get_file_size(body);
+					if (fileSize_num>=0){
+						// send initial message to server
+						strcpy(buffer, "put ");
+						strcat(buffer, body);
+						strcat(buffer, " ");
+						sprintf(fileSize_str, "%lld", fileSize_num);
+						strcat(buffer, fileSize_str);
 
-					// clear out the buffer
-					int i;
-					for(i=strlen(buffer);i>-1;i--)
-						buffer[i]=0;
+						// ensure that the file can be opened before sending data to the server
+						FILE *fp = fopen(body, "rb");
+						if (fp!=NULL){
+							send(server_socket, buffer, strlen(buffer)+1, MSG_NOSIGNAL);
+							if (errno==EPIPE){
+								printf("ERROR: CONNECTION BROKEN\n");
+								force_close=1;
+							}
 
-					// send the contents of the file
-					FILE *fp = fopen(body, "rb");
-					while(fileSize_num>0){
-						// read in up to BUFFER_SIZE bytes
-						size_t bytes_read = fread(buffer,1,BUFFER_SIZE,fp);
-						// decrement the file size tracker
-						fileSize_num-=bytes_read;
-						// send the buffered content
-						send(server_socket,buffer, bytes_read, MSG_NOSIGNAL);
-						// check if sent
-						if (errno==EPIPE){
-							printf("ERROR: CONNECTION BROKEN\n");
-							force_close=1;
-							break;
+							// clear out the buffer
+							int i;
+							for(i=strlen(buffer);i>-1;i--)
+								buffer[i]=0;
+
+							if (force_close!=1){
+								while(fileSize_num>0){
+									// read in up to BUFFER_SIZE bytes
+									size_t bytes_read = fread(buffer,1,BUFFER_SIZE,fp);
+									// decrement the file size tracker
+									fileSize_num-=bytes_read;
+									// send the buffered content
+									send(server_socket,buffer, bytes_read, MSG_NOSIGNAL);
+									// check if sent
+									if (errno==EPIPE){
+										printf("ERROR: CONNECTION BROKEN\n");
+										force_close=1;
+										break;
+									}
+								}
+							}
+							fclose(fp);
 						}
 					}
-				}
-				else{
-					printf("ERROR: FILE NOT FOUND\n");
-				}
-				break;
+					else{
+						printf("ERROR: FILE NOT FOUND\n");
+					}
+					break;
 				}
 			case 3: // get case
-				//printf("get case\n"); // delete later
-				break;
+				{
+					char buffer[BUFFER_SIZE]={0};
+					long long filesize_num;
+					sprintf(buffer, "get %s", body);
+					send(server_socket, buffer, strlen(buffer)+1, MSG_NOSIGNAL);
+					if (errno==EPIPE){
+						printf("ERROR: CONNECTION BROKEN\n");
+						force_close=1;
+					}
+
+					int bytes_recieved = recv(server_socket, buffer, BUFFER_SIZE, MSG_NOSIGNAL);
+					if (bytes_recieved==0){
+						printf("ERROR: CONNECTION BROKEN\n");
+						force_close=1;
+					}
+
+					char *command;
+					char *filename;
+					char *filesize_str;
+					if (force_close==0){
+						command = strtok(buffer, "\n ");
+						if (strcmp(command,"get")==0){
+							filename = strtok(NULL, "\n ");
+							filesize_str = strtok(NULL, "\n ");
+							filesize_num = atoll(filesize_str);
+							FILE *fp = fopen(filename,"wb");
+							if (fp != NULL){
+								while(filesize_num>0){
+									int i;
+									for (i=0; i<BUFFER_SIZE; i++)
+										buffer[i]=0;
+									// read data from server into buffer
+									bytes_recieved = recv(server_socket, buffer, BUFFER_SIZE, MSG_NOSIGNAL);
+									// check if connection is still valid
+									if (bytes_recieved==0){
+										printf("ERROR: CONNECTION BROKEN\n");
+										force_close=1;
+										break;
+									}
+									else if (bytes_recieved>0){
+									// decrement the file size tracker
+										filesize_num-=bytes_recieved;
+									// write data recieved to file
+										fwrite(buffer, 1, bytes_recieved, fp);
+									}
+								}
+								fclose(fp);
+							}
+							else{
+								printf("ERROR: COULD NOT WRITE TO FILE\n");
+							}
+						}
+						else if (strcmp(command, "nf")){
+							printf("ERROR: FILE NOT FOUND\n");
+						}
+						else{
+							printf("ERROR: UNKNOWN ERROR ENCOUNTERED\n");
+						}
+					}
+					break;
+				}
 			case 4: // pwd case
 				//printf("pwd case\n"); // delete later
 				{

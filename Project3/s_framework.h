@@ -26,4 +26,5 @@
 	server_t *clientTerminate(server_t *clientList, int socket);
 	server_t *clientCreate(server_t *clientList, int socket);
 	void printClientCount(server_t *clientList);
+	long long get_file_size(char *filename);
 #endif

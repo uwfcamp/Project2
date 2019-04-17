@@ -263,15 +263,52 @@ void * clientThread(void * param){
 				param = strtok(param, " \n");
 				char *size_str = strtok(NULL, " \n");
 				FILE *fp = fopen(param, "wb");
-				long long size_num = atoll(size_str);
-				while(size_num>0){
-					recieved = recv(client->socket, buffer, BUFFER_SIZE, MSG_NOSIGNAL);
-					if (recieved == 0)
-						break;
-					size_num-=recieved;
-					fwrite(buffer, 1, recieved, fp);
+				if (fp != NULL){
+					long long size_num = atoll(size_str);
+					while(size_num>0){
+						recieved = recv(client->socket, buffer, BUFFER_SIZE, MSG_NOSIGNAL);
+						if (recieved == 0)
+							break;
+						size_num-=recieved;
+						fwrite(buffer, 1, recieved, fp);
+					}
+					fclose(fp);
 				}
-				fclose(fp);
+			}
+			else if (strcmp(command,"get")==0){
+				// code for responding to file request
+				long long filesize = get_file_size(param);
+				char buffer[BUFFER_SIZE]={0};
+				if (filesize>=0){
+					FILE *fp = fopen(param, "rb");
+					if (fp!=NULL){
+						sprintf(buffer, "get %s %lld", param, filesize);
+						send(client->socket, buffer, strlen(buffer)+1, MSG_NOSIGNAL | MSG_DONTWAIT);
+						error=errno;
+						if (error!=EPIPE){
+							while(filesize>0){
+								int i;
+								for (i=0; i<BUFFER_SIZE; i++)
+									buffer[i]=0;
+								int bytes_read = fread(buffer, 1, BUFFER_SIZE, fp);
+								filesize -= bytes_read;
+								send(client->socket, buffer, bytes_read, MSG_NOSIGNAL | MSG_DONTWAIT);
+								error=errno;
+								if (error == EPIPE)
+									break;
+							}
+						}
+						fclose(fp);
+					}
+					else{
+						char errmsg[3]="nf";
+						send(client->socket, errmsg, strlen(errmsg)+1, MSG_NOSIGNAL);
+					}
+				}
+				else{
+					char errmsg[3]="nf";
+					send(client->socket, errmsg, strlen(errmsg)+1, MSG_NOSIGNAL);
+				}
 			}
 			else if (strcmp(command, "echo")==0){
 				send(client->socket, param, strlen(param)+1, MSG_NOSIGNAL | MSG_DONTWAIT);
@@ -388,4 +425,11 @@ server_t *clientCreate(server_t *clientList, int socket){
 
 	// return the root of the list
 	return root;
+}
+
+long long get_file_size(char *filename){
+	struct stat st;
+	if (stat(filename, &st) == 0)
+		return st.st_size;
+	return -1;
 }
