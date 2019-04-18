@@ -39,8 +39,8 @@ II. RUNNING THE PROGRAM
   1.  server: Start the server program by entering "./server". No extra files are neccesary to 
       run this program. 
       
-  2.  client: Start the client program by entering "./client". No extra files are neccesary to
-      run this program.
+  2.  client: Put the client executable in a separate directory from the server. Start the client
+      program by entering "./client". No extra files are neccesary to run this program.
       
 III. USER INPUT
 
