@@ -211,7 +211,7 @@ int main(void) {
 								printf("ERROR: COULD NOT WRITE TO FILE\n");
 							}
 						}
-						else if (strcmp(command, "nf")){
+						else if (strcmp(command, "nf")==0){
 							printf("ERROR: FILE NOT FOUND\n");
 						}
 						else{
